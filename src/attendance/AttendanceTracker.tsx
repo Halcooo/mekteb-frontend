@@ -42,9 +42,9 @@ function AttendanceTracker() {
   const [newStudent, setNewStudent] = useState({
     firstName: "",
     lastName: "",
-    studentId: "",
     gradeLevel: "",
-    email: "",
+    dateOfBirth: "",
+    parentId: null,
   });
   const [savingStudents, setSavingStudents] = useState<Set<number>>(new Set());
 
@@ -91,7 +91,8 @@ function AttendanceTracker() {
         `${student.firstName} ${student.lastName}`
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
-        student.studentId?.toLowerCase().includes(searchTerm.toLowerCase())
+        student.gradeLevel?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        student.id.toString().includes(searchTerm)
     );
   }, [studentsResponse?.data, searchTerm]);
 
@@ -204,9 +205,9 @@ function AttendanceTracker() {
       setNewStudent({
         firstName: "",
         lastName: "",
-        studentId: "",
         gradeLevel: "",
-        email: "",
+        dateOfBirth: "",
+        parentId: null,
       });
     },
   });
@@ -215,7 +216,8 @@ function AttendanceTracker() {
     if (
       !newStudent.firstName ||
       !newStudent.lastName ||
-      !newStudent.gradeLevel
+      !newStudent.gradeLevel ||
+      !newStudent.dateOfBirth
     ) {
       return;
     }
@@ -737,21 +739,17 @@ function AttendanceTracker() {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
-                    {t("students.studentId", "Student ID")}
+                    {t("students.dateOfBirth", "Date of Birth")} *
                   </Form.Label>
                   <Form.Control
-                    type="text"
-                    value={newStudent.studentId}
+                    type="date"
+                    value={newStudent.dateOfBirth}
                     onChange={(e) =>
                       setNewStudent({
                         ...newStudent,
-                        studentId: e.target.value,
+                        dateOfBirth: e.target.value,
                       })
                     }
-                    placeholder={t(
-                      "students.enterStudentId",
-                      "Enter student ID"
-                    )}
                   />
                 </Form.Group>
               </Col>
@@ -788,17 +786,6 @@ function AttendanceTracker() {
                 </Form.Group>
               </Col>
             </Row>
-            <Form.Group className="mb-3">
-              <Form.Label>{t("students.email", "Email")}</Form.Label>
-              <Form.Control
-                type="email"
-                value={newStudent.email}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, email: e.target.value })
-                }
-                placeholder={t("students.enterEmail", "Enter email address")}
-              />
-            </Form.Group>
           </Form>
         </Modal.Body>
         <Modal.Footer>
@@ -812,7 +799,8 @@ function AttendanceTracker() {
               createStudentMutation.isPending ||
               !newStudent.firstName ||
               !newStudent.lastName ||
-              !newStudent.gradeLevel
+              !newStudent.gradeLevel ||
+              !newStudent.dateOfBirth
             }
           >
             {createStudentMutation.isPending ? (
