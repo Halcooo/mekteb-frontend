@@ -1,4 +1,43 @@
-.home {
-  min-width: 100vw;
+// Global App Styles
+
+.app {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+// Main content area (below navbar)
+.main-content {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+}
+
+// Remove default margins and paddings from Bootstrap containers in app context
+.app .container,
+.app .container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+// Ensure consistent viewport handling
+body {
+  overflow-x: hidden;
+}
+
+// Global responsive utilities
+@media (max-width: 768px) {
+  .d-mobile-none {
+    display: none !important;
+  }
+
+  .fs-mobile-sm {
+    font-size: 0.875rem !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .d-desktop-none {
+    display: none !important;
+  }
 }

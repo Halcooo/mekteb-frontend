@@ -2,6 +2,7 @@ import { Navbar, Nav, Container, Dropdown } from "react-bootstrap";
 import { Link, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import mektebLogo from "../assets/mekteb.png";
+import "./AppNavbar.scss";
 
 function AppNavbar() {
   const { t, i18n } = useTranslation();
@@ -21,14 +22,16 @@ function AppNavbar() {
           <img
             src={mektebLogo}
             alt="Mekteb Logo"
-            style={{ width: "32px", height: "32px" }}
-            className="me-2"
+            className="navbar-brand-logo"
           />
-          <span className="d-none d-sm-inline">{t("mekteb")}</span>
-          <span className="d-sm-none">Mekteb</span>
+          <span className="navbar-brand-text desktop">{t("mekteb")}</span>
+          <span className="navbar-brand-text mobile">Mekteb</span>
         </Navbar.Brand>
 
-        <Navbar.Toggle aria-controls="mekteb-navbar-nav" className="border-0">
+        <Navbar.Toggle
+          aria-controls="mekteb-navbar-nav"
+          className="navbar-toggler-custom"
+        >
           <span className="navbar-toggler-icon"></span>
         </Navbar.Toggle>
 
@@ -57,6 +60,20 @@ function AppNavbar() {
             >
               <i className="bi bi-people me-2"></i>
               <span className="d-lg-inline d-xl-inline">{t("students")}</span>
+            </Nav.Link>
+            <Nav.Link
+              as={Link}
+              to="/parent-dashboard"
+              className={`fw-500 ${
+                isRouteActive("/parent-dashboard")
+                  ? "active bg-primary text-white rounded"
+                  : ""
+              }`}
+            >
+              <i className="fas fa-family me-2"></i>
+              <span className="d-lg-inline d-xl-inline">
+                {t("parentDashboard.title")}
+              </span>
             </Nav.Link>
             <Nav.Link
               as={Link}

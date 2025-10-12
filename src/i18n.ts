@@ -149,6 +149,101 @@ i18n
           selectGrade: "Izaberite razred",
           createStudent: "Stvori učenika",
 
+          // Parent Key Management
+          parentKey: {
+            label: "Ključ za roditelje",
+            generating: "Generiše se...",
+            copied: "Kopirano!",
+            clickToCopy: "Kliknite da kopirate ključ za roditelje",
+            title: "Ključ za povezivanje roditelja",
+            description:
+              "Roditelji mogu koristiti ovaj ključ da se povežu sa učenikom",
+            shareWith: "Podijelite ovaj ključ sa roditeljima",
+            qrCode: "QR kod",
+            manual: "Ručno upisivanje",
+            notGenerated: "Ključ za roditelje još nije generisan",
+          },
+
+          // Parent Dashboard
+          parentDashboard: {
+            title: "Roditeljski panel",
+            connectStudent: "Poveži učenika",
+            enterStudentKey: "Unesite ključ učenika",
+            connect: "Poveži",
+            myChildren: "Moja djeca",
+            noStudentsConnected: "Nema povezanih učenika",
+            connectFirstStudent:
+              "Povežite prvog učenika koristeći ključ koji ste dobili od škole",
+            studentConnectedSuccess: "Uspješno ste se povezali sa {{name}}!",
+            connectionFailed: "Povezivanje neuspješno",
+            networkError: "Greška mreže",
+            errorLoadingStudents: "Greška pri učitavanju učenika",
+            attendanceRate: "Stopa prisustva",
+            connectedSince: "Povezan od",
+            viewAttendance: "Pogledaj prisustvo",
+            viewComments: "Pogledaj komentare",
+            attendanceDetails: "Detalji prisustva",
+            attendanceDetailsPlaceholder:
+              "Detalji prisustva će biti prikazani ovdje",
+            keyHelp:
+              "Unesite ključ koji ste dobili od škole za povezivanje sa učenikom",
+            studentAlreadyConnected: "Učenik je već povezan sa vašim nalogom",
+            invalidKey:
+              "Neispravni ključ učenika. Molimo provjerite ključ i pokušajte ponovo.",
+            invalidKeyFormat:
+              "Neispravni format ključa. Ključ treba biti u formatu YYYY-MMDD-XXXX",
+            disconnect: "Prekini vezu",
+            confirmDisconnect:
+              "Jeste li sigurni da se želite odvojiti od {{name}}?",
+            studentDisconnectedSuccess:
+              "Uspješno ste prekinuli vezu sa {{name}}",
+            disconnectError:
+              "Greška pri prekidanju veze sa učenikom. Pokušajte ponovo.",
+          },
+
+          // Comments System
+          comments: {
+            title: "Dnevni komentari",
+            selectDate: "Odaberite datum",
+            loading: "Učitavanje komentara...",
+            noComments: "Nema komentara za ovaj datum",
+            errorLoading: "Greška pri učitavanju komentara",
+            admin: "Administrator",
+            teacher: "Učitelj",
+            parent: "Roditelj",
+            reply: "Odgovori",
+            replyToComment: "Odgovori na komentar",
+            yourReply: "Vaš odgovor",
+            replyPlaceholder: "Ovdje upišite vaš odgovor...",
+            submitReply: "Pošalji odgovor",
+            replyError: "Greška pri slanju odgovora",
+            submitting: "Slanje...",
+            newComment: "Novi komentar",
+            addComment: "Dodaj komentar",
+            commentContent: "Sadržaj komentara",
+            commentPlaceholder: "Ovdje upišite komentar...",
+            submitComment: "Pošalji komentar",
+            commentError: "Greška pri slanju komentara",
+            commentSuccess: "Komentar je uspješno dodan",
+            replySuccess: "Odgovor je uspješno dodan",
+            editComment: "Uredi komentar",
+            deleteComment: "Obriši komentar",
+            confirmDelete: "Jeste li sigurni da želite obrisati ovaj komentar?",
+            dailyManagement: "Upravljanje dnevnim komentarima",
+            studentsWithComments: "učenika sa komentarima",
+            noCommentsForDate: "Nema komentara za ovaj datum",
+            searchStudent: "Pretraži učenika",
+            searchPlaceholder: "Pretraži po imenu ili razredu...",
+            filterGrade: "Filtriraj po razredu",
+            allGrades: "Svi razredi",
+            selectStudent: "Odaberite učenika",
+            noMatchingStudents: "Nema pronađenih učenika",
+            allStudentsHaveComments:
+              "Svi učenici imaju komentare za ovaj datum",
+            errorLoadingStudents: "Greška pri učitavanju učenika",
+            replies: "odgovora",
+          },
+
           // Search and pagination
           searchStudents: "Pretraži učenike po imenu, prezimenu, razredu...",
           searchPlaceholder: "Pretraga...",
@@ -169,6 +264,23 @@ i18n
           shortDate: "Kratki datum",
           longDate: "Dugačak datum",
           invalidDate: "Neispravan datum",
+
+          // Date Picker
+          datePicker: {
+            selectDate: "Odaberite datum",
+            today: "Danas",
+            clear: "Očisti",
+            invalidDate: "Neispravan datum",
+            dateRequired: "Datum je obavezan",
+            dateFormatError: "Format datuma mora biti DD.MM.YYYY",
+            minDateError: "Datum ne može biti prije {{date}}",
+            maxDateError: "Datum ne može biti nakon {{date}}",
+            monthNames:
+              "Januar,Februar,Mart,April,Maj,Juni,Juli,August,Septembar,Oktobar,Novembar,Decembar",
+            weekDays: "Pon,Uto,Sri,Čet,Pet,Sub,Ned",
+            weekDaysLong:
+              "Ponedeljak,Utorak,Srijeda,Četvrtak,Petak,Subota,Nedjelja",
+          },
 
           // Mobile-friendly labels
           menu: "Meni",
@@ -198,10 +310,11 @@ i18n
             refresh: "Osvježi",
             saveSuccess: "Prisustvo je uspješno sačuvano!",
             saveError: "Greška pri čuvanju prisustva. Molimo pokušajte ponovo.",
+            bulkSave: "Masovno čuvanje",
+            savingChanges: "Čuvanje promjena...",
             autoSaveEnabled:
               "Auto-čuvanje omogućeno - promjene se čuvaju automatski",
-            savingChanges: "Čuvanje promjena...",
-            bulkSave: "Masovno čuvanje",
+            lastSaved: "Zadnje sačuvano u {{time}}",
             bulkSaveTooltip: "Sačuvaj sve trenutno prisustvo odjednom",
             status: {
               present: "Prisutan",
@@ -408,6 +521,100 @@ i18n
           selectGrade: "Select grade",
           createStudent: "Create Student",
 
+          // Parent Key Management
+          parentKey: {
+            label: "Parent Key",
+            generating: "Generating...",
+            copied: "Copied!",
+            clickToCopy: "Click to copy parent key",
+            title: "Parent Connection Key",
+            description: "Parents can use this key to connect to the student",
+            shareWith: "Share this key with parents",
+            qrCode: "QR Code",
+            manual: "Manual Entry",
+            notGenerated: "Parent key not generated yet",
+          },
+
+          // Parent Dashboard
+          parentDashboard: {
+            title: "Parent Dashboard",
+            connectStudent: "Connect Student",
+            enterStudentKey: "Enter student key",
+            connect: "Connect",
+            myChildren: "My Children",
+            noStudentsConnected: "No students connected",
+            connectFirstStudent:
+              "Connect your first student using the key provided by the school",
+            studentConnectedSuccess: "Successfully connected to {{name}}!",
+            connectionFailed: "Connection failed",
+            networkError: "Network error",
+            errorLoadingStudents: "Error loading students",
+            attendanceRate: "Attendance Rate",
+            connectedSince: "Connected Since",
+            viewAttendance: "View Attendance",
+            viewComments: "View Comments",
+            attendanceDetails: "Attendance Details",
+            attendanceDetailsPlaceholder:
+              "Attendance details will be displayed here",
+            keyHelp:
+              "Enter the key provided by the school to connect to a student",
+            studentAlreadyConnected:
+              "Student is already connected to your account",
+            invalidKey:
+              "Invalid student key. Please check the key and try again.",
+            invalidKeyFormat:
+              "Invalid key format. Key should be in format YYYY-MMDD-XXXX",
+            disconnect: "Disconnect",
+            confirmDisconnect:
+              "Are you sure you want to disconnect from {{name}}?",
+            studentDisconnectedSuccess:
+              "Successfully disconnected from {{name}}",
+            disconnectError:
+              "Failed to disconnect from student. Please try again.",
+          },
+
+          // Comments System
+          comments: {
+            title: "Daily Comments",
+            selectDate: "Select Date",
+            loading: "Loading comments...",
+            noComments: "No comments for this date",
+            errorLoading: "Failed to load comments",
+            admin: "Admin",
+            teacher: "Teacher",
+            parent: "Parent",
+            reply: "Reply",
+            replyToComment: "Reply to Comment",
+            yourReply: "Your Reply",
+            replyPlaceholder: "Type your reply here...",
+            submitReply: "Submit Reply",
+            replyError: "Failed to submit reply",
+            submitting: "Submitting...",
+            newComment: "New Comment",
+            addComment: "Add Comment",
+            commentContent: "Comment Content",
+            commentPlaceholder: "Type your comment here...",
+            submitComment: "Submit Comment",
+            commentError: "Failed to submit comment",
+            commentSuccess: "Comment added successfully",
+            replySuccess: "Reply added successfully",
+            editComment: "Edit Comment",
+            deleteComment: "Delete Comment",
+            confirmDelete: "Are you sure you want to delete this comment?",
+            dailyManagement: "Daily Comments Management",
+            studentsWithComments: "students with comments",
+            noCommentsForDate: "No comments for this date",
+            searchStudent: "Search Student",
+            searchPlaceholder: "Search by name or grade...",
+            filterGrade: "Filter by Grade",
+            allGrades: "All Grades",
+            selectStudent: "Select Student",
+            noMatchingStudents: "No matching students found",
+            allStudentsHaveComments: "All students have comments for this date",
+            errorLoadingStudents: "Failed to load students",
+            replies: "replies",
+          },
+
           // Search and pagination
           searchStudents: "Search students by name, grade...",
           searchPlaceholder: "Search...",
@@ -428,6 +635,23 @@ i18n
           shortDate: "Short date",
           longDate: "Long date",
           invalidDate: "Invalid date",
+
+          // Date Picker
+          datePicker: {
+            selectDate: "Select date",
+            today: "Today",
+            clear: "Clear",
+            invalidDate: "Invalid date",
+            dateRequired: "Date is required",
+            dateFormatError: "Date format must be MM/DD/YYYY",
+            minDateError: "Date cannot be before {{date}}",
+            maxDateError: "Date cannot be after {{date}}",
+            monthNames:
+              "January,February,March,April,May,June,July,August,September,October,November,December",
+            weekDays: "Mon,Tue,Wed,Thu,Fri,Sat,Sun",
+            weekDaysLong:
+              "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday",
+          },
 
           // Mobile-friendly labels
           menu: "Menu",

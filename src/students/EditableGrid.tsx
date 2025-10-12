@@ -11,8 +11,12 @@ import {
   Row,
   Col,
   Badge,
+  OverlayTrigger,
+  Tooltip,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import DatePicker from "../components/DatePicker";
+import "./EditableGrid.scss";
 import type {
   Student,
   UpdateStudentData,
@@ -36,6 +40,60 @@ interface EditableRow {
     originalValue: string | number | null;
   };
 }
+
+interface ParentKeyDisplayProps {
+  parentKey: string | null | undefined;
+  studentName: string;
+}
+
+const ParentKeyDisplay: React.FC<ParentKeyDisplayProps> = ({ parentKey }) => {
+  const { t } = useTranslation();
+  const [copied, setCopied] = useState(false);
+
+  const copyToClipboard = async () => {
+    try {
+      if (parentKey) {
+        await navigator.clipboard.writeText(parentKey);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+
+  if (!parentKey) {
+    return (
+      <span className="text-muted">
+        <i className="fas fa-key me-1"></i>
+        {t("parentKey.notGenerated", "Not generated")}
+      </span>
+    );
+  }
+
+  return (
+    <OverlayTrigger
+      placement="top"
+      overlay={
+        <Tooltip id={`tooltip-${parentKey}`}>
+          {copied
+            ? t("parentKey.copied", "Copied!")
+            : t("parentKey.clickToCopy", "Click to copy parent key")}
+        </Tooltip>
+      }
+    >
+      <Button
+        variant="outline-primary"
+        size="sm"
+        onClick={copyToClipboard}
+        className={`parent-key-btn ${copied ? "copied" : ""}`}
+      >
+        <code className="parent-key-code">{parentKey}</code>
+        <i className={`fas ${copied ? "fa-check" : "fa-copy"} ms-1`}></i>
+      </Button>
+    </OverlayTrigger>
+  );
+};
 
 const EditableGrid: React.FC<EditableGridProps> = ({
   students,
@@ -248,7 +306,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                 : e.target.value;
             updateField(student.id, field, value);
           }}
-          style={{ minWidth: "120px" }}
+          className="editable-input"
         />
       );
     }
@@ -299,6 +357,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                 <th>{t("lastName", "Last Name")}</th>
                 <th>{t("dateOfBirth", "Date of Birth")}</th>
                 <th>{t("grade", "Grade Level")}</th>
+                <th>{t("parentKey", "Parent Key")}</th>
                 <th>Parent ID</th>
                 <th>{t("parentName", "Parent Name")}</th>
                 <th>{t("actions", "Actions")}</th>
@@ -321,6 +380,12 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                       {renderEditableCell(student, "dateOfBirth", "date")}
                     </td>
                     <td>{renderEditableCell(student, "gradeLevel")}</td>
+                    <td>
+                      <ParentKeyDisplay
+                        parentKey={student.parentKey}
+                        studentName={`${student.firstName} ${student.lastName}`}
+                      />
+                    </td>
                     <td>{renderEditableCell(student, "parentId", "number")}</td>
                     <td>{student.parentName || "N/A"}</td>
                     <td>
@@ -558,14 +623,15 @@ const EditableGrid: React.FC<EditableGridProps> = ({
             </div>
             <div className="row">
               <div className="col-md-6 mb-3">
-                <Form.Label>Date of Birth</Form.Label>
-                <Form.Control
-                  type="date"
+                <DatePicker
                   value={newStudentData.dateOfBirth}
-                  onChange={(e) =>
-                    handleNewStudentChange("dateOfBirth", e.target.value)
+                  onChange={(value) =>
+                    handleNewStudentChange("dateOfBirth", value)
                   }
+                  label={t("dateOfBirth", "Date of Birth")}
+                  placeholder={t("datePicker.selectDate", "Select date")}
                   required
+                  maxDate={new Date().toISOString().split("T")[0]} // Can't be in the future
                 />
               </div>
               <div className="col-md-6 mb-3">

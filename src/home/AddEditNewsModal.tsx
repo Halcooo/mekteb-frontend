@@ -2,6 +2,7 @@ import React from "react";
 import { Modal, Form, Button, Row, Col, Spinner } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { NewsItem } from "../types/index";
+import "./AddEditNewsModal.scss";
 
 interface AddEditNewsModalProps {
   show: boolean;
@@ -93,19 +94,17 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
                 <Row>
                   {imagePreviewUrls.map((url, index) => (
                     <Col key={index} xs={6} md={4} className="mb-2">
-                      <div className="position-relative">
+                      <div className="image-preview">
                         <img
                           src={url}
                           alt={`Preview ${index + 1}`}
-                          className="img-fluid rounded"
-                          style={{ maxHeight: "100px", objectFit: "cover" }}
+                          className="preview-image img-fluid rounded"
                         />
                         <Button
                           variant="danger"
                           size="sm"
-                          className="position-absolute top-0 end-0 m-1"
+                          className="remove-image-btn"
                           onClick={() => onRemoveSelectedImage(index)}
-                          style={{ transform: "translate(50%, -50%)" }}
                         >
                           <i className="bi bi-x"></i>
                         </Button>
@@ -126,22 +125,20 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
                 <Row>
                   {selectedNews.images.map((image) => (
                     <Col key={image.id} xs={6} md={4} className="mb-2">
-                      <div className="position-relative">
+                      <div className="image-preview">
                         <img
                           src={`http://localhost:5000${
                             image.url ||
                             `/api/images/${image.imagePath?.split("/").pop()}`
                           }`}
                           alt={image.originalName}
-                          className="img-fluid rounded"
-                          style={{ maxHeight: "100px", objectFit: "cover" }}
+                          className="preview-image img-fluid rounded"
                         />
                         <Button
                           variant="danger"
                           size="sm"
-                          className="position-absolute top-0 end-0 m-1"
+                          className="remove-image-btn"
                           onClick={() => onDeleteExistingImage(image.id)}
-                          style={{ transform: "translate(50%, -50%)" }}
                         >
                           <i className="bi bi-trash"></i>
                         </Button>

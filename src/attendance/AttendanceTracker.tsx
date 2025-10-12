@@ -1,5 +1,4 @@
 import {
-  Container,
   Row,
   Col,
   Card,
@@ -24,6 +23,9 @@ import {
   formatDateForInput,
 } from "./attendanceApi";
 import { studentApi } from "../students/studentApi";
+import DatePicker from "../components/DatePicker";
+import PageLayout from "../components/PageLayout";
+import "./AttendanceTracker.scss";
 
 function AttendanceTracker() {
   const { t } = useTranslation();
@@ -258,36 +260,35 @@ function AttendanceTracker() {
 
   if (studentsLoading) {
     return (
-      <Container className="py-4">
+      <PageLayout title="Attendance Tracker" className="attendance-tracker">
         <div className="text-center">
           <Spinner animation="border" className="me-2" />
           Loading students...
         </div>
-      </Container>
+      </PageLayout>
     );
   }
 
   if (studentsError) {
     return (
-      <Container className="py-4">
+      <PageLayout title="Attendance Tracker" className="attendance-tracker">
         <Alert variant="danger">
           Error loading students. Please try again.
         </Alert>
-      </Container>
+      </PageLayout>
     );
   }
 
   return (
-    <Container fluid className="py-4">
-      <Row>
-        <Col>
-          <h2 className="mb-4">
-            <i className="bi bi-calendar-check me-2 text-primary"></i>
-            {t("attendanceTracker.title", "Attendance Tracker")}
-          </h2>
-        </Col>
-      </Row>
-
+    <PageLayout
+      title={
+        <span>
+          <i className="bi bi-calendar-check"></i>
+          {t("attendanceTracker.title", "Attendance Tracker")}
+        </span>
+      }
+      className="attendance-tracker"
+    >
       {/* Date Selection and Summary */}
       <Row className="mb-4">
         <Col md={6}>
@@ -297,11 +298,11 @@ function AttendanceTracker() {
                 {t("attendanceTracker.selectDate", "Select Date")}
               </Card.Title>
               <Form.Group>
-                <Form.Control
-                  type="date"
+                <DatePicker
                   value={selectedDate}
-                  onChange={(e) => setSelectedDate(e.target.value)}
-                  className="form-control-lg"
+                  onChange={setSelectedDate}
+                  size="lg"
+                  placeholder={t("datePicker.selectDate", "Select date")}
                 />
               </Form.Group>
               <div className="mt-3">
@@ -385,8 +386,7 @@ function AttendanceTracker() {
                       as="span"
                       animation="border"
                       size="sm"
-                      className="me-1"
-                      style={{ width: "12px", height: "12px" }}
+                      className="saving-spinner"
                     />
                     {t("attendanceTracker.savingChanges", "Saving changes...")}
                   </>
@@ -423,8 +423,7 @@ function AttendanceTracker() {
                   as="span"
                   animation="border"
                   size="sm"
-                  className="me-1"
-                  style={{ width: "12px", height: "12px" }}
+                  className="loading-spinner me-1"
                 />
                 {t("attendanceTracker.saving", "Saving...")}
               </>
@@ -540,8 +539,7 @@ function AttendanceTracker() {
                                     as="span"
                                     animation="border"
                                     size="sm"
-                                    className="ms-2 text-primary"
-                                    style={{ width: "16px", height: "16px" }}
+                                    className="form-control-spinner ms-2 text-primary"
                                   />
                                 )}
                               </div>
@@ -557,8 +555,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "PRESENT")
                                 }
-                                className="text-success form-check-lg"
-                                style={{ transform: "scale(1.2)" }}
+                                className="attendance-radio status-radio present text-success form-check-lg"
                               />
                             </td>
                             <td className="text-center p-2">
@@ -569,8 +566,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "ABSENT")
                                 }
-                                className="text-danger form-check-lg"
-                                style={{ transform: "scale(1.2)" }}
+                                className="attendance-radio status-radio absent text-danger form-check-lg"
                               />
                             </td>
                             <td className="text-center p-2">
@@ -581,8 +577,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "LATE")
                                 }
-                                className="text-warning form-check-lg"
-                                style={{ transform: "scale(1.2)" }}
+                                className="attendance-radio status-radio late text-warning form-check-lg"
                               />
                             </td>
                             <td className="text-center p-2">
@@ -593,8 +588,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "EXCUSED")
                                 }
-                                className="text-info form-check-lg"
-                                style={{ transform: "scale(1.2)" }}
+                                className="attendance-radio status-radio excused text-info form-check-lg"
                               />
                             </td>
                             <td>{getStatusBadge(currentStatus)}</td>
@@ -738,18 +732,18 @@ function AttendanceTracker() {
             <Row>
               <Col md={6}>
                 <Form.Group className="mb-3">
-                  <Form.Label>
-                    {t("students.dateOfBirth", "Date of Birth")} *
-                  </Form.Label>
-                  <Form.Control
-                    type="date"
+                  <DatePicker
                     value={newStudent.dateOfBirth}
-                    onChange={(e) =>
+                    onChange={(value) =>
                       setNewStudent({
                         ...newStudent,
-                        dateOfBirth: e.target.value,
+                        dateOfBirth: value,
                       })
                     }
+                    label={t("students.dateOfBirth", "Date of Birth")}
+                    placeholder={t("datePicker.selectDate", "Select date")}
+                    required
+                    maxDate={new Date().toISOString().split("T")[0]} // Can't be in the future
                   />
                 </Form.Group>
               </Col>
@@ -822,7 +816,7 @@ function AttendanceTracker() {
           </Button>
         </Modal.Footer>
       </Modal>
-    </Container>
+    </PageLayout>
   );
 }
 

@@ -8,9 +8,11 @@ function App() {
   const hideNavbar = ["/login", "/register"].includes(location.pathname);
 
   return (
-    <div className="home">
+    <div className="app">
       {!hideNavbar && <AppNavbar />}
-      <AppRoutes />
+      <main className="main-content">
+        <AppRoutes />
+      </main>
     </div>
   );
 }

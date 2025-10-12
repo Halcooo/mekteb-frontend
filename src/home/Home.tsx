@@ -9,7 +9,9 @@ import NewsCard from "./NewsCard";
 import AddEditNewsModal from "./AddEditNewsModal";
 import DeleteNewsModal from "./DeleteNewsModal";
 import PreviewNewsModal from "./PreviewNewsModal";
+import PageLayout from "../components/PageLayout";
 import { useNewsOperations } from "./useNewsOperations";
+import "./Home.scss";
 
 function Home() {
   const { t } = useTranslation();
@@ -112,48 +114,33 @@ function Home() {
 
   return (
     <>
-      <Container fluid className="px-2 px-md-3 mt-2 mt-md-4">
-        {/* Mobile-responsive header */}
-        <Row className="align-items-center mb-3 mb-md-5">
-          <Col xs={12} md={8}>
-            <h1
-              className="mb-1 h2 h1-md"
-              style={{ fontWeight: "700", color: "#2c3e50" }}
+      <PageLayout
+        title={
+          <span>
+            <i className="bi bi-newspaper"></i>
+            {t("news")}
+          </span>
+        }
+        subtitle={t("latestUpdates", "Najnovije vijesti i obavještenja")}
+        className="home-container"
+      >
+        {isAdmin && (
+          <div className="d-flex justify-content-end mb-4">
+            <Button
+              variant="primary"
+              onClick={handleAddNews}
+              className="home-add-btn"
             >
-              {t("news")}
-            </h1>
-            <p
-              className="text-muted mb-2 mb-md-0 small"
-              style={{ fontSize: "0.95rem" }}
-            >
-              {t("latestUpdates", "Najnovije vijesti i obavještenja")}
-            </p>
-          </Col>
-          {isAdmin && (
-            <Col xs={12} md={4} className="text-start text-md-end">
-              <Button
-                variant="primary"
-                onClick={handleAddNews}
-                className="d-flex d-md-inline-flex align-items-center px-3 px-md-4 py-2 shadow-sm w-100 w-md-auto"
-                style={{
-                  borderRadius: "0.5rem",
-                  fontWeight: "500",
-                  fontSize: "0.9rem",
-                }}
-              >
-                <i className="bi bi-plus-circle me-2"></i>
-                <span className="d-none d-md-inline">
-                  {t("addNews", "Add News")}
-                </span>
-                <span className="d-md-none">
-                  {t("add", "Add")} {t("news", "News")}
-                </span>
-              </Button>
-            </Col>
-          )}
-        </Row>
+              <i className="bi bi-plus-circle me-2"></i>
+              <span className="d-none d-sm-inline">
+                {t("addNews", "Add News")}
+              </span>
+              <span className="d-inline d-sm-none">{t("add", "Add")}</span>
+            </Button>
+          </div>
+        )}
 
-        <Row className="g-3 g-md-4">
+        <Row className="home-news-grid">
           {news && news.length > 0 ? (
             news.map((item) => (
               <Col key={item.id} xs={12} sm={6} lg={4} className="d-flex">
@@ -168,17 +155,14 @@ function Home() {
             ))
           ) : (
             <Col xs={12}>
-              <div className="text-center py-5 my-5">
-                <div className="mb-4">
-                  <i
-                    className="bi bi-newspaper"
-                    style={{ fontSize: "4rem", color: "#6c757d" }}
-                  ></i>
+              <div className="home-empty-state">
+                <div>
+                  <i className="bi bi-newspaper empty-icon"></i>
                 </div>
-                <h4 className="text-muted mb-3">
+                <h4 className="empty-title">
                   {t("noNewsAvailable", "No news available.")}
                 </h4>
-                <p className="text-muted" style={{ fontSize: "1.1rem" }}>
+                <p className="empty-description">
                   {t(
                     "noNewsDescription",
                     "Trenutno nema objavljenih vijesti. Provjerite kasnije."
@@ -188,10 +172,9 @@ function Home() {
                   <Button
                     variant="primary"
                     onClick={handleAddNews}
-                    className="mt-3 px-4 py-2"
-                    style={{ borderRadius: "0.5rem" }}
+                    className="empty-add-btn"
                   >
-                    <i className="bi bi-plus-circle me-2"></i>
+                    <i className="bi bi-plus-circle icon"></i>
                     {t("addFirstNews", "Dodaj prvu vijest")}
                   </Button>
                 )}
@@ -208,7 +191,7 @@ function Home() {
             </Spinner>
           </div>
         )}
-      </Container>
+      </PageLayout>
 
       {/* Add/Edit News Modal */}
       <AddEditNewsModal

@@ -3,6 +3,7 @@ import { Card, Button, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { NewsItem } from "../types/index";
 import { formatBosnianRelativeTime } from "../utils/dateFormatter";
+import "./NewsCard.scss";
 
 interface NewsCardProps {
   item: NewsItem;
@@ -21,16 +22,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
 }) => {
   const { t } = useTranslation();
 
-  const handleCardMouseEnter = (e: React.MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.transform = "translateY(-2px)";
-    e.currentTarget.style.boxShadow = "0 0.5rem 1rem rgba(0, 0, 0, 0.15)";
-  };
-
-  const handleCardMouseLeave = (e: React.MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.transform = "translateY(0)";
-    e.currentTarget.style.boxShadow = "0 0.125rem 0.25rem rgba(0, 0, 0, 0.075)";
-  };
-
   const handlePreviewClick = () => {
     onPreview(item);
   };
@@ -46,23 +37,9 @@ const NewsCard: React.FC<NewsCardProps> = ({
   };
 
   return (
-    <Card
-      className="h-100 shadow-sm border-0"
-      style={{
-        transition: "all 0.2s ease-in-out",
-        cursor: "pointer",
-      }}
-      onMouseEnter={handleCardMouseEnter}
-      onMouseLeave={handleCardMouseLeave}
-    >
+    <Card className="news-card">
       {/* Image Display */}
-      <div
-        className="position-relative"
-        style={{
-          height: window.innerWidth < 768 ? "180px" : "200px",
-          backgroundColor: "#f8f9fa",
-        }}
-      >
+      <div className="news-card-image-container">
         {item.images && item.images.length > 0 ? (
           <>
             <Card.Img
@@ -72,62 +49,32 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 `/api/images/${item.images[0].imagePath?.split("/").pop()}`
               }`}
               alt={item.title}
-              style={{
-                height: "200px",
-                objectFit: "cover",
-                borderTopLeftRadius: "0.375rem",
-                borderTopRightRadius: "0.375rem",
-              }}
+              className="news-card-image"
             />
             {item.images.length > 1 && (
-              <div
-                className="position-absolute top-0 end-0 m-3 bg-dark bg-opacity-75 text-white px-2 py-1 rounded-pill"
-                style={{ fontSize: "0.75rem", fontWeight: "500" }}
-              >
-                <i className="bi bi-images me-1"></i>+{item.images.length - 1}
+              <div className="news-card-image-badge">
+                <i className="bi bi-images news-card-icon me-1"></i>+
+                {item.images.length - 1}
               </div>
             )}
           </>
         ) : (
-          <div
-            className="d-flex align-items-center justify-content-center h-100"
-            style={{
-              borderTopLeftRadius: "0.375rem",
-              borderTopRightRadius: "0.375rem",
-            }}
-          >
-            <div className="text-center text-muted">
-              <i className="bi bi-newspaper" style={{ fontSize: "2rem" }}></i>
-              <div className="mt-2" style={{ fontSize: "0.9rem" }}>
-                {t("news", "News")}
-              </div>
+          <div className="news-card-placeholder">
+            <div>
+              <i className="bi bi-newspaper icon"></i>
+              <div className="text">{t("news", "News")}</div>
             </div>
           </div>
         )}
       </div>
 
-      <Card.Body className="d-flex flex-column" style={{ minHeight: "200px" }}>
-        <div className="d-flex justify-content-between align-items-start mb-3">
-          <Card.Title
-            style={{
-              cursor: "pointer",
-              fontSize: "1.1rem",
-              fontWeight: "600",
-              lineHeight: "1.3",
-              marginBottom: "0",
-              minHeight: "2.6rem",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
-              overflow: "hidden",
-            }}
-            onClick={handlePreviewClick}
-            className="text-primary"
-          >
+      <Card.Body className="news-card-body">
+        <div className="news-card-header">
+          <Card.Title onClick={handlePreviewClick} className="news-card-title">
             {item.title}
           </Card.Title>
           {isAdmin && (
-            <div className="d-flex gap-1 ms-2">
+            <div className="news-card-admin-buttons">
               <OverlayTrigger
                 placement="top"
                 overlay={<Tooltip>{t("editNews", "Edit News")}</Tooltip>}
@@ -135,13 +82,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 <Button
                   variant="outline-primary"
                   size="sm"
-                  className="rounded-circle d-flex align-items-center justify-content-center border-0"
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    fontSize: "0.8rem",
-                    backgroundColor: "rgba(13, 110, 253, 0.1)",
-                  }}
+                  className="news-card-admin-btn edit"
                   onClick={handleEditClick}
                 >
                   <i className="bi bi-pencil-square"></i>
@@ -154,13 +95,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 <Button
                   variant="outline-danger"
                   size="sm"
-                  className="rounded-circle d-flex align-items-center justify-content-center border-0"
-                  style={{
-                    width: "30px",
-                    height: "30px",
-                    fontSize: "0.8rem",
-                    backgroundColor: "rgba(220, 53, 69, 0.1)",
-                  }}
+                  className="news-card-admin-btn delete"
                   onClick={handleDeleteClick}
                 >
                   <i className="bi bi-trash3"></i>
@@ -170,57 +105,36 @@ const NewsCard: React.FC<NewsCardProps> = ({
           )}
         </div>
 
-        <Card.Text
-          className="flex-grow-1"
-          style={{
-            fontSize: "0.95rem",
-            lineHeight: "1.5",
-            minHeight: "4.5rem",
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
-            overflow: "hidden",
-            marginBottom: "1rem",
-          }}
-        >
+        <Card.Text className="news-card-text">
           {item.text.length > 120
             ? `${item.text.substring(0, 120)}...`
             : item.text}
         </Card.Text>
 
         {item.text.length > 120 && (
-          <div className="mb-3">
-            <Button
-              variant="outline-primary"
-              size="sm"
-              className="px-3"
-              style={{
-                fontSize: "0.85rem",
-                borderRadius: "1rem",
-              }}
+          <div className="news-card-read-more">
+            <button
+              className="news-card-read-more-btn"
               onClick={handlePreviewClick}
             >
-              <i className="bi bi-arrow-right me-2"></i>
+              <i className="bi bi-arrow-right news-card-icon me-2"></i>
               {t("readMore", "Read more")}
-            </Button>
+            </button>
           </div>
         )}
 
         {/* Timestamp - always at bottom */}
-        <div
-          className="mt-auto pt-3 border-top"
-          style={{ borderColor: "#dee2e6" }}
-        >
-          <div className="d-flex justify-content-between align-items-center">
+        <div className="news-card-footer">
+          <div className="footer-content">
             {item.createdAt && (
-              <small className="text-muted d-flex align-items-center">
-                <i className="bi bi-clock me-1"></i>
+              <small className="timestamp">
+                <i className="bi bi-clock news-card-icon me-1"></i>
                 {formatBosnianRelativeTime(item.createdAt)}
               </small>
             )}
             {item.authorUsername && (
-              <small className="text-muted d-flex align-items-center">
-                <i className="bi bi-person me-1"></i>
+              <small className="author">
+                <i className="bi bi-person news-card-icon me-1"></i>
                 {item.authorUsername}
               </small>
             )}

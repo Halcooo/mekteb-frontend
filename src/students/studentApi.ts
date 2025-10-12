@@ -8,6 +8,7 @@ export interface Student {
   lastName: string;
   dateOfBirth: string;
   gradeLevel: string;
+  parentKey: string | null; // Unique key for parent connection (auto-generated)
   createdAt?: string;
   updatedAt?: string;
   // Join fields from users table

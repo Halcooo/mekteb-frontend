@@ -1,5 +1,4 @@
 import {
-  Container,
   Row,
   Col,
   Form,
@@ -17,6 +16,7 @@ import {
   type CreateStudentData,
 } from "./studentApi";
 import EditableGrid from "./EditableGrid";
+import PageLayout from "../components/PageLayout";
 
 function Students() {
   const { t } = useTranslation();
@@ -110,19 +110,16 @@ function Students() {
   };
 
   return (
-    <Container fluid className="py-2 py-md-4 px-2 px-md-3">
-      {/* Header */}
-      <Row className="mb-3 mb-md-4">
-        <Col>
-          <h2 className="h3 h2-md mb-1">
-            {t("studentsManagement", "Students Management")}
-          </h2>
-          <p className="text-muted small d-none d-md-block">
-            {t("studentsList", "Manage students information and records")}
-          </p>
-        </Col>
-      </Row>
-
+    <PageLayout
+      title={
+        <span>
+          <i className="bi bi-people"></i>
+          {t("studentsManagement", "Students Management")}
+        </span>
+      }
+      subtitle={t("studentsList", "Manage students information and records")}
+      className="students-container"
+    >
       {/* Search and Filter Section */}
       <Card className="border-0 shadow-sm mb-3">
         <Card.Body className="p-3">
@@ -297,7 +294,7 @@ function Students() {
           </Col>
         </Row>
       )}
-    </Container>
+    </PageLayout>
   );
 }
 

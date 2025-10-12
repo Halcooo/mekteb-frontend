@@ -3,6 +3,7 @@ import { Modal, Button, Badge, Carousel } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { NewsItem } from "../types/index";
 import { formatBosnianDate } from "../utils/dateFormatter";
+import "./PreviewNewsModal.scss";
 
 interface PreviewNewsModalProps {
   show: boolean;
@@ -72,8 +73,7 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                           .pop()}`
                       }`}
                       alt={selectedNews.title}
-                      className="img-fluid rounded"
-                      style={{ maxHeight: "400px", objectFit: "contain" }}
+                      className="gallery-image img-fluid rounded"
                     />
                   </div>
                 ) : (

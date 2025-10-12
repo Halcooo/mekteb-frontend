@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { Spinner } from "react-bootstrap";
+import "./RouteComponents.scss";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -22,11 +23,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "50vh" }}
-      >
-        <Spinner animation="border" role="status">
+      <div className="route-container">
+        <Spinner animation="border" role="status" className="loading-spinner">
           <span className="visually-hidden">{t("loading")}</span>
         </Spinner>
       </div>

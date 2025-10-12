@@ -1,0 +1,25 @@
+// AppNavbar Component Styles
+
+.navbar-brand-logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 0.5rem;
+}
+
+.navbar-brand-text {
+  &.desktop {
+    @media (max-width: 575px) {
+      display: none;
+    }
+  }
+
+  &.mobile {
+    @media (min-width: 576px) {
+      display: none;
+    }
+  }
+}
+
+.navbar-toggler-custom {
+  border: 0;
+}

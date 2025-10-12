@@ -1,0 +1,96 @@
+// Home Component Styles (Updated for PageLayout system)
+
+.home-container {
+  // Add News button styling
+  .home-add-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    border-radius: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+    }
+
+    i {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 767px) {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+
+      i {
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  @media (min-width: 768px) {
+    display: inline-flex;
+    padding: 0.5rem 1rem;
+    width: auto;
+  }
+
+  .icon {
+    margin-right: 0.5rem;
+  }
+
+  .desktop-text {
+    @media (max-width: 767px) {
+      display: none;
+    }
+  }
+
+  .mobile-text {
+    @media (min-width: 768px) {
+      display: none;
+    }
+  }
+}
+
+.home-news-grid {
+  gap: 1rem;
+
+  @media (min-width: 768px) {
+    gap: 1.5rem;
+  }
+}
+
+.home-empty-state {
+  text-align: center;
+  padding: 3rem 0 5rem;
+  margin: 3rem 0;
+
+  .empty-icon {
+    font-size: 4rem;
+    color: #6c757d;
+    margin-bottom: 1.5rem;
+  }
+
+  .empty-title {
+    color: #6c757d;
+    margin-bottom: 1rem;
+  }
+
+  .empty-description {
+    color: #6c757d;
+    font-size: 1.1rem;
+  }
+
+  .empty-add-btn {
+    margin-top: 1rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+
+    .icon {
+      margin-right: 0.5rem;
+    }
+  }
+}

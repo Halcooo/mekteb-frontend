@@ -4,6 +4,7 @@ import LoginJWT from "./components/LoginJWT";
 import RegisterJWT from "./components/RegisterJWT";
 import Students from "./students/Students";
 import Attendance from "./attendance/Attendance";
+import ParentDashboard from "./parent/ParentDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 
@@ -40,6 +41,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute>
             <h1>Profile Page</h1>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/parent-dashboard"
+        element={
+          <ProtectedRoute>
+            <ParentDashboard />
           </ProtectedRoute>
         }
       />
