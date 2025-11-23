@@ -2,6 +2,7 @@ import { Container, Row, Col, Spinner, Alert, Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useCallback } from "react";
+import type { NewsItem } from "../types/index";
 import apiClient from "../api/apiClient";
 import { useAuth } from "../hooks/useAuth";
 // Import extracted components
@@ -9,7 +10,6 @@ import NewsCard from "./NewsCard";
 import AddEditNewsModal from "./AddEditNewsModal";
 import DeleteNewsModal from "./DeleteNewsModal";
 import PreviewNewsModal from "./PreviewNewsModal";
-import PageLayout from "../components/PageLayout";
 import { useNewsOperations } from "./useNewsOperations";
 import "./Home.scss";
 
@@ -73,7 +73,9 @@ function Home() {
     initialPageParam: 1,
   });
 
-  const news = data?.pages.flatMap((page) => page.data) || [];
+  // Flatten pages into a single news array
+  const news: NewsItem[] =
+    data?.pages?.flatMap((page: { data: NewsItem[] }) => page.data) || [];
 
   // Infinite scroll handler
   const handleScroll = useCallback(() => {
@@ -114,18 +116,22 @@ function Home() {
 
   return (
     <>
-      <PageLayout
-        title={
-          <span>
-            <i className="bi bi-newspaper"></i>
-            {t("news")}
-          </span>
-        }
-        subtitle={t("latestUpdates", "Najnovije vijesti i obavještenja")}
-        className="home-container"
-      >
-        {isAdmin && (
-          <div className="d-flex justify-content-end mb-4">
+      {/* Page Header - Full Width */}
+      <div className="page-header-top w-100 py-4 mb-4">
+        <Container
+          fluid
+          className="d-flex justify-content-between align-items-center px-4"
+        >
+          <div>
+            <h1 className="mb-2">
+              <i className="bi bi-newspaper me-2"></i>
+              {t("news")}
+            </h1>
+            <p className="text-muted mb-0">
+              {t("latestUpdates", "Najnovije vijesti i obavještenja")}
+            </p>
+          </div>
+          {isAdmin && (
             <Button
               variant="primary"
               onClick={handleAddNews}
@@ -137,61 +143,78 @@ function Home() {
               </span>
               <span className="d-inline d-sm-none">{t("add", "Add")}</span>
             </Button>
-          </div>
-        )}
-
-        <Row className="home-news-grid">
-          {news && news.length > 0 ? (
-            news.map((item) => (
-              <Col key={item.id} xs={12} sm={6} lg={4} className="d-flex">
-                <NewsCard
-                  item={item}
-                  isAdmin={isAdmin}
-                  onPreview={handlePreviewNews}
-                  onEdit={handleEditNews}
-                  onDelete={handleDeleteNews}
-                />
-              </Col>
-            ))
-          ) : (
-            <Col xs={12}>
-              <div className="home-empty-state">
-                <div>
-                  <i className="bi bi-newspaper empty-icon"></i>
-                </div>
-                <h4 className="empty-title">
-                  {t("noNewsAvailable", "No news available.")}
-                </h4>
-                <p className="empty-description">
-                  {t(
-                    "noNewsDescription",
-                    "Trenutno nema objavljenih vijesti. Provjerite kasnije."
-                  )}
-                </p>
-                {isAdmin && (
-                  <Button
-                    variant="primary"
-                    onClick={handleAddNews}
-                    className="empty-add-btn"
-                  >
-                    <i className="bi bi-plus-circle icon"></i>
-                    {t("addFirstNews", "Dodaj prvu vijest")}
-                  </Button>
-                )}
-              </div>
-            </Col>
           )}
-        </Row>
+        </Container>
+      </div>
 
-        {/* Loading indicator for infinite scroll */}
-        {isFetchingNextPage && (
-          <div className="text-center py-4">
-            <Spinner animation="border" role="status">
-              <span className="visually-hidden">{t("loading")}</span>
-            </Spinner>
+      {/* News Content - Full Width Container with Centered Content */}
+      <div className="news-content-wrapper w-100">
+        <div className="px-4">
+          <div className="news-content-centered">
+            {/* News Grid */}
+            <Row className="home-news-grid">
+              {news && news.length > 0 ? (
+                news.map((item) => (
+                  <Col
+                    key={item.id}
+                    xs={12}
+                    sm={12}
+                    md={4}
+                    lg={4}
+                    xl={4}
+                    xxl={4}
+                    className="d-flex"
+                  >
+                    <NewsCard
+                      item={item}
+                      isAdmin={isAdmin}
+                      onPreview={handlePreviewNews}
+                      onEdit={handleEditNews}
+                      onDelete={handleDeleteNews}
+                    />
+                  </Col>
+                ))
+              ) : (
+                <Col xs={12}>
+                  <div className="home-empty-state">
+                    <div>
+                      <i className="bi bi-newspaper empty-icon"></i>
+                    </div>
+                    <h4 className="empty-title">
+                      {t("noNewsAvailable", "No news available.")}
+                    </h4>
+                    <p className="empty-description">
+                      {t(
+                        "noNewsDescription",
+                        "Trenutno nema objavljenih vijesti. Provjerite kasnije."
+                      )}
+                    </p>
+                    {isAdmin && (
+                      <Button
+                        variant="primary"
+                        onClick={handleAddNews}
+                        className="empty-add-btn"
+                      >
+                        <i className="bi bi-plus-circle icon"></i>
+                        {t("addFirstNews", "Dodaj prvu vijest")}
+                      </Button>
+                    )}
+                  </div>
+                </Col>
+              )}
+            </Row>
+
+            {/* Loading indicator for infinite scroll */}
+            {isFetchingNextPage && (
+              <div className="text-center py-4">
+                <Spinner animation="border" role="status">
+                  <span className="visually-hidden">{t("loading")}</span>
+                </Spinner>
+              </div>
+            )}
           </div>
-        )}
-      </PageLayout>
+        </div>
+      </div>
 
       {/* Add/Edit News Modal */}
       <AddEditNewsModal

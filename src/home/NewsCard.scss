@@ -10,18 +10,22 @@
   box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
   border: 0;
 
-  // Responsive card heights
-  min-height: 500px;
-  max-height: 500px;
+  // Optimized heights for 3-row HD display (9 cards visible without scroll)
+  min-height: 320px;
 
-  @media (max-width: 767px) {
-    min-height: 480px;
-    max-height: 480px;
+  // Tablet & large mobile - 2 cards per row
+  @media (max-width: 991px) {
+    min-height: 340px;
   }
 
+  // Medium devices - full width
+  @media (max-width: 767px) {
+    min-height: 320px;
+  }
+
+  // Small devices - full width, more compact
   @media (max-width: 575px) {
-    min-height: 450px;
-    max-height: 450px;
+    min-height: 280px;
   }
 
   &:hover {
@@ -45,14 +49,22 @@
   position: relative;
   background-color: #f8f9fa;
   flex-shrink: 0;
-  height: 200px;
+  /* Optimized for 3-row HD layout */
+  height: 140px;
 
-  @media (max-width: 767px) {
-    height: 180px;
+  // Tablet - 2 columns
+  @media (max-width: 991px) {
+    height: 150px;
   }
 
+  // Medium devices - full width
+  @media (max-width: 767px) {
+    height: 140px;
+  }
+
+  // Small devices - full width
   @media (max-width: 575px) {
-    height: 160px;
+    height: 120px;
   }
 }
 
@@ -101,15 +113,10 @@
   flex-direction: column;
   flex: 1 1 auto;
   overflow: hidden;
-  min-height: 300px;
+  /* Let body size be determined by content so cards are more compact on wide screens */
   padding: 1.25rem;
 
   @media (max-width: 767px) {
-    min-height: 300px;
-  }
-
-  @media (max-width: 575px) {
-    min-height: 290px;
     padding: 1rem;
   }
 }

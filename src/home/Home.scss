@@ -1,5 +1,55 @@
 // Home Component Styles (Updated for PageLayout system)
 
+.page-header-top {
+  width: 100%;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+
+  h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #212529;
+    display: flex;
+    align-items: center;
+    margin: 0;
+
+    i {
+      font-size: 2.5rem;
+      color: var(--bs-primary, #0d6efd);
+    }
+
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+
+      i {
+        font-size: 1.75rem;
+      }
+    }
+  }
+
+  .text-muted {
+    font-size: 1rem;
+    color: #6c757d;
+
+    @media (max-width: 768px) {
+      font-size: 0.95rem;
+    }
+  }
+}
+
+// Full-width news content wrapper
+.news-content-wrapper {
+  width: 100%;
+  background-color: #fff;
+  padding: 2rem 0;
+
+  .news-content-centered {
+    max-width: 100%;
+    margin: 0 auto;
+    width: 100%;
+  }
+}
+
 .home-container {
   // Add News button styling
   .home-add-btn {
@@ -57,9 +107,31 @@
 
 .home-news-grid {
   gap: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
 
   @media (min-width: 768px) {
     gap: 1.5rem;
+  }
+
+  /* Force 3 columns on medium and larger screens */
+  > .d-flex {
+    @media (min-width: 768px) {
+      flex: 0 0 calc(33.33333% - 1rem);
+      max-width: calc(33.33333% - 1rem);
+    }
+
+    @media (min-width: 992px) {
+      flex: 0 0 calc(33.33333% - 1.5rem);
+      max-width: calc(33.33333% - 1.5rem);
+    }
+
+    /* Mobile: 1 column */
+    @media (max-width: 767px) {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
   }
 }
 
