@@ -1,0 +1,74 @@
+.editable-grid .editable-input {
+  min-width: 120px;
+  border-radius: 0.25rem;
+}
+.editable-grid .editable-input:focus {
+  border-color: var(--bs-primary, #0d6efd);
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+.editable-grid .table .table-header {
+  background-color: var(--bs-light, #f8f9fa);
+  font-weight: 600;
+}
+.editable-grid .table .table-header th {
+  border-bottom: 2px solid var(--bs-border-color, #dee2e6);
+  padding: 0.75rem 0.5rem;
+}
+.editable-grid .table .table-row:hover {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+.editable-grid .table .table-row td {
+  padding: 0.5rem;
+  vertical-align: middle;
+}
+.editable-grid .loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+.editable-grid .empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--bs-secondary, #6c757d);
+}
+.editable-grid .parent-key-btn {
+  border: 1px solid var(--bs-primary, #0d6efd);
+  background-color: transparent;
+  color: var(--bs-primary, #0d6efd);
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+.editable-grid .parent-key-btn .parent-key-code {
+  background-color: transparent;
+  color: inherit;
+  font-size: 0.75rem;
+  font-family: "Courier New", monospace;
+  border: none;
+  padding: 0;
+}
+.editable-grid .parent-key-btn:hover {
+  background-color: var(--bs-primary, #0d6efd);
+  color: white;
+  transform: translateY(-1px);
+}
+.editable-grid .parent-key-btn.copied {
+  background-color: var(--bs-success, #198754);
+  border-color: var(--bs-success, #198754);
+  color: white;
+}
+.editable-grid .parent-key-btn.copied .parent-key-code {
+  color: white;
+}
+.editable-grid .parent-key-btn i {
+  font-size: 0.7rem;
+}
+@media (max-width: 768px) {
+  .editable-grid .parent-key-btn .parent-key-code {
+    font-size: 0.65rem;
+  }
+  .editable-grid .table {
+    font-size: 0.85rem;
+  }
+}/*# sourceMappingURL=EditableGrid.css.map */

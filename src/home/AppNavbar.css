@@ -1,0 +1,20 @@
+.navbar-brand-logo {
+  width: 32px;
+  height: 32px;
+  margin-right: 0.5rem;
+}
+
+@media (max-width: 575px) {
+  .navbar-brand-text.desktop {
+    display: none;
+  }
+}
+@media (min-width: 576px) {
+  .navbar-brand-text.mobile {
+    display: none;
+  }
+}
+
+.navbar-toggler-custom {
+  border: 0;
+}/*# sourceMappingURL=AppNavbar.css.map */

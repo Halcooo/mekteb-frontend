@@ -1,0 +1,223 @@
+@media (max-width: 767px) {
+  .mobile-spacing.p-mobile-1 {
+    padding: 0.25rem !important;
+  }
+  .mobile-spacing.p-mobile-2 {
+    padding: 0.5rem !important;
+  }
+  .mobile-spacing.p-mobile-3 {
+    padding: 1rem !important;
+  }
+  .mobile-spacing.p-mobile-4 {
+    padding: 1.5rem !important;
+  }
+  .mobile-spacing.px-mobile-1 {
+    padding-left: 0.25rem !important;
+    padding-right: 0.25rem !important;
+  }
+  .mobile-spacing.px-mobile-2 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .mobile-spacing.px-mobile-3 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  .mobile-spacing.py-mobile-1 {
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+  .mobile-spacing.py-mobile-2 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+  .mobile-spacing.py-mobile-3 {
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+  }
+  .mobile-spacing.m-mobile-1 {
+    margin: 0.25rem !important;
+  }
+  .mobile-spacing.m-mobile-2 {
+    margin: 0.5rem !important;
+  }
+  .mobile-spacing.m-mobile-3 {
+    margin: 1rem !important;
+  }
+  .mobile-spacing.mx-mobile-1 {
+    margin-left: 0.25rem !important;
+    margin-right: 0.25rem !important;
+  }
+  .mobile-spacing.mx-mobile-2 {
+    margin-left: 0.5rem !important;
+    margin-right: 0.5rem !important;
+  }
+  .mobile-spacing.mx-mobile-3 {
+    margin-left: 1rem !important;
+    margin-right: 1rem !important;
+  }
+  .mobile-spacing.my-mobile-1 {
+    margin-top: 0.25rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+  .mobile-spacing.my-mobile-2 {
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+  .mobile-spacing.my-mobile-3 {
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .fs-mobile-xs {
+    font-size: 0.75rem !important;
+  }
+  .fs-mobile-sm {
+    font-size: 0.875rem !important;
+  }
+  .fs-mobile-base {
+    font-size: 1rem !important;
+  }
+  .fs-mobile-lg {
+    font-size: 1.125rem !important;
+  }
+  .fs-mobile-xl {
+    font-size: 1.25rem !important;
+  }
+}
+@media (max-width: 767px) {
+  .btn-mobile-sm {
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    line-height: 1.3 !important;
+  }
+  .btn-mobile-xs {
+    padding: 0.125rem 0.375rem !important;
+    font-size: 0.625rem !important;
+    line-height: 1.2 !important;
+  }
+}
+@media (max-width: 767px) {
+  .card-mobile-compact .card-body {
+    padding: 0.75rem !important;
+  }
+  .card-mobile-xs .card-body {
+    padding: 0.5rem !important;
+  }
+}
+@media (max-width: 767px) {
+  .table-mobile-compact {
+    font-size: 0.875rem;
+  }
+  .table-mobile-compact th,
+  .table-mobile-compact td {
+    padding: 0.375rem 0.25rem !important;
+    vertical-align: middle;
+  }
+  .table-mobile-compact .btn {
+    padding: 0.125rem 0.375rem;
+    font-size: 0.75rem;
+  }
+}
+@media (max-width: 767px) {
+  .form-mobile-compact .form-control,
+  .form-mobile-compact .form-select {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  .form-mobile-compact .form-label {
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+  .form-mobile-compact .input-group-text {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+  }
+}
+@media (max-width: 767px) {
+  .modal-mobile-fullscreen .modal-dialog {
+    margin: 0.5rem;
+    max-width: calc(100% - 1rem);
+  }
+  .modal-mobile-fullscreen .modal-dialog .modal-content {
+    border-radius: 0.5rem;
+  }
+}
+@media (max-width: 991px) {
+  .nav-mobile-stack .nav-link {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+  }
+  .nav-mobile-stack .nav-link i {
+    margin-right: 0.375rem;
+  }
+}
+@media (max-width: 767px) {
+  .row-mobile-tight {
+    --bs-gutter-x: 0.75rem;
+    --bs-gutter-y: 0.75rem;
+  }
+  .col-mobile-full {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+@media (hover: none) and (pointer: coarse) {
+  .touch-friendly .btn,
+  .touch-friendly .form-control,
+  .touch-friendly .form-select {
+    min-height: 44px;
+  }
+  .touch-friendly .table td,
+  .touch-friendly .table th {
+    padding: 0.75rem 0.5rem;
+  }
+}
+@media (max-width: 575px) {
+  .d-xs-none {
+    display: none !important;
+  }
+}
+@media (min-width: 576px) and (max-width: 767px) {
+  .d-sm-only {
+    display: block !important;
+  }
+}
+@media (min-width: 768px) {
+  .d-md-up {
+    display: block !important;
+  }
+}
+@media (max-width: 767px) {
+  .loading-mobile .spinner-border {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .loading-mobile .loading-text {
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+  }
+}
+@media (max-width: 767px) {
+  .alert-mobile {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+    margin-bottom: 0.75rem;
+  }
+  .alert-mobile .alert-heading {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+  }
+}
+@media (max-width: 767px) {
+  .breadcrumb-mobile {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+  .breadcrumb-mobile .breadcrumb-item:not(:last-child)::after {
+    margin: 0 0.25rem;
+  }
+}/*# sourceMappingURL=responsive-utils.css.map */

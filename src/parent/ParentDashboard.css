@@ -1,0 +1,112 @@
+.parent-dashboard .help-text {
+  margin-top: 0.5rem;
+}
+.parent-dashboard .help-text small {
+  display: flex;
+  align-items: center;
+}
+.parent-dashboard .help-text small i {
+  color: var(--bs-primary);
+}
+.parent-dashboard .table-responsive .badge {
+  font-size: 0.875rem;
+  padding: 0.375rem 0.75rem;
+}
+.parent-dashboard .card-header {
+  background-color: var(--bs-light);
+  border-bottom: 1px solid var(--bs-border-color);
+}
+.parent-dashboard .card-header h5 {
+  color: var(--bs-primary);
+  font-weight: 600;
+}
+.parent-dashboard .card-header i {
+  color: var(--bs-primary);
+}
+.parent-dashboard .empty-state i {
+  opacity: 0.5;
+}
+.parent-dashboard .demo-keys {
+  border-top: 1px solid var(--bs-border-color);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+.parent-dashboard .demo-keys .demo-key-item {
+  padding: 0.375rem;
+  border-radius: 0.25rem;
+  transition: background-color 0.2s ease;
+}
+.parent-dashboard .demo-keys .demo-key-item:hover {
+  background-color: var(--bs-light);
+}
+.parent-dashboard .demo-keys .demo-key-item .demo-key-btn {
+  border: none;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+}
+.parent-dashboard .demo-keys .demo-key-item .demo-key-btn:hover {
+  background-color: var(--bs-primary);
+  color: white;
+}
+.parent-dashboard .demo-keys .demo-key-item .demo-key-btn:hover code {
+  color: white !important;
+}
+.parent-dashboard .demo-keys .demo-key-item .demo-key-btn code {
+  background: none;
+  border: none;
+  font-size: 0.7rem;
+  font-family: "Courier New", monospace;
+}
+.parent-dashboard .attendance-details .attendance-summary .card {
+  border: 1px solid var(--bs-border-color);
+  transition: all 0.2s ease;
+}
+.parent-dashboard .attendance-details .attendance-summary .card:hover {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+.parent-dashboard .attendance-details .attendance-summary .card .card-body {
+  padding: 1rem 0.75rem;
+}
+.parent-dashboard .attendance-details .attendance-summary .card .card-body h4 {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+@media (max-width: 768px) {
+  .parent-dashboard .table-responsive {
+    font-size: 0.875rem;
+  }
+  .parent-dashboard .card-header .d-flex {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .parent-dashboard .card-header .d-flex .btn {
+    align-self: flex-end;
+  }
+}
+.parent-dashboard .student-row {
+  transition: background-color 0.3s ease;
+}
+.parent-dashboard .student-row.newly-added {
+  background-color: rgba(25, 135, 84, 0.1);
+  animation: highlightFade 2s ease-out;
+}
+@keyframes highlightFade {
+  0% {
+    background-color: rgba(25, 135, 84, 0.2);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.parent-dashboard .spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 200px;
+}
+.parent-dashboard .spinner-container .spinner-border {
+  color: var(--bs-primary);
+}/*# sourceMappingURL=ParentDashboard.css.map */

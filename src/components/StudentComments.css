@@ -1,0 +1,85 @@
+.student-comments .comment-thread {
+  border: none !important;
+  padding: 1rem !important;
+}
+.student-comments .comment-thread:not(:last-child) {
+  border-bottom: 1px solid var(--bs-border-color) !important;
+}
+.student-comments .comment.parent-comment {
+  background-color: var(--bs-light);
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid var(--bs-primary);
+}
+.student-comments .comment.reply-comment {
+  background-color: var(--bs-body-bg);
+  padding: 0.75rem;
+  border-radius: 6px;
+  border-left: 3px solid var(--bs-success);
+  margin-left: 1.5rem;
+  position: relative;
+}
+.student-comments .comment.reply-comment::before {
+  content: "";
+  position: absolute;
+  left: -12px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background-color: var(--bs-border-color);
+}
+.student-comments .comment.reply-comment:not(:last-child) {
+  margin-bottom: 0.75rem;
+}
+.student-comments .comment-header .badge {
+  font-size: 0.7rem;
+}
+.student-comments .comment-header .author-name {
+  font-size: 0.9rem;
+}
+.student-comments .comment-content {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--bs-body-color);
+  white-space: pre-wrap;
+}
+.student-comments .comment-actions .btn {
+  font-size: 0.8rem;
+  padding: 0.25rem 0.5rem;
+}
+.student-comments .replies {
+  border-top: 1px solid var(--bs-border-color);
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+@media (max-width: 768px) {
+  .student-comments .comment.reply-comment {
+    margin-left: 1rem;
+  }
+  .student-comments .comment-header {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 0.5rem;
+  }
+  .student-comments .comment-header .badge {
+    font-size: 0.65rem;
+  }
+  .student-comments .comment-content {
+    font-size: 0.9rem;
+  }
+  .student-comments .comment-actions {
+    margin-top: 0.75rem;
+  }
+}
+@media (prefers-color-scheme: dark) {
+  .student-comments .comment.parent-comment {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+  }
+  .student-comments .comment.reply-comment {
+    background-color: rgba(var(--bs-success-rgb), 0.05);
+  }
+}
+
+.modal .modal-body .form-control {
+  resize: vertical;
+}/*# sourceMappingURL=StudentComments.css.map */

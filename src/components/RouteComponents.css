@@ -1,0 +1,29 @@
+.route-container {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.route-container .loading-spinner {
+  color: var(--bs-primary, #0d6efd);
+}
+.route-container .error-message {
+  text-align: center;
+  color: var(--bs-danger, #dc3545);
+}
+
+.auth-redirect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+}
+.auth-redirect .redirect-message {
+  margin-bottom: 1rem;
+  color: var(--bs-secondary, #6c757d);
+}
+.auth-redirect .redirect-spinner {
+  color: var(--bs-primary, #0d6efd);
+}/*# sourceMappingURL=RouteComponents.css.map */

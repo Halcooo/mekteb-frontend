@@ -1,0 +1,202 @@
+.spacing-utils .m-xs {
+  margin: 0.25rem;
+}
+.spacing-utils .m-sm {
+  margin: 0.5rem;
+}
+.spacing-utils .m-md {
+  margin: 1rem;
+}
+.spacing-utils .m-lg {
+  margin: 1.5rem;
+}
+.spacing-utils .m-xl {
+  margin: 3rem;
+}
+.spacing-utils .p-xs {
+  padding: 0.25rem;
+}
+.spacing-utils .p-sm {
+  padding: 0.5rem;
+}
+.spacing-utils .p-md {
+  padding: 1rem;
+}
+.spacing-utils .p-lg {
+  padding: 1.5rem;
+}
+.spacing-utils .p-xl {
+  padding: 3rem;
+}
+
+.flex-utils .d-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.flex-utils .d-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.flex-utils .d-flex-column-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-utils .text-truncate-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.text-utils .text-truncate-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.button-utils .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.button-utils .btn-icon i {
+  margin-right: 0.5rem;
+}
+.button-utils .btn-icon i:last-child {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+.button-utils .btn-loading {
+  position: relative;
+}
+.button-utils .btn-loading:disabled {
+  pointer-events: none;
+}
+.button-utils .btn-loading .spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.form-utils .form-floating-custom {
+  position: relative;
+}
+.form-utils .form-floating-custom .form-control {
+  padding: 1rem 0.75rem 0.25rem;
+}
+.form-utils .form-floating-custom .form-control:not(:-moz-placeholder) ~ label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  opacity: 0.75;
+}
+.form-utils .form-floating-custom .form-control:focus ~ label, .form-utils .form-floating-custom .form-control:not(:placeholder-shown) ~ label {
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+  opacity: 0.75;
+}
+.form-utils .form-floating-custom label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1rem 0.75rem;
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+  transform-origin: 0 0;
+}
+
+.card-utils .card-hover {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+.card-utils .card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+.card-utils .card-loading {
+  position: relative;
+}
+.card-utils .card-loading::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.animation-utils .fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+.animation-utils .fade-out {
+  animation: fadeOut 0.3s ease-in-out;
+}
+.animation-utils .slide-in-up {
+  animation: slideInUp 0.3s ease-out;
+}
+.animation-utils .slide-out-down {
+  animation: slideOutDown 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes slideOutDown {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+@media (max-width: 575px) {
+  .responsive-utils .hide-mobile {
+    display: none !important;
+  }
+  .responsive-utils .show-mobile {
+    display: block !important;
+  }
+}
+@media (min-width: 576px) {
+  .responsive-utils .hide-desktop {
+    display: none !important;
+  }
+  .responsive-utils .show-desktop {
+    display: block !important;
+  }
+}/*# sourceMappingURL=utilities.css.map */

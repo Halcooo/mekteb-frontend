@@ -1,0 +1,35 @@
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+}
+
+.app .container,
+.app .container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .d-mobile-none {
+    display: none !important;
+  }
+  .fs-mobile-sm {
+    font-size: 0.875rem !important;
+  }
+}
+@media (min-width: 769px) {
+  .d-desktop-none {
+    display: none !important;
+  }
+}/*# sourceMappingURL=App.css.map */

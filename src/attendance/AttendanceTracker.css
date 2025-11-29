@@ -1,0 +1,72 @@
+.attendance-tracker .saving-spinner {
+  width: 12px;
+  height: 12px;
+  margin-right: 0.25rem;
+}
+.attendance-tracker .loading-spinner {
+  width: 12px;
+  height: 12px;
+}
+.attendance-tracker .form-control-spinner {
+  width: 16px;
+  height: 16px;
+}
+.attendance-tracker .attendance-radio {
+  transform: scale(1.2);
+}
+.attendance-tracker .attendance-radio:checked {
+  background-color: var(--bs-primary);
+  border-color: var(--bs-primary);
+}
+.attendance-tracker .status-radio.present:checked {
+  background-color: var(--bs-success, #198754);
+  border-color: var(--bs-success, #198754);
+}
+.attendance-tracker .status-radio.absent:checked {
+  background-color: var(--bs-danger, #dc3545);
+  border-color: var(--bs-danger, #dc3545);
+}
+.attendance-tracker .status-radio.late:checked {
+  background-color: var(--bs-warning, #ffc107);
+  border-color: var(--bs-warning, #ffc107);
+}
+.attendance-tracker .status-radio.excused:checked {
+  background-color: var(--bs-info, #0dcaf0);
+  border-color: var(--bs-info, #0dcaf0);
+}
+.attendance-tracker .current-status-badge {
+  font-weight: 500;
+  border-radius: 0.375rem;
+}
+.attendance-tracker .current-status-badge.present {
+  background-color: var(--bs-success, #198754);
+  color: white;
+}
+.attendance-tracker .current-status-badge.absent {
+  background-color: var(--bs-danger, #dc3545);
+  color: white;
+}
+.attendance-tracker .current-status-badge.late {
+  background-color: var(--bs-warning, #ffc107);
+  color: var(--bs-dark, #212529);
+}
+.attendance-tracker .current-status-badge.excused {
+  background-color: var(--bs-info, #0dcaf0);
+  color: var(--bs-dark, #212529);
+}
+
+.student-modal .form-group {
+  margin-bottom: 1rem;
+}
+.student-modal .form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+.student-modal .form-control,
+.student-modal .form-select {
+  border-radius: 0.375rem;
+}
+.student-modal .form-control:focus,
+.student-modal .form-select:focus {
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}/*# sourceMappingURL=AttendanceTracker.css.map */

@@ -1,7 +1,5 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:5000/api";
-
 // Interfaces
 export interface LoginCredentials {
   username: string;
@@ -45,7 +43,7 @@ export const authApi = {
   // Login
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>(
-      `${API_BASE_URL}/auth/login`,
+      `${import.meta.env.VITE_API_URL}/auth/login`,
       credentials
     );
     return response.data;
@@ -54,7 +52,7 @@ export const authApi = {
   // Register
   register: async (userData: RegisterData): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>(
-      `${API_BASE_URL}/auth/register`,
+      `${import.meta.env.VITE_API_URL}/auth/register`,
       userData
     );
     return response.data;
@@ -63,7 +61,7 @@ export const authApi = {
   // Refresh token
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>(
-      `${API_BASE_URL}/auth/refresh`,
+      `${import.meta.env.VITE_API_URL}/auth/refresh`,
       { refreshToken }
     );
     return response.data;
@@ -72,7 +70,7 @@ export const authApi = {
   // Logout
   logout: async (): Promise<ApiResponse<null>> => {
     const response = await axios.post<ApiResponse<null>>(
-      `${API_BASE_URL}/auth/logout`
+      `${import.meta.env.VITE_API_URL}/auth/logout`
     );
     return response.data;
   },
