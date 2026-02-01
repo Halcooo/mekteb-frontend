@@ -17,6 +17,7 @@ import PageLayout from "../components/PageLayout";
 import { parentApi } from "../api/parentApi";
 import type { ConnectedStudent as ApiConnectedStudent } from "../api/parentApi";
 import { validateParentKey } from "../utils/parentKeyUtils";
+import { formatBosnianDate } from "../utils/dateFormatter";
 import StudentComments from "../components/StudentComments";
 import "./ParentDashboard.scss";
 
@@ -39,7 +40,7 @@ const ParentDashboard: React.FC = () => {
     useState<ConnectedStudent | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
 
   const fetchConnectedStudents = useCallback(async () => {
@@ -52,7 +53,7 @@ const ParentDashboard: React.FC = () => {
           connectionDate:
             student.createdAt?.split("T")[0] ||
             new Date().toISOString().split("T")[0],
-        }))
+        })),
       );
     } catch (error) {
       console.error("Error fetching connected students:", error);
@@ -76,8 +77,8 @@ const ParentDashboard: React.FC = () => {
       setError(
         t(
           "parentDashboard.invalidKeyFormat",
-          "Invalid key format. Key should be in format YYYY-MMDD-XXXX"
-        )
+          "Invalid key format. Key should be in format YYYY-MMDD-XXXX",
+        ),
       );
       return;
     }
@@ -92,15 +93,15 @@ const ParentDashboard: React.FC = () => {
       if (response.success && response.student) {
         // Check if student is already connected
         const alreadyConnected = connectedStudents.some(
-          (s) => s.id === response.student!.id
+          (s) => s.id === response.student!.id,
         );
 
         if (alreadyConnected) {
           setError(
             t(
               "parentDashboard.studentAlreadyConnected",
-              "Student is already connected to your account"
-            )
+              "Student is already connected to your account",
+            ),
           );
           return;
         }
@@ -111,14 +112,14 @@ const ParentDashboard: React.FC = () => {
         setSuccess(
           t("parentDashboard.studentConnectedSuccess", {
             name: response.student.firstName,
-          })
+          }),
         );
         setStudentKey("");
 
         // Scroll to the connected students section to show the new addition
         setTimeout(() => {
           const connectedSection = document.querySelector(
-            ".connected-students-section"
+            ".connected-students-section",
           );
           if (connectedSection) {
             connectedSection.scrollIntoView({
@@ -132,14 +133,14 @@ const ParentDashboard: React.FC = () => {
           response.message ||
             t(
               "parentDashboard.invalidKey",
-              "Invalid student key. Please check the key and try again."
-            )
+              "Invalid student key. Please check the key and try again.",
+            ),
         );
       }
     } catch (error: unknown) {
       console.error("Error connecting student:", error);
       setError(
-        t("parentDashboard.networkError", "Network error. Please try again.")
+        t("parentDashboard.networkError", "Network error. Please try again."),
       );
     } finally {
       setLoading(false);
@@ -162,7 +163,7 @@ const ParentDashboard: React.FC = () => {
         t("parentDashboard.confirmDisconnect", {
           name: `${student.firstName} ${student.lastName}`,
           defaultValue: `Are you sure you want to disconnect from ${student.firstName} ${student.lastName}?`,
-        })
+        }),
       )
     ) {
       return;
@@ -179,15 +180,15 @@ const ParentDashboard: React.FC = () => {
         t("parentDashboard.studentDisconnectedSuccess", {
           name: student.firstName,
           defaultValue: `Successfully disconnected from ${student.firstName}`,
-        })
+        }),
       );
     } catch (error) {
       console.error("Error disconnecting student:", error);
       setError(
         t(
           "parentDashboard.disconnectError",
-          "Failed to disconnect from student. Please try again."
-        )
+          "Failed to disconnect from student. Please try again.",
+        ),
       );
     } finally {
       setLoading(false);
@@ -347,7 +348,7 @@ const ParentDashboard: React.FC = () => {
                           <td>
                             <Badge
                               bg={getStatusBadgeVariant(
-                                student.attendanceRate || 0
+                                student.attendanceRate || 0,
                               )}
                             >
                               {(student.attendanceRate || 0).toFixed(1)}%
@@ -356,7 +357,7 @@ const ParentDashboard: React.FC = () => {
                           <td>
                             {student.connectionDate
                               ? new Date(
-                                  student.connectionDate
+                                  student.connectionDate,
                                 ).toLocaleDateString()
                               : t("common.unknown", "Unknown")}
                           </td>
@@ -482,17 +483,17 @@ const ParentDashboard: React.FC = () => {
                     },
                   ].map((record, index) => (
                     <tr key={index}>
-                      <td>{new Date(record.date).toLocaleDateString()}</td>
+                      <td>{formatBosnianDate(record.date)}</td>
                       <td>
                         <Badge
                           bg={
                             record.status === "present"
                               ? "success"
                               : record.status === "late"
-                              ? "warning"
-                              : record.status === "absent"
-                              ? "danger"
-                              : "info"
+                                ? "warning"
+                                : record.status === "absent"
+                                  ? "danger"
+                                  : "info"
                           }
                         >
                           {record.status.charAt(0).toUpperCase() +

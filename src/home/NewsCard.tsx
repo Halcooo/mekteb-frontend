@@ -5,7 +5,11 @@ import type { NewsItem } from "../types/index";
 import { formatBosnianRelativeTime } from "../utils/dateFormatter";
 import "./NewsCard.scss";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "";
+// Extract base URL (remove /api from the end if present)
+const VITE_API_URL = import.meta.env.VITE_API_URL || "";
+const API_BASE_URL = VITE_API_URL.endsWith("/api")
+  ? VITE_API_URL.slice(0, -4)
+  : VITE_API_URL;
 
 interface NewsCardProps {
   item: NewsItem;

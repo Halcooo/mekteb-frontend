@@ -12,6 +12,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { commentsApi } from "../api/commentsApi";
 import type { StudentComment } from "../api/commentsApi";
+import { formatBosnianDate } from "../utils/dateFormatter";
 import "./StudentComments.scss";
 
 interface StudentCommentsProps {
@@ -44,7 +45,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
     try {
       const fetchedComments = await commentsApi.getStudentComments(
         studentId,
-        selectedDate
+        selectedDate,
       );
       setComments(fetchedComments);
     } catch (error) {
@@ -95,15 +96,15 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
 
   // Format date for display
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return formatBosnianDate(dateString);
   };
 
   // Format time for display
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    const d = new Date(dateString);
+    const hours = d.getHours().toString().padStart(2, "0");
+    const minutes = d.getMinutes().toString().padStart(2, "0");
+    return `${hours}:${minutes}`;
   };
 
   // Group comments by parent/replies
@@ -257,7 +258,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                 onChange={(e) => setReplyText(e.target.value)}
                 placeholder={t(
                   "comments.replyPlaceholder",
-                  "Type your reply here..."
+                  "Type your reply here...",
                 )}
                 required
               />
