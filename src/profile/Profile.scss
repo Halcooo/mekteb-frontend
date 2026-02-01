@@ -1,0 +1,79 @@
+.profile-page {
+  min-height: calc(100vh - 200px);
+  display: flex;
+  align-items: center;
+
+  .card {
+    border: none;
+    margin-top: 1rem;
+
+    .card-body {
+      h4 {
+        color: #333;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+      }
+
+      hr {
+        margin: 2rem 0;
+        opacity: 0.2;
+      }
+    }
+  }
+
+  .form-control:disabled {
+    background-color: #f8f9fa;
+    color: #6c757d;
+  }
+
+  .btn {
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &:disabled {
+      opacity: 0.6;
+    }
+  }
+
+  .form-label {
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-text {
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 576px) {
+    .card-body {
+      padding: 1.5rem !important;
+
+      h4 {
+        font-size: 1.25rem;
+      }
+    }
+
+    .btn {
+      width: 100%;
+      margin-bottom: 0.5rem;
+
+      &:not(:last-child) {
+        margin-right: 0;
+      }
+    }
+
+    .d-flex {
+      flex-direction: column;
+
+      &.gap-2 {
+        gap: 0.5rem !important;
+      }
+    }
+  }
+}

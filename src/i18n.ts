@@ -202,6 +202,16 @@ i18n
               "Greška pri prekidanju veze sa učenikom. Pokušajte ponovo.",
           },
 
+          // Profile Management
+          profileSettings: {
+            myProfile: "Moj profil",
+            edit: "Uredi profil",
+            updateSuccess: "Profil je uspješno ažuriran!",
+            updateError: "Greška pri ažuriranju profila",
+            nameLengthError: "Ime i prezime su obavezni",
+            emailCannotChange: "Email ne može biti promijenjen",
+          },
+
           // Comments System
           comments: {
             title: "Dnevni komentari",
@@ -588,6 +598,16 @@ i18n
               "Failed to disconnect from student. Please try again.",
           },
 
+          // Profile Management
+          profileSettings: {
+            myProfile: "My Profile",
+            edit: "Edit Profile",
+            updateSuccess: "Profile updated successfully!",
+            updateError: "Failed to update profile",
+            nameLengthError: "First and last name are required",
+            emailCannotChange: "Email cannot be changed",
+          },
+
           // Comments System
           comments: {
             title: "Daily Comments",
@@ -678,138 +698,6 @@ i18n
             weekDaysLong:
               "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday",
           },
-
-          // Common UI
-          loading: "Loading...",
-          loadingStudents: "Loading students...",
-          errorLoadingStudents: "Error loading students. Please try again.",
-          id: "ID",
-          parentId: "Parent ID",
-          date: "Date",
-          status: "Status",
-          notes: "Notes",
-          onTime: "On time",
-          sickLeave: "Sick leave",
-          medicalAppointment: "Medical appointment",
-          arrivedLate: "Arrived {{minutes}} mins late",
-          mektebLogo: "Mekteb Logo",
-          recentAttendance: "Recent Attendance (Last 10 Days)",
-
-          // Common UI
-          loading: "Učitavanje...",
-          loadingStudents: "Učitavanje učenika...",
-          errorLoadingStudents:
-            "Greška pri učitavanju učenika. Molimo pokušajte ponovo.",
-          id: "ID",
-          parentId: "ID roditelja",
-          date: "Datum",
-          status: "Status",
-          notes: "Napomene",
-          onTime: "Na vrijeme",
-          sickLeave: "Bolovanje",
-          medicalAppointment: "Ljekarski pregled",
-          arrivedLate: "Kasni {{minutes}} min",
-          mektebLogo: "Mekteb Logo",
-          recentAttendance: "Nedavno prisustvo (Zadnjih 10 dana)",
-
-          // Mobile-friendly labels
-          menu: "Menu",
-          closeMenu: "Close menu",
-          showMore: "Show more",
-          showLess: "Show less",
-          details: "Details",
-          actions: "Actions",
-          refresh: "Refresh",
-          filter: "Filter",
-          sort: "Sort",
-          noData: "No data",
-          errorOccurred: "An error occurred",
-          tryAgain: "Try again",
-
-          // Attendance Management
-          attendanceTracker: {
-            title: "Attendance Tracker",
-            selectDate: "Select Date",
-            selectedDate: "Selected",
-            summary: "Daily Summary",
-            presentRate: "Present Rate",
-            studentList: "Student Attendance",
-            currentStatus: "Status",
-            saveAttendance: "Save Attendance",
-            saving: "Saving...",
-            refresh: "Refresh",
-            saveSuccess: "Attendance saved successfully!",
-            saveError: "Error saving attendance. Please try again.",
-            autoSaveEnabled:
-              "Auto-save enabled - changes are saved automatically",
-            savingChanges: "Saving changes...",
-            bulkSave: "Bulk Save",
-            bulkSaveTooltip: "Save all current attendance at once",
-            status: {
-              present: "Present",
-              absent: "Absent",
-              late: "Late",
-              excused: "Excused",
-            },
-          },
-
-          // News Management
-          latestUpdates: "Latest news and announcements",
-          addNews: "Add News",
-          editNews: "Edit News",
-          deleteNews: "Delete News",
-          confirmDeleteNews: "Are you sure you want to delete this news item?",
-          noNewsAvailable: "No news available.",
-          errorLoadingNews: "Error loading news. Please try again later.",
-          title: "Title",
-          content: "Content",
-          enterNewsTitle: "Enter news title",
-          enterNewsContent: "Enter news content",
-          saving: "Saving...",
-          deleting: "Deleting...",
-          loadingMoreNews: "Loading more news...",
-          loadMore: "Load More",
-          noMoreNews: "No more news to load",
-          readMore: "Read more",
-          by: "By",
-          unknown: "Unknown",
-          imageNumber: "Image {{number}} of {{total}}",
-          publishedOn: "Published:",
-          createdOn: "Created:",
-          today: "today",
-          yesterday: "yesterday",
-          daysAgo: "{{count}} days ago",
-          hoursAgo: "{{count}} hours ago",
-          minutesAgo: "{{count}} minutes ago",
-          justNow: "just now",
-          noNewsDescription:
-            "There are currently no published news. Check back later.",
-          addFirstNews: "Add first news",
-
-          // Image Management
-          images: "Images",
-          existingImages: "Existing Images",
-          addImages: "Add Images",
-          uploadImages: "Upload Images",
-          selectImages: "Select Images",
-          imagePreview: "Image Preview",
-          deleteImage: "Delete Image",
-          confirmDeleteImage: "Are you sure you want to delete this image?",
-          noImagesSelected: "No images selected",
-          maxImagesAllowed: "Maximum 5 images allowed",
-          maxFileSize: "Max {{size}}MB each",
-          maxFileSizeExceeded: "File exceeds maximum size of 5MB",
-          onlyImagesAllowed: "Only images are allowed",
-          uploadingImages: "Uploading images...",
-          imagesUploadedSuccessfully: "Images uploaded successfully",
-          errorUploadingImages: "Error uploading images",
-          errorDeletingImage: "Error deleting image",
-
-          // Sample news content
-          firstNewsTitle: "Welcome!",
-          firstNewsContent: "This is the first news item.",
-          secondNewsTitle: "Update",
-          secondNewsContent: "Here is another news update.",
         },
       },
     },
