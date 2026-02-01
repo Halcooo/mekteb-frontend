@@ -357,13 +357,13 @@ const EditableGrid: React.FC<EditableGridProps> = ({
           <Table striped bordered hover size="sm">
             <thead className="table-dark">
               <tr>
-                <th>ID</th>
+                <th>{t("id", "ID")}</th>
                 <th>{t("firstName", "First Name")}</th>
                 <th>{t("lastName", "Last Name")}</th>
                 <th>{t("dateOfBirth", "Date of Birth")}</th>
                 <th>{t("grade", "Grade Level")}</th>
                 <th>{t("parentKey.label", "Parent Key")}</th>
-                <th>Parent ID</th>
+                <th>{t("parentId", "Parent ID")}</th>
                 <th>{t("parentName", "Parent Name")}</th>
                 <th>{t("actions", "Actions")}</th>
               </tr>

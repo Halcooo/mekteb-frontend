@@ -20,12 +20,12 @@ import {
   type AttendanceSummary,
   getStatusColor,
   getStatusIcon,
-  formatDate,
   formatDateForInput,
 } from "./attendanceApi";
 import { studentApi } from "../students/studentApi";
 import DatePicker from "../components/DatePicker";
 import PageLayout from "../components/PageLayout";
+import { formatBosnianDate } from "../utils/dateFormatter";
 import "./AttendanceTracker.scss";
 
 function AttendanceTracker() {
@@ -42,6 +42,13 @@ function AttendanceTracker() {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(20);
   const [showAddStudent, setShowAddStudent] = useState(false);
+
+  // Scroll to top on page change (mobile)
+  useEffect(() => {
+    if (window.innerWidth < 768) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [currentPage]);
   const [newStudent, setNewStudent] = useState({
     firstName: "",
     lastName: "",
@@ -298,7 +305,7 @@ function AttendanceTracker() {
       <PageLayout title="Attendance Tracker" className="attendance-tracker">
         <div className="text-center">
           <Spinner animation="border" className="me-2" />
-          Loading students...
+          {t("loadingStudents", "Loading students...")}
         </div>
       </PageLayout>
     );
@@ -308,7 +315,10 @@ function AttendanceTracker() {
     return (
       <PageLayout title="Attendance Tracker" className="attendance-tracker">
         <Alert variant="danger">
-          Error loading students. Please try again.
+          {t(
+            "errorLoadingStudents",
+            "Error loading students. Please try again.",
+          )}
         </Alert>
       </PageLayout>
     );
@@ -343,7 +353,7 @@ function AttendanceTracker() {
               <div className="mt-3">
                 <small className="text-muted">
                   {t("attendanceTracker.selectedDate", "Selected")}:{" "}
-                  {formatDate(selectedDate)}
+                  {formatBosnianDate(selectedDate)}
                 </small>
               </div>
             </Card.Body>
@@ -481,7 +491,7 @@ function AttendanceTracker() {
                 <Col md={4}>
                   <h5 className="mb-0">
                     {t("attendanceTracker.studentList", "Student Attendance")} -{" "}
-                    {formatDate(selectedDate)}
+                    {formatBosnianDate(selectedDate)}
                   </h5>
                 </Col>
                 <Col md={6}>
@@ -489,7 +499,7 @@ function AttendanceTracker() {
                     <Form.Control
                       type="text"
                       placeholder={t(
-                        "students.searchPlaceholder",
+                        "studentsSearchPlaceholder",
                         "Search students by name or ID...",
                       )}
                       value={searchTerm}
@@ -517,7 +527,7 @@ function AttendanceTracker() {
                   <small className="text-muted">
                     {t("common.showing", "Showing")} {filteredStudents.length}{" "}
                     {t("common.of", "of")} {studentsResponse?.data?.length || 0}{" "}
-                    {t("students.students", "students")}
+                    {t("studentCountLabel", "students")}
                     {filteredStudents.length > studentsPerPage && (
                       <>
                         {" "}
@@ -535,104 +545,210 @@ function AttendanceTracker() {
                   <Spinner animation="border" />
                 </div>
               ) : (
-                <div className="table-responsive">
-                  <Table hover className="mb-0">
-                    <thead className="table-light">
-                      <tr>
-                        <th>{t("students.name", "Name")}</th>
-                        <th>{t("students.gradeLevel", "Grade")}</th>
-                        <th className="text-center">
-                          {t("attendanceTracker.status.present", "Present")}
-                        </th>
-                        <th className="text-center">
-                          {t("attendanceTracker.status.absent", "Absent")}
-                        </th>
-                        <th className="text-center">
-                          {t("attendanceTracker.status.late", "Late")}
-                        </th>
-                        <th className="text-center">
-                          {t("attendanceTracker.status.excused", "Excused")}
-                        </th>
-                        <th>
-                          {t("attendanceTracker.currentStatus", "Status")}
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {students.map((student) => {
-                        const currentStatus =
-                          attendanceData[student.id] || "ABSENT";
-                        return (
-                          <tr key={student.id}>
-                            <td>
-                              <div className="d-flex align-items-center">
-                                <strong>
+                <>
+                  {/* Desktop Table View */}
+                  <div className="table-responsive d-none d-md-block">
+                    <Table hover className="mb-0">
+                      <thead className="table-light">
+                        <tr>
+                          <th>{t("students.name", "Name")}</th>
+                          <th>{t("students.gradeLevel", "Grade")}</th>
+                          <th className="text-center">
+                            {t("attendanceTracker.status.present", "Present")}
+                          </th>
+                          <th className="text-center">
+                            {t("attendanceTracker.status.absent", "Absent")}
+                          </th>
+                          <th className="text-center">
+                            {t("attendanceTracker.status.late", "Late")}
+                          </th>
+                          <th className="text-center">
+                            {t("attendanceTracker.status.excused", "Excused")}
+                          </th>
+                          <th>
+                            {t("attendanceTracker.currentStatus", "Status")}
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map((student) => {
+                          const currentStatus =
+                            attendanceData[student.id] || "ABSENT";
+                          return (
+                            <tr key={student.id}>
+                              <td>
+                                <div className="d-flex align-items-center">
+                                  <strong>
+                                    {student.firstName} {student.lastName}
+                                  </strong>
+                                  {savingStudents.has(student.id) && (
+                                    <Spinner
+                                      as="span"
+                                      animation="border"
+                                      size="sm"
+                                      className="form-control-spinner ms-2 text-primary"
+                                    />
+                                  )}
+                                </div>
+                              </td>
+                              <td>
+                                <Badge bg="secondary">
+                                  {student.gradeLevel}
+                                </Badge>
+                              </td>
+                              <td className="text-center p-2">
+                                <Form.Check
+                                  type="radio"
+                                  name={`attendance-${student.id}`}
+                                  checked={currentStatus === "PRESENT"}
+                                  onChange={() =>
+                                    handleStatusChange(student.id, "PRESENT")
+                                  }
+                                  className="d-flex justify-content-center"
+                                />
+                              </td>
+                              <td className="text-center p-2">
+                                <Form.Check
+                                  type="radio"
+                                  name={`attendance-${student.id}`}
+                                  checked={currentStatus === "ABSENT"}
+                                  onChange={() =>
+                                    handleStatusChange(student.id, "ABSENT")
+                                  }
+                                  className="d-flex justify-content-center"
+                                />
+                              </td>
+                              <td className="text-center p-2">
+                                <Form.Check
+                                  type="radio"
+                                  name={`attendance-${student.id}`}
+                                  checked={currentStatus === "LATE"}
+                                  onChange={() =>
+                                    handleStatusChange(student.id, "LATE")
+                                  }
+                                  className="d-flex justify-content-center"
+                                />
+                              </td>
+                              <td className="text-center p-2">
+                                <Form.Check
+                                  type="radio"
+                                  name={`attendance-${student.id}`}
+                                  checked={currentStatus === "EXCUSED"}
+                                  onChange={() =>
+                                    handleStatusChange(student.id, "EXCUSED")
+                                  }
+                                  className="d-flex justify-content-center"
+                                />
+                              </td>
+                              <td>{getStatusBadge(currentStatus)}</td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </Table>
+                  </div>
+
+                  {/* Mobile Card View */}
+                  <div className="d-md-none">
+                    {students.map((student) => {
+                      const currentStatus =
+                        attendanceData[student.id] || "ABSENT";
+                      return (
+                        <Card key={student.id} className="mb-2 mx-2">
+                          <Card.Body className="p-3">
+                            <div className="d-flex justify-content-between align-items-start mb-3">
+                              <div>
+                                <strong className="d-block">
                                   {student.firstName} {student.lastName}
                                 </strong>
+                                <Badge bg="secondary" className="mt-1">
+                                  {student.gradeLevel}
+                                </Badge>
+                              </div>
+                              <div className="d-flex align-items-center">
+                                {getStatusBadge(currentStatus)}
                                 {savingStudents.has(student.id) && (
                                   <Spinner
                                     as="span"
                                     animation="border"
                                     size="sm"
-                                    className="form-control-spinner ms-2 text-primary"
+                                    className="ms-2 text-primary"
                                   />
                                 )}
                               </div>
-                            </td>
-                            <td>
-                              <Badge bg="secondary">{student.gradeLevel}</Badge>
-                            </td>
-                            <td className="text-center p-2">
-                              <Form.Check
-                                type="radio"
-                                name={`attendance-${student.id}`}
-                                checked={currentStatus === "PRESENT"}
-                                onChange={() =>
+                            </div>
+                            <div className="d-grid gap-2">
+                              <Button
+                                variant={
+                                  currentStatus === "PRESENT"
+                                    ? "success"
+                                    : "outline-success"
+                                }
+                                onClick={() =>
                                   handleStatusChange(student.id, "PRESENT")
                                 }
-                                className="d-flex justify-content-center"
-                              />
-                            </td>
-                            <td className="text-center p-2">
-                              <Form.Check
-                                type="radio"
-                                name={`attendance-${student.id}`}
-                                checked={currentStatus === "ABSENT"}
-                                onChange={() =>
+                                className="d-flex align-items-center justify-content-center"
+                              >
+                                <i className="bi bi-check-circle me-2"></i>
+                                {t(
+                                  "attendanceTracker.status.present",
+                                  "Present",
+                                )}
+                              </Button>
+                              <Button
+                                variant={
+                                  currentStatus === "ABSENT"
+                                    ? "danger"
+                                    : "outline-danger"
+                                }
+                                onClick={() =>
                                   handleStatusChange(student.id, "ABSENT")
                                 }
-                                className="d-flex justify-content-center"
-                              />
-                            </td>
-                            <td className="text-center p-2">
-                              <Form.Check
-                                type="radio"
-                                name={`attendance-${student.id}`}
-                                checked={currentStatus === "LATE"}
-                                onChange={() =>
-                                  handleStatusChange(student.id, "LATE")
-                                }
-                                className="d-flex justify-content-center"
-                              />
-                            </td>
-                            <td className="text-center p-2">
-                              <Form.Check
-                                type="radio"
-                                name={`attendance-${student.id}`}
-                                checked={currentStatus === "EXCUSED"}
-                                onChange={() =>
-                                  handleStatusChange(student.id, "EXCUSED")
-                                }
-                                className="d-flex justify-content-center"
-                              />
-                            </td>
-                            <td>{getStatusBadge(currentStatus)}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </Table>
-                </div>
+                                className="d-flex align-items-center justify-content-center"
+                              >
+                                <i className="bi bi-x-circle me-2"></i>
+                                {t("attendanceTracker.status.absent", "Absent")}
+                              </Button>
+                              <div className="d-flex gap-2">
+                                <Button
+                                  variant={
+                                    currentStatus === "LATE"
+                                      ? "warning"
+                                      : "outline-warning"
+                                  }
+                                  onClick={() =>
+                                    handleStatusChange(student.id, "LATE")
+                                  }
+                                  className="flex-fill d-flex align-items-center justify-content-center"
+                                >
+                                  <i className="bi bi-clock me-1"></i>
+                                  {t("attendanceTracker.status.late", "Late")}
+                                </Button>
+                                <Button
+                                  variant={
+                                    currentStatus === "EXCUSED"
+                                      ? "info"
+                                      : "outline-info"
+                                  }
+                                  onClick={() =>
+                                    handleStatusChange(student.id, "EXCUSED")
+                                  }
+                                  className="flex-fill d-flex align-items-center justify-content-center"
+                                >
+                                  <i className="bi bi-file-text me-1"></i>
+                                  {t(
+                                    "attendanceTracker.status.excused",
+                                    "Excused",
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </>
               )}
 
               {/* Pagination */}
@@ -647,7 +763,7 @@ function AttendanceTracker() {
                         filteredStudents.length,
                       )}{" "}
                       {t("common.of", "of")} {filteredStudents.length}{" "}
-                      {t("students.students", "students")}
+                      {t("studentCountLabel", "students")}
                     </small>
                   </div>
                   <div className="d-flex gap-1">

@@ -42,7 +42,7 @@ function AppRoutes() {
       <Route
         path="/parent-dashboard"
         element={
-          <ProtectedRoute requiredRole="parent">
+          <ProtectedRoute requiredRole={["parent", "admin"]}>
             <ParentDashboard />
           </ProtectedRoute>
         }

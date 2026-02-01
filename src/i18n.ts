@@ -245,6 +245,17 @@ i18n
             replies: "odgovora",
           },
 
+          // Students management
+          studentsSearchPlaceholder: "Pretraži učenike po imenu ili ID-u...",
+          studentCountLabel: "učenika",
+
+          // Common UI
+          common: {
+            showing: "Prikazuje",
+            of: "od",
+            page: "Stranica",
+          },
+
           // Search and pagination
           searchStudents: "Pretraži učenike po imenu, prezimenu, razredu...",
           searchPlaceholder: "Pretraga...",
@@ -361,14 +372,16 @@ i18n
 
           // Image Management
           images: "Slike",
+          existingImages: "Postojeće slike",
           addImages: "Dodaj slike",
           uploadImages: "Učitaj slike",
           selectImages: "Odaberi slike",
-          imagePreview: "Pregled slike",
+          imagePreview: "Pregled slika",
           deleteImage: "Obriši sliku",
-          confirmDeleteImage: "Jeste li sigurni da želite obrisati ovu sliku?",
-          noImagesSelected: "Nisu odabrane slike",
-          maxImagesAllowed: "Maksimalno 5 slika je dozvoljeno",
+          confirmDeleteImage: "Da li ste sigurni da želite obrisati ovu sliku?",
+          noImagesSelected: "Nema odabranih slika",
+          maxImagesAllowed: "Maksimalno 5 slika dozvoljeno",
+          maxFileSize: "Maks {{size}}MB svaka",
           maxFileSizeExceeded: "Datoteka prelazi maksimalnu veličinu od 5MB",
           onlyImagesAllowed: "Samo slike su dozvoljene",
           uploadingImages: "Učitavanje slika...",
@@ -617,6 +630,17 @@ i18n
             replies: "replies",
           },
 
+          // Students management
+          studentsSearchPlaceholder: "Search students by name or ID...",
+          studentCountLabel: "students",
+
+          // Common UI
+          common: {
+            showing: "Showing",
+            of: "of",
+            page: "Page",
+          },
+
           // Search and pagination
           searchStudents: "Search students by name, grade...",
           searchPlaceholder: "Search...",
@@ -654,6 +678,39 @@ i18n
             weekDaysLong:
               "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday,Sunday",
           },
+
+          // Common UI
+          loading: "Loading...",
+          loadingStudents: "Loading students...",
+          errorLoadingStudents: "Error loading students. Please try again.",
+          id: "ID",
+          parentId: "Parent ID",
+          date: "Date",
+          status: "Status",
+          notes: "Notes",
+          onTime: "On time",
+          sickLeave: "Sick leave",
+          medicalAppointment: "Medical appointment",
+          arrivedLate: "Arrived {{minutes}} mins late",
+          mektebLogo: "Mekteb Logo",
+          recentAttendance: "Recent Attendance (Last 10 Days)",
+
+          // Common UI
+          loading: "Učitavanje...",
+          loadingStudents: "Učitavanje učenika...",
+          errorLoadingStudents:
+            "Greška pri učitavanju učenika. Molimo pokušajte ponovo.",
+          id: "ID",
+          parentId: "ID roditelja",
+          date: "Datum",
+          status: "Status",
+          notes: "Napomene",
+          onTime: "Na vrijeme",
+          sickLeave: "Bolovanje",
+          medicalAppointment: "Ljekarski pregled",
+          arrivedLate: "Kasni {{minutes}} min",
+          mektebLogo: "Mekteb Logo",
+          recentAttendance: "Nedavno prisustvo (Zadnjih 10 dana)",
 
           // Mobile-friendly labels
           menu: "Menu",
@@ -731,6 +788,7 @@ i18n
 
           // Image Management
           images: "Images",
+          existingImages: "Existing Images",
           addImages: "Add Images",
           uploadImages: "Upload Images",
           selectImages: "Select Images",
@@ -739,6 +797,7 @@ i18n
           confirmDeleteImage: "Are you sure you want to delete this image?",
           noImagesSelected: "No images selected",
           maxImagesAllowed: "Maximum 5 images allowed",
+          maxFileSize: "Max {{size}}MB each",
           maxFileSizeExceeded: "File exceeds maximum size of 5MB",
           onlyImagesAllowed: "Only images are allowed",
           uploadingImages: "Uploading images...",

@@ -17,7 +17,7 @@ interface AddEditNewsModalProps {
   onHide: () => void;
   onSubmit: (e: React.FormEvent) => void;
   onInputChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => void;
   onImageSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveSelectedImage: (index: number) => void;
@@ -84,7 +84,8 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
               className="mb-2"
             />
             <Form.Text className="text-muted">
-              {t("maxImagesAllowed", "Maximum 5 images allowed")} (Max 5MB each)
+              {t("maxImagesAllowed", "Maximum 5 images allowed")} (
+              {t("maxFileSize", "Max {{size}}MB each", { size: 5 })})
             </Form.Text>
 
             {/* Image Previews */}
@@ -121,7 +122,7 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
             selectedNews?.images &&
             selectedNews.images.length > 0 && (
               <div className="mb-3">
-                <h6>{t("images", "Existing Images")}</h6>
+                <h6>{t("existingImages", "Existing Images")}</h6>
                 <Row>
                   {selectedNews.images.map((image) => (
                     <Col key={image.id} xs={6} md={4} className="mb-2">

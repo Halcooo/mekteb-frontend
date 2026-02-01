@@ -94,7 +94,7 @@ function Students() {
   // Handle update
   const handleUpdate = async (
     id: number,
-    data: UpdateStudentData
+    data: UpdateStudentData,
   ): Promise<void> => {
     await updateMutation.mutateAsync({ id, data });
   };
@@ -133,7 +133,7 @@ function Students() {
                   type="text"
                   placeholder={t(
                     "searchStudents",
-                    "Search students by name, grade..."
+                    "Search students by name, grade...",
                   )}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -164,14 +164,14 @@ function Students() {
                           1,
                         end: Math.min(
                           pagination.currentPage * pagination.itemsPerPage,
-                          pagination.totalItems
+                          pagination.totalItems,
                         ),
                         total: pagination.totalItems,
-                      }
+                      },
                     )}
                   </span>
                   <span className="d-md-none">
-                    {pagination.totalItems} {t("students", "students")}
+                    {pagination.totalItems} {t("studentCountLabel", "students")}
                   </span>
                 </small>
               )}
@@ -225,7 +225,7 @@ function Students() {
                         disabled={!pagination.hasNextPage}
                         onClick={() =>
                           setCurrentPage(
-                            Math.min(pagination.totalPages, currentPage + 1)
+                            Math.min(pagination.totalPages, currentPage + 1),
                           )
                         }
                         className="w-100"
@@ -270,14 +270,14 @@ function Students() {
                             {pageNum}
                           </Pagination.Item>
                         );
-                      }
+                      },
                     )}
 
                     <Pagination.Next
                       disabled={!pagination.hasNextPage}
                       onClick={() =>
                         setCurrentPage(
-                          Math.min(pagination.totalPages, currentPage + 1)
+                          Math.min(pagination.totalPages, currentPage + 1),
                         )
                       }
                       title={t("nextPage", "Next page")}

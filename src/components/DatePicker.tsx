@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Form, InputGroup, Dropdown, Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { formatBosnianDate } from "../utils/dateFormatter";
 import "./DatePicker.scss";
 
 interface DatePickerProps {
@@ -81,12 +82,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr) return "";
-    const date = new Date(dateStr);
-    return date.toLocaleDateString(currentLang === "bs" ? "bs-BA" : "en-US", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    return formatBosnianDate(dateStr);
   };
 
   const getDaysInMonth = (date: Date) => {
@@ -102,7 +98,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     const selectedDateObj = new Date(
       viewMonth.getFullYear(),
       viewMonth.getMonth(),
-      day
+      day,
     );
     const dateString = selectedDateObj.toISOString().split("T")[0];
 
@@ -149,7 +145,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       const dayDate = new Date(
         viewMonth.getFullYear(),
         viewMonth.getMonth(),
-        day
+        day,
       );
       const dayString = dayDate.toISOString().split("T")[0];
       const isSelected = dayString === selectedDate;
@@ -166,7 +162,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
           onClick={() => !isDisabled && handleDateSelect(day)}
         >
           {day}
-        </div>
+        </div>,
       );
     }
 

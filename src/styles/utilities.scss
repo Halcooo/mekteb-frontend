@@ -248,3 +248,84 @@
     }
   }
 }
+
+// ============================================
+// MOBILE-FIRST ENHANCEMENTS
+// ============================================
+
+// Touch-friendly elements (44px minimum)
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.75rem;
+}
+
+// Mobile typography
+@media (max-width: 768px) {
+  .text-mobile-xs {
+    font-size: 0.75rem !important;
+  }
+  .text-mobile-sm {
+    font-size: 0.875rem !important;
+  }
+  .text-mobile-md {
+    font-size: 1rem !important;
+  }
+  .text-mobile-lg {
+    font-size: 1.125rem !important;
+  }
+
+  // Full width on mobile
+  .w-mobile-100 {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  // Stack flex items vertically on mobile
+  .stack-mobile {
+    flex-direction: column !important;
+
+    > * {
+      width: 100% !important;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  // Mobile-friendly buttons
+  .btn-mobile-block {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  // Smaller spacing on mobile
+  .gap-mobile-1 {
+    gap: 0.25rem !important;
+  }
+  .gap-mobile-2 {
+    gap: 0.5rem !important;
+  }
+  .gap-mobile-3 {
+    gap: 0.75rem !important;
+  }
+
+  // Mobile padding overrides
+  .px-mobile-2 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+  .py-mobile-2 {
+    padding-top: 0.5rem !important;
+    padding-bottom: 0.5rem !important;
+  }
+}
+
+// Scrollable tables on mobile
+.table-mobile-scroll {
+  @media (max-width: 768px) {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    white-space: nowrap;
+  }
+}

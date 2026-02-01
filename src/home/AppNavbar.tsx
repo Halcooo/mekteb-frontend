@@ -21,11 +21,11 @@ function AppNavbar() {
         <Navbar.Brand as={Link} to="/" className="fw-bold">
           <img
             src={mektebLogo}
-            alt="Mekteb Logo"
+            alt={t("mektebLogo", "Mekteb Logo")}
             className="navbar-brand-logo"
           />
           <span className="navbar-brand-text desktop">{t("mekteb")}</span>
-          <span className="navbar-brand-text mobile">Mekteb</span>
+          <span className="navbar-brand-text mobile">{t("mekteb")}</span>
         </Navbar.Brand>
 
         <Navbar.Toggle
@@ -85,8 +85,8 @@ function AppNavbar() {
                   </span>
                 </Nav.Link>
 
-                {/* Parent Dashboard - only for parents */}
-                {user?.role === "parent" && (
+                {/* Parent Dashboard - for parents and admins */}
+                {(user?.role === "parent" || user?.role === "admin") && (
                   <Nav.Link
                     as={Link}
                     to="/parent-dashboard"
@@ -96,9 +96,9 @@ function AppNavbar() {
                         : ""
                     }`}
                   >
-                    <i className="fas fa-family me-2"></i>
+                    <i className="bi bi-people-fill me-2"></i>
                     <span className="d-lg-inline d-xl-inline">
-                      {t("parentDashboard.title")}
+                      {t("parentDashboard.title", "Parent View")}
                     </span>
                   </Nav.Link>
                 )}
@@ -151,7 +151,6 @@ function AppNavbar() {
               </Button>
             )}
 
-    
             <LanguageDropdown />
           </Nav>
         </Navbar.Collapse>

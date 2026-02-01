@@ -448,38 +448,70 @@ const ParentDashboard: React.FC = () => {
                 </Row>
               </div>
 
-              <h6 className="mb-3">Recent Attendance (Last 10 Days)</h6>
+              <h6 className="mb-3">
+                {t("recentAttendance", "Recent Attendance (Last 10 Days)")}
+              </h6>
               <Table striped size="sm">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Notes</th>
+                    <th>{t("date", "Date")}</th>
+                    <th>{t("status", "Status")}</th>
+                    <th>{t("notes", "Notes")}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {[
-                    { date: "2025-10-12", status: "present", notes: "On time" },
-                    { date: "2025-10-11", status: "present", notes: "On time" },
+                    {
+                      date: "2025-10-12",
+                      status: "present",
+                      notes: t("onTime", "On time"),
+                    },
+                    {
+                      date: "2025-10-11",
+                      status: "present",
+                      notes: t("onTime", "On time"),
+                    },
                     {
                       date: "2025-10-10",
                       status: "late",
-                      notes: "Arrived 10 mins late",
+                      notes: t("arrivedLate", "Arrived {{minutes}} mins late", {
+                        minutes: 10,
+                      }),
                     },
-                    { date: "2025-10-09", status: "present", notes: "On time" },
+                    {
+                      date: "2025-10-09",
+                      status: "present",
+                      notes: t("onTime", "On time"),
+                    },
                     {
                       date: "2025-10-08",
                       status: "absent",
-                      notes: "Sick leave",
+                      notes: t("sickLeave", "Sick leave"),
                     },
-                    { date: "2025-10-07", status: "present", notes: "On time" },
-                    { date: "2025-10-06", status: "present", notes: "On time" },
-                    { date: "2025-10-05", status: "present", notes: "On time" },
-                    { date: "2025-10-04", status: "present", notes: "On time" },
+                    {
+                      date: "2025-10-07",
+                      status: "present",
+                      notes: t("onTime", "On time"),
+                    },
+                    {
+                      date: "2025-10-06",
+                      status: "present",
+                      notes: t("onTime", "On time"),
+                    },
+                    {
+                      date: "2025-10-05",
+                      status: "present",
+                      notes: t("onTime", "On time"),
+                    },
+                    {
+                      date: "2025-10-04",
+                      status: "present",
+                      notes: t("onTime", "On time"),
+                    },
                     {
                       date: "2025-10-03",
                       status: "excused",
-                      notes: "Medical appointment",
+                      notes: t("medicalAppointment", "Medical appointment"),
                     },
                   ].map((record, index) => (
                     <tr key={index}>
