@@ -18,6 +18,7 @@ i18n
 
           // Authentication
           login: "Prijava",
+          logout: "Odjava",
           register: "Registracija",
           username: "Korisničko ime",
           email: "Email adresa",
@@ -393,6 +394,7 @@ i18n
 
           // Authentication
           login: "Login",
+          logout: "Logout",
           register: "Register",
           username: "Username",
           email: "Email address",

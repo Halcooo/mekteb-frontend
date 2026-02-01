@@ -17,6 +17,7 @@ import {
   attendanceApi,
   type AttendanceStatus,
   type BulkAttendanceData,
+  type AttendanceSummary,
   getStatusColor,
   getStatusIcon,
   formatDate,
@@ -32,7 +33,7 @@ function AttendanceTracker() {
   const queryClient = useQueryClient();
 
   const [selectedDate, setSelectedDate] = useState(
-    formatDateForInput(new Date())
+    formatDateForInput(new Date()),
   );
   const [attendanceData, setAttendanceData] = useState<
     Record<number, AttendanceStatus>
@@ -94,7 +95,7 @@ function AttendanceTracker() {
           .toLowerCase()
           .includes(searchTerm.toLowerCase()) ||
         student.gradeLevel?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        student.id.toString().includes(searchTerm)
+        student.id.toString().includes(searchTerm),
     );
   }, [studentsResponse?.data, searchTerm]);
 
@@ -108,15 +109,49 @@ function AttendanceTracker() {
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
   const existingAttendance = useMemo(
     () => attendanceResponse?.data || [],
-    [attendanceResponse?.data]
+    [attendanceResponse?.data],
   );
-  const summary = summaryResponse?.data || {
+  type SummaryTotals = {
+    totalStudents: number;
+    presentCount: number;
+    absentCount: number;
+    lateCount: number;
+    excusedCount: number;
+  };
+  const summaryData = summaryResponse?.data as
+    | AttendanceSummary
+    | SummaryTotals[]
+    | undefined;
+  const emptyTotals: SummaryTotals = {
     totalStudents: 0,
     presentCount: 0,
     absentCount: 0,
     lateCount: 0,
     excusedCount: 0,
-    presentRate: 0,
+  };
+
+  const totals: SummaryTotals =
+    summaryData && !Array.isArray(summaryData)
+      ? summaryData.totals
+      : Array.isArray(summaryData)
+        ? summaryData.reduce<SummaryTotals>(
+            (acc, row) => {
+              acc.totalStudents += Number(row.totalStudents ?? 0);
+              acc.presentCount += Number(row.presentCount ?? 0);
+              acc.absentCount += Number(row.absentCount ?? 0);
+              acc.lateCount += Number(row.lateCount ?? 0);
+              acc.excusedCount += Number(row.excusedCount ?? 0);
+              return acc;
+            },
+            { ...emptyTotals },
+          )
+        : emptyTotals;
+
+  const summary = {
+    ...totals,
+    presentRate: totals.totalStudents
+      ? Math.round((totals.presentCount / totals.totalStudents) * 1000) / 10
+      : 0,
   };
 
   // Initialize attendance data when existing attendance loads
@@ -131,7 +166,7 @@ function AttendanceTracker() {
     // Set default status for students without attendance record
     students.forEach((student) => {
       if (!newAttendanceData[student.id]) {
-        newAttendanceData[student.id] = "PRESENT"; // Default to present
+        newAttendanceData[student.id] = "ABSENT"; // Default to absent
       }
     });
 
@@ -163,7 +198,7 @@ function AttendanceTracker() {
 
       // Check if attendance record already exists for this student and date
       const existingRecord = existingAttendance.find(
-        (record) => record.student_id === studentId
+        (record) => record.student_id === studentId,
       );
 
       if (existingRecord) {
@@ -241,7 +276,7 @@ function AttendanceTracker() {
     const attendanceRecords = students.map((student) => ({
       student_id: student.id,
       date: selectedDate,
-      status: attendanceData[student.id] || "PRESENT",
+      status: attendanceData[student.id] || "ABSENT",
     }));
 
     const bulkData: BulkAttendanceData = {
@@ -377,7 +412,7 @@ function AttendanceTracker() {
               <small>
                 {t(
                   "attendanceTracker.autoSaveEnabled",
-                  "Auto-save enabled - changes are saved automatically"
+                  "Auto-save enabled - changes are saved automatically",
                 )}
                 {savingStudents.size > 0 && (
                   <>
@@ -414,7 +449,7 @@ function AttendanceTracker() {
             className="ms-2"
             title={t(
               "attendanceTracker.bulkSaveTooltip",
-              "Save all current attendance at once"
+              "Save all current attendance at once",
             )}
           >
             {saveMutation.isPending ? (
@@ -455,7 +490,7 @@ function AttendanceTracker() {
                       type="text"
                       placeholder={t(
                         "students.searchPlaceholder",
-                        "Search students by name or ID..."
+                        "Search students by name or ID...",
                       )}
                       value={searchTerm}
                       onChange={(e) => {
@@ -526,7 +561,7 @@ function AttendanceTracker() {
                     <tbody>
                       {students.map((student) => {
                         const currentStatus =
-                          attendanceData[student.id] || "PRESENT";
+                          attendanceData[student.id] || "ABSENT";
                         return (
                           <tr key={student.id}>
                             <td>
@@ -555,7 +590,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "PRESENT")
                                 }
-                                className="attendance-radio status-radio present text-success form-check-lg"
+                                className="d-flex justify-content-center"
                               />
                             </td>
                             <td className="text-center p-2">
@@ -566,7 +601,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "ABSENT")
                                 }
-                                className="attendance-radio status-radio absent text-danger form-check-lg"
+                                className="d-flex justify-content-center"
                               />
                             </td>
                             <td className="text-center p-2">
@@ -577,7 +612,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "LATE")
                                 }
-                                className="attendance-radio status-radio late text-warning form-check-lg"
+                                className="d-flex justify-content-center"
                               />
                             </td>
                             <td className="text-center p-2">
@@ -588,7 +623,7 @@ function AttendanceTracker() {
                                 onChange={() =>
                                   handleStatusChange(student.id, "EXCUSED")
                                 }
-                                className="attendance-radio status-radio excused text-info form-check-lg"
+                                className="d-flex justify-content-center"
                               />
                             </td>
                             <td>{getStatusBadge(currentStatus)}</td>
@@ -609,7 +644,7 @@ function AttendanceTracker() {
                       {(currentPage - 1) * studentsPerPage + 1} -{" "}
                       {Math.min(
                         currentPage * studentsPerPage,
-                        filteredStudents.length
+                        filteredStudents.length,
                       )}{" "}
                       {t("common.of", "of")} {filteredStudents.length}{" "}
                       {t("students.students", "students")}
@@ -677,7 +712,7 @@ function AttendanceTracker() {
           <i className="bi bi-exclamation-triangle me-2"></i>
           {t(
             "attendanceTracker.saveError",
-            "Error saving attendance. Please try again."
+            "Error saving attendance. Please try again.",
           )}
         </Alert>
       )}
@@ -708,7 +743,7 @@ function AttendanceTracker() {
                     }
                     placeholder={t(
                       "students.enterFirstName",
-                      "Enter first name"
+                      "Enter first name",
                     )}
                   />
                 </Form.Group>

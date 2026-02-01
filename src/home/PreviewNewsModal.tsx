@@ -66,7 +66,7 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                 {selectedNews.images.length === 1 ? (
                   <div className="text-center">
                     <img
-                      src={`http://localhost:5000${
+                      src={`https://api.mekteb-pazaric.com/backend${
                         selectedNews.images[0].url ||
                         `/api/images/${selectedNews.images[0].imagePath
                           ?.split("/")
@@ -82,7 +82,7 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                       <Carousel.Item key={image.id}>
                         <div className="text-center">
                           <img
-                            src={`http://localhost:5000${
+                            src={`https://api.mekteb-pazaric.com/backend${
                               image.url ||
                               `/api/images/${image.imagePath?.split("/").pop()}`
                             }`}

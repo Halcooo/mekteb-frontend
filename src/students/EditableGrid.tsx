@@ -175,7 +175,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
         },
       }));
     },
-    []
+    [],
   );
 
   // Save changes
@@ -227,7 +227,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
         });
       }
     },
-    [editingRows, onUpdate, cancelEditing]
+    [editingRows, onUpdate, cancelEditing],
   );
 
   // Handle delete with confirmation
@@ -235,7 +235,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
     async (studentId: number, studentName: string) => {
       if (
         window.confirm(
-          `Are you sure you want to delete ${studentName}? This action cannot be undone.`
+          `Are you sure you want to delete ${studentName}? This action cannot be undone.`,
         )
       ) {
         try {
@@ -245,7 +245,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
         }
       }
     },
-    [onDelete]
+    [onDelete],
   );
 
   // Handle new student creation
@@ -277,14 +277,14 @@ const EditableGrid: React.FC<EditableGridProps> = ({
         [field]: value,
       }));
     },
-    []
+    [],
   );
 
   // Render editable cell
   const renderEditableCell = (
     student: Student,
     field: keyof Student,
-    type: "text" | "date" | "number" = "text"
+    type: "text" | "date" | "number" = "text",
   ) => {
     const isEditing = editingRows[student.id]?.[field]?.isEditing;
     const currentValue = isEditing
@@ -309,6 +309,11 @@ const EditableGrid: React.FC<EditableGridProps> = ({
           className="editable-input"
         />
       );
+    }
+
+    // Format dates when displaying
+    if (type === "date" && currentValue) {
+      return <span>{formatDate(String(currentValue))}</span>;
     }
 
     return <span>{currentValue ?? "N/A"}</span>;
@@ -357,7 +362,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                 <th>{t("lastName", "Last Name")}</th>
                 <th>{t("dateOfBirth", "Date of Birth")}</th>
                 <th>{t("grade", "Grade Level")}</th>
-                <th>{t("parentKey", "Parent Key")}</th>
+                <th>{t("parentKey.label", "Parent Key")}</th>
                 <th>Parent ID</th>
                 <th>{t("parentName", "Parent Name")}</th>
                 <th>{t("actions", "Actions")}</th>
@@ -429,7 +434,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                               onClick={() =>
                                 handleDelete(
                                   student.id,
-                                  `${student.firstName} ${student.lastName}`
+                                  `${student.firstName} ${student.lastName}`,
                                 )
                               }
                             >
@@ -565,7 +570,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                                   onClick={() =>
                                     handleDelete(
                                       student.id,
-                                      `${student.firstName} ${student.lastName}`
+                                      `${student.firstName} ${student.lastName}`,
                                     )
                                   }
                                 >
@@ -655,7 +660,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                 onChange={(e) =>
                   handleNewStudentChange(
                     "parentId",
-                    e.target.value ? Number(e.target.value) : null
+                    e.target.value ? Number(e.target.value) : null,
                   )
                 }
                 placeholder="Enter parent ID (leave empty if no parent)"

@@ -1,16 +1,16 @@
-import { Navbar, Nav, Container, Dropdown } from "react-bootstrap";
-import { Link, useLocation } from "react-router-dom";
+import { Navbar, Nav, Container, Button } from "react-bootstrap";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import mektebLogo from "../assets/mekteb.png";
+import { useAuth } from "../hooks/useAuth";
+import LanguageDropdown from "../components/LanguageDropdown";
 import "./AppNavbar.scss";
 
 function AppNavbar() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const location = useLocation();
-
-  const changeLanguage = (language: string) => {
-    i18n.changeLanguage(language);
-  };
+  const navigate = useNavigate();
+  const { isAuthenticated, logout, user } = useAuth();
 
   // Helper to check if route is active
   const isRouteActive = (path: string) => location.pathname === path;
@@ -39,102 +39,120 @@ function AppNavbar() {
           <Nav className="me-auto">
             <Nav.Link
               as={Link}
-              to="/attendance"
+              to="/"
               className={`fw-500 ${
-                isRouteActive("/attendance")
-                  ? "active bg-primary text-white rounded"
-                  : ""
+                isRouteActive("/") ? "active bg-primary text-white rounded" : ""
               }`}
             >
-              <i className="bi bi-calendar-check me-2"></i>
-              <span className="d-lg-inline d-xl-inline">{t("attendance")}</span>
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/students"
-              className={`fw-500 ${
-                isRouteActive("/students")
-                  ? "active bg-primary text-white rounded"
-                  : ""
-              }`}
-            >
-              <i className="bi bi-people me-2"></i>
-              <span className="d-lg-inline d-xl-inline">{t("students")}</span>
-            </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/parent-dashboard"
-              className={`fw-500 ${
-                isRouteActive("/parent-dashboard")
-                  ? "active bg-primary text-white rounded"
-                  : ""
-              }`}
-            >
-              <i className="fas fa-family me-2"></i>
+              <i className="bi bi-house me-2"></i>
               <span className="d-lg-inline d-xl-inline">
-                {t("parentDashboard.title")}
+                {t("home", "Home")}
               </span>
             </Nav.Link>
-            <Nav.Link
-              as={Link}
-              to="/profile"
-              className={`fw-500 ${
-                isRouteActive("/profile")
-                  ? "active bg-primary text-white rounded"
-                  : ""
-              }`}
-            >
-              <i className="bi bi-person-circle me-2"></i>
-              <span className="d-lg-inline d-xl-inline">{t("profile")}</span>
-            </Nav.Link>
+
+            {/* Show these links only to authenticated users */}
+            {isAuthenticated && (
+              <>
+                {/* Attendance - only for admins */}
+                {user?.role === "admin" && (
+                  <Nav.Link
+                    as={Link}
+                    to="/attendance"
+                    className={`fw-500 ${
+                      isRouteActive("/attendance")
+                        ? "active bg-primary text-white rounded"
+                        : ""
+                    }`}
+                  >
+                    <i className="bi bi-calendar-check me-2"></i>
+                    <span className="d-lg-inline d-xl-inline">
+                      {t("attendance")}
+                    </span>
+                  </Nav.Link>
+                )}
+                <Nav.Link
+                  as={Link}
+                  to="/students"
+                  className={`fw-500 ${
+                    isRouteActive("/students")
+                      ? "active bg-primary text-white rounded"
+                      : ""
+                  }`}
+                >
+                  <i className="bi bi-people me-2"></i>
+                  <span className="d-lg-inline d-xl-inline">
+                    {t("students")}
+                  </span>
+                </Nav.Link>
+
+                {/* Parent Dashboard - only for parents */}
+                {user?.role === "parent" && (
+                  <Nav.Link
+                    as={Link}
+                    to="/parent-dashboard"
+                    className={`fw-500 ${
+                      isRouteActive("/parent-dashboard")
+                        ? "active bg-primary text-white rounded"
+                        : ""
+                    }`}
+                  >
+                    <i className="fas fa-family me-2"></i>
+                    <span className="d-lg-inline d-xl-inline">
+                      {t("parentDashboard.title")}
+                    </span>
+                  </Nav.Link>
+                )}
+                <Nav.Link
+                  as={Link}
+                  to="/profile"
+                  className={`fw-500 ${
+                    isRouteActive("/profile")
+                      ? "active bg-primary text-white rounded"
+                      : ""
+                  }`}
+                >
+                  <i className="bi bi-person-circle me-2"></i>
+                  <span className="d-lg-inline d-xl-inline">
+                    {t("profile")}
+                  </span>
+                </Nav.Link>
+              </>
+            )}
           </Nav>
 
-          {/* Debug info - shows current route */}
-          <Nav className="d-flex align-items-center me-3">
-            <small className="text-muted d-none d-lg-block">
-              Current: <code>{location.pathname}</code>
-            </small>
-          </Nav>
-
-          <Nav className="mt-2 mt-lg-0">
-            <Dropdown align="end">
-              <Dropdown.Toggle
-                variant="outline-secondary"
-                id="language-dropdown"
+          <Nav className="mt-2 mt-lg-0 d-flex align-items-center gap-2">
+            {/* Login/Logout Buttons */}
+            {!isAuthenticated ? (
+              <>
+                <Link to="/login" style={{ textDecoration: "none" }}>
+                  <Button variant="outline-primary" size="sm" className="me-2">
+                    <i className="bi bi-box-arrow-in-right me-1"></i>
+                    {t("login", "Login")}
+                  </Button>
+                </Link>
+                <Link to="/register" style={{ textDecoration: "none" }}>
+                  <Button variant="primary" size="sm">
+                    <i className="bi bi-person-plus me-1"></i>
+                    {t("register", "Register")}
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <Button
+                variant="outline-danger"
                 size="sm"
-                className="d-flex align-items-center"
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                }}
               >
-                <i className="bi bi-globe me-1"></i>
-                <span className="d-none d-md-inline me-1">
-                  {t("language", "Lang")}
-                </span>
-                <span className="badge bg-primary">
-                  {i18n.language.toUpperCase()}
-                </span>
-              </Dropdown.Toggle>
-              <Dropdown.Menu className="shadow">
-                <Dropdown.Item
-                  onClick={() => changeLanguage("bs")}
-                  className={i18n.language === "bs" ? "active" : ""}
-                >
-                  <i className="bi bi-flag me-2"></i>
-                  {t("languageBosnian")}
-                  {i18n.language === "bs" && (
-                    <i className="bi bi-check-lg float-end text-success"></i>
-                  )}
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => changeLanguage("en")}
-                  className={i18n.language === "en" ? "active" : ""}
-                >
-                  <i className="bi bi-flag me-2"></i>
-                  {t("languageEnglish")}
-                  {i18n.language === "en" && (
-                    <i className="bi bi-check-lg float-end text-success"></i>
-                  )}
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
+                <i className="bi bi-box-arrow-right me-1"></i>
+                {t("logout", "Logout")}
+              </Button>
+            )}
+
+    
+            <LanguageDropdown />
           </Nav>
         </Navbar.Collapse>
       </Container>

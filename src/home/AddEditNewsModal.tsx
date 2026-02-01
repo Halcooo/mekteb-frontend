@@ -127,7 +127,7 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
                     <Col key={image.id} xs={6} md={4} className="mb-2">
                       <div className="image-preview">
                         <img
-                          src={`http://localhost:5000${
+                          src={`https://api.mekteb-pazaric.com/backend${
                             image.url ||
                             `/api/images/${image.imagePath?.split("/").pop()}`
                           }`}

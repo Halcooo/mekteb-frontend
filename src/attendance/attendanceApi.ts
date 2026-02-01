@@ -35,13 +35,27 @@ export interface AttendanceStats {
   attendanceRate: number;
 }
 
-export interface AttendanceSummary {
+export interface AttendanceSummaryTotals {
   totalStudents: number;
   presentCount: number;
   absentCount: number;
   lateCount: number;
   excusedCount: number;
   presentRate: number;
+}
+
+export interface AttendanceSummaryByGrade {
+  grade_level: string | null;
+  totalStudents: number;
+  presentCount: number;
+  absentCount: number;
+  lateCount: number;
+  excusedCount: number;
+}
+
+export interface AttendanceSummary {
+  totals: AttendanceSummaryTotals;
+  byGrade: AttendanceSummaryByGrade[];
 }
 
 export interface ApiResponse<T> {
@@ -73,17 +87,17 @@ export const attendanceApi = {
   // Get attendance by date
   getByDate: async (date: string): Promise<ApiResponse<Attendance[]>> => {
     const response = await apiClient.get<ApiResponse<Attendance[]>>(
-      `/attendance/date/${date}`
+      `/attendance/date/${date}`,
     );
     return response.data;
   },
 
   // Get attendance summary by date
   getSummaryByDate: async (
-    date: string
+    date: string,
   ): Promise<ApiResponse<AttendanceSummary>> => {
     const response = await apiClient.get<ApiResponse<AttendanceSummary>>(
-      `/attendance/date/${date}/summary`
+      `/attendance/date/${date}/summary`,
     );
     return response.data;
   },
@@ -92,7 +106,7 @@ export const attendanceApi = {
   getByStudent: async (
     studentId: number,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
   ): Promise<ApiResponse<Attendance[]>> => {
     let url = `/attendance/student/${studentId}`;
     const params = new URLSearchParams();
@@ -108,7 +122,7 @@ export const attendanceApi = {
   getStudentStats: async (
     studentId: number,
     startDate?: string,
-    endDate?: string
+    endDate?: string,
   ): Promise<ApiResponse<AttendanceStats>> => {
     let url = `/attendance/student/${studentId}/stats`;
     const params = new URLSearchParams();
@@ -122,22 +136,22 @@ export const attendanceApi = {
 
   // Create single attendance record
   create: async (
-    attendanceData: CreateAttendanceData
+    attendanceData: CreateAttendanceData,
   ): Promise<ApiResponse<Attendance>> => {
     const response = await apiClient.post<ApiResponse<Attendance>>(
       "/attendance",
-      attendanceData
+      attendanceData,
     );
     return response.data;
   },
 
   // Create multiple attendance records (bulk)
   createBulk: async (
-    bulkData: BulkAttendanceData
+    bulkData: BulkAttendanceData,
   ): Promise<ApiResponse<Attendance[]>> => {
     const response = await apiClient.post<ApiResponse<Attendance[]>>(
       "/attendance/bulk",
-      bulkData
+      bulkData,
     );
     return response.data;
   },
@@ -145,11 +159,11 @@ export const attendanceApi = {
   // Update attendance record
   update: async (
     id: number,
-    attendanceData: UpdateAttendanceData
+    attendanceData: UpdateAttendanceData,
   ): Promise<ApiResponse<Attendance>> => {
     const response = await apiClient.put<ApiResponse<Attendance>>(
       `/attendance/${id}`,
-      attendanceData
+      attendanceData,
     );
     return response.data;
   },
@@ -157,7 +171,7 @@ export const attendanceApi = {
   // Delete attendance record
   delete: async (id: number): Promise<ApiResponse<null>> => {
     const response = await apiClient.delete<ApiResponse<null>>(
-      `/attendance/${id}`
+      `/attendance/${id}`,
     );
     return response.data;
   },

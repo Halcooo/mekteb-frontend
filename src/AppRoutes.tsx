@@ -11,19 +11,14 @@ import PublicRoute from "./components/PublicRoute";
 function AppRoutes() {
   return (
     <Routes>
+      {/* Public Routes - available to all users */}
+      <Route path="/" element={<Home />} />
+
       {/* Protected Routes - require authentication */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
       <Route
         path="/attendance"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="admin">
             <Attendance />
           </ProtectedRoute>
         }
@@ -47,7 +42,7 @@ function AppRoutes() {
       <Route
         path="/parent-dashboard"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute requiredRole="parent">
             <ParentDashboard />
           </ProtectedRoute>
         }

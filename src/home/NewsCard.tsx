@@ -5,6 +5,8 @@ import type { NewsItem } from "../types/index";
 import { formatBosnianRelativeTime } from "../utils/dateFormatter";
 import "./NewsCard.scss";
 
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace("/api", "") || "";
+
 interface NewsCardProps {
   item: NewsItem;
   isAdmin: boolean;
@@ -44,10 +46,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
           <>
             <Card.Img
               variant="top"
-              src={`http://localhost:5000${
-                item.images[0].url ||
-                `/api/images/${item.images[0].imagePath?.split("/").pop()}`
-              }`}
+              src={`${API_BASE_URL}${item.images[0].url}`}
               alt={item.title}
               className="news-card-image"
             />
