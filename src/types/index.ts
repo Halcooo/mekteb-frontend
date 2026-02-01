@@ -22,6 +22,7 @@ export interface NewsItem {
   createdBy: number;
   createdAt?: string;
   authorUsername?: string;
+  authorName?: string;
   images?: NewsImage[];
 }
 
