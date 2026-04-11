@@ -23,6 +23,8 @@ import {
   formatDateForInput,
 } from "./attendanceApi";
 import { studentApi } from "../students/studentApi";
+import type { Student } from "../students/studentApi";
+import { commentsApi } from "../api/commentsApi";
 import DatePicker from "../components/DatePicker";
 import PageLayout from "../components/PageLayout";
 import { formatBosnianDate } from "../utils/dateFormatter";
@@ -42,6 +44,13 @@ function AttendanceTracker() {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(20);
   const [showAddStudent, setShowAddStudent] = useState(false);
+  const [showCommentModal, setShowCommentModal] = useState(false);
+  const [selectedCommentStudent, setSelectedCommentStudent] =
+    useState<Student | null>(null);
+  const [commentText, setCommentText] = useState("");
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [commentError, setCommentError] = useState<string | null>(null);
+  const [commentSuccess, setCommentSuccess] = useState<string | null>(null);
 
   // Scroll to top on page change (mobile)
   useEffect(() => {
@@ -304,6 +313,48 @@ function AttendanceTracker() {
     };
 
     saveMutation.mutate(bulkData);
+  };
+
+  const handleAddCommentForStudent = (studentId: number) => {
+    const student = students.find((s) => s.id === studentId);
+    if (!student) return;
+
+    setSelectedCommentStudent(student);
+    setCommentText("");
+    setCommentError(null);
+    setShowCommentModal(true);
+  };
+
+  const handleSubmitComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedCommentStudent || !commentText.trim()) {
+      return;
+    }
+
+    setCommentSubmitting(true);
+    setCommentError(null);
+
+    try {
+      await commentsApi.createComment({
+        studentId: selectedCommentStudent.id,
+        content: commentText.trim(),
+        date: selectedDate,
+      });
+
+      setShowCommentModal(false);
+      setCommentText("");
+      setCommentSuccess(
+        t("comments.commentSuccess", "Comment added successfully"),
+      );
+
+      setTimeout(() => setCommentSuccess(null), 3000);
+    } catch (error) {
+      console.error("Error adding comment from attendance:", error);
+      setCommentError(t("comments.commentError", "Failed to add comment"));
+    } finally {
+      setCommentSubmitting(false);
+    }
   };
 
   const getStatusBadge = (status: AttendanceStatus) => (
@@ -571,6 +622,7 @@ function AttendanceTracker() {
                           <th>
                             {t("attendanceTracker.currentStatus", "Status")}
                           </th>
+                          <th>{t("actions", "Actions")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -644,6 +696,18 @@ function AttendanceTracker() {
                                 />
                               </td>
                               <td>{getStatusBadge(currentStatus)}</td>
+                              <td>
+                                <Button
+                                  variant="outline-info"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleAddCommentForStudent(student.id)
+                                  }
+                                >
+                                  <i className="bi bi-chat-left-text me-1"></i>
+                                  {t("comments.addComment", "Add Comment")}
+                                </Button>
+                              </td>
                             </tr>
                           );
                         })}
@@ -745,6 +809,16 @@ function AttendanceTracker() {
                                   )}
                                 </Button>
                               </div>
+                              <Button
+                                variant="outline-info"
+                                onClick={() =>
+                                  handleAddCommentForStudent(student.id)
+                                }
+                                className="d-flex align-items-center justify-content-center"
+                              >
+                                <i className="bi bi-chat-left-text me-2"></i>
+                                {t("comments.addComment", "Add Comment")}
+                              </Button>
                             </div>
                           </Card.Body>
                         </Card>
@@ -835,6 +909,95 @@ function AttendanceTracker() {
           )}
         </Alert>
       )}
+
+      {commentSuccess && (
+        <Alert variant="success" className="mt-3">
+          <i className="bi bi-check-circle me-2"></i>
+          {commentSuccess}
+        </Alert>
+      )}
+
+      {commentError && (
+        <Alert
+          variant="danger"
+          className="mt-3"
+          dismissible
+          onClose={() => setCommentError(null)}
+        >
+          <i className="bi bi-exclamation-triangle me-2"></i>
+          {commentError}
+        </Alert>
+      )}
+
+      {/* Add Comment Modal */}
+      <Modal
+        show={showCommentModal}
+        onHide={() => setShowCommentModal(false)}
+        centered
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <i className="bi bi-chat-left-text me-2"></i>
+            {t("comments.addComment", "Add Comment")}
+          </Modal.Title>
+        </Modal.Header>
+
+        <Form onSubmit={handleSubmitComment}>
+          <Modal.Body>
+            <p className="mb-2">
+              <strong>
+                {selectedCommentStudent?.firstName}{" "}
+                {selectedCommentStudent?.lastName}
+              </strong>
+              {" • "}
+              <span className="text-muted">
+                {formatBosnianDate(selectedDate)}
+              </span>
+            </p>
+
+            <Form.Group>
+              <Form.Label>
+                {t("comments.commentContent", "Comment Content")}
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder={t(
+                  "comments.commentPlaceholder",
+                  "Type your comment here...",
+                )}
+                required
+              />
+            </Form.Group>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowCommentModal(false)}
+              disabled={commentSubmitting}
+            >
+              {t("common.cancel", "Cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={commentSubmitting || !commentText.trim()}
+            >
+              {commentSubmitting ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  {t("comments.submitting", "Submitting...")}
+                </>
+              ) : (
+                t("comments.submitComment", "Submit Comment")
+              )}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
       {/* Add Student Modal */}
       <Modal show={showAddStudent} onHide={() => setShowAddStudent(false)}>

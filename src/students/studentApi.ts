@@ -58,7 +58,7 @@ export interface GetStudentsParams {
 export const studentApi = {
   // Get all students with pagination and search
   getAll: async (
-    params: GetStudentsParams = {}
+    params: GetStudentsParams = {},
   ): Promise<ApiResponse<Student[]>> => {
     const { page = 1, limit = 10, search = "" } = params;
     const queryParams = new URLSearchParams({
@@ -68,18 +68,15 @@ export const studentApi = {
     });
 
     const url = `/students?${queryParams}`;
-    console.log("API Request URL:", url);
-    console.log("Search params:", { page, limit, search });
 
     const response = await apiClient.get<ApiResponse<Student[]>>(url);
-    console.log("API Response:", response.data);
     return response.data;
   },
 
   // Get student by ID
   getById: async (id: number): Promise<Student> => {
     const response = await apiClient.get<ApiResponse<Student>>(
-      `/students/${id}`
+      `/students/${id}`,
     );
     return response.data.data;
   },
@@ -88,7 +85,7 @@ export const studentApi = {
   create: async (studentData: CreateStudentData): Promise<Student> => {
     const response = await apiClient.post<ApiResponse<Student>>(
       "/students",
-      studentData
+      studentData,
     );
     return response.data.data;
   },
@@ -96,11 +93,11 @@ export const studentApi = {
   // Update student
   update: async (
     id: number,
-    studentData: UpdateStudentData
+    studentData: UpdateStudentData,
   ): Promise<Student> => {
     const response = await apiClient.put<ApiResponse<Student>>(
       `/students/${id}`,
-      studentData
+      studentData,
     );
     return response.data.data;
   },
@@ -113,7 +110,7 @@ export const studentApi = {
   // Search students
   search: async (searchTerm: string): Promise<Student[]> => {
     const response = await apiClient.get<ApiResponse<Student[]>>(
-      `/students/search?q=${encodeURIComponent(searchTerm)}`
+      `/students/search?q=${encodeURIComponent(searchTerm)}`,
     );
     return response.data.data;
   },
@@ -121,7 +118,7 @@ export const studentApi = {
   // Get students by grade
   getByGrade: async (grade: string): Promise<Student[]> => {
     const response = await apiClient.get<ApiResponse<Student[]>>(
-      `/students/grade/${encodeURIComponent(grade)}`
+      `/students/grade/${encodeURIComponent(grade)}`,
     );
     return response.data.data;
   },
@@ -129,16 +126,15 @@ export const studentApi = {
   // Get students by parent
   getByParent: async (parentId: number): Promise<Student[]> => {
     const response = await apiClient.get<ApiResponse<Student[]>>(
-      `/students/parent/${parentId}`
+      `/students/parent/${parentId}`,
     );
     return response.data.data;
   },
 
   // Get student statistics
   getStats: async (): Promise<unknown> => {
-    const response = await apiClient.get<ApiResponse<unknown>>(
-      "/students/stats"
-    );
+    const response =
+      await apiClient.get<ApiResponse<unknown>>("/students/stats");
     return response.data.data;
   },
 };

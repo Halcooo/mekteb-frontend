@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import mektebLogo from "../assets/mekteb.png";
 import { useAuth } from "../hooks/useAuth";
 import LanguageDropdown from "../components/LanguageDropdown";
+import NotificationBell from "../components/NotificationBell";
 import "./AppNavbar.scss";
 
 function AppNavbar() {
@@ -12,7 +13,6 @@ function AppNavbar() {
   const navigate = useNavigate();
   const { isAuthenticated, logout, user } = useAuth();
 
-  // Helper to check if route is active
   const isRouteActive = (path: string) => location.pathname === path;
 
   return (
@@ -50,10 +50,8 @@ function AppNavbar() {
               </span>
             </Nav.Link>
 
-            {/* Show these links only to authenticated users */}
             {isAuthenticated && (
               <>
-                {/* Attendance - only for admins */}
                 {user?.role === "admin" && (
                   <Nav.Link
                     as={Link}
@@ -70,7 +68,8 @@ function AppNavbar() {
                     </span>
                   </Nav.Link>
                 )}
-                {user?.role !== "user" && (
+
+                {["admin", "teacher"].includes(user?.role || "") && (
                   <Nav.Link
                     as={Link}
                     to="/students"
@@ -87,7 +86,6 @@ function AppNavbar() {
                   </Nav.Link>
                 )}
 
-                {/* Parent Dashboard - for parents, admins and users */}
                 {(user?.role === "parent" ||
                   user?.role === "admin" ||
                   user?.role === "user") && (
@@ -106,6 +104,7 @@ function AppNavbar() {
                     </span>
                   </Nav.Link>
                 )}
+
                 <Nav.Link
                   as={Link}
                   to="/profile"
@@ -125,7 +124,6 @@ function AppNavbar() {
           </Nav>
 
           <Nav className="mt-2 mt-lg-0 d-flex align-items-center gap-2">
-            {/* Login/Logout Buttons */}
             {!isAuthenticated ? (
               <>
                 <Link to="/login" style={{ textDecoration: "none" }}>
@@ -142,17 +140,20 @@ function AppNavbar() {
                 </Link>
               </>
             ) : (
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={() => {
-                  logout();
-                  navigate("/login");
-                }}
-              >
-                <i className="bi bi-box-arrow-right me-1"></i>
-                {t("logout", "Logout")}
-              </Button>
+              <>
+                <NotificationBell />
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={() => {
+                    logout();
+                    navigate("/login");
+                  }}
+                >
+                  <i className="bi bi-box-arrow-right me-1"></i>
+                  {t("logout", "Logout")}
+                </Button>
+              </>
             )}
 
             <LanguageDropdown />

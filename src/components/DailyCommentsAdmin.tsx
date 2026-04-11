@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Card,
   Button,
@@ -19,10 +19,20 @@ import type { StudentComment } from "../api/commentsApi";
 import type { Student } from "../students/studentApi";
 import "./DailyCommentsAdmin.scss";
 
-const DailyCommentsAdmin: React.FC = () => {
+interface DailyCommentsAdminProps {
+  initialDate?: string;
+  initialStudentId?: number;
+  autoOpenAddModal?: boolean;
+}
+
+const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
+  initialDate,
+  initialStudentId,
+  autoOpenAddModal = false,
+}) => {
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0]
+    initialDate || new Date().toISOString().split("T")[0],
   );
   const [comments, setComments] = useState<StudentComment[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -35,10 +45,15 @@ const DailyCommentsAdmin: React.FC = () => {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [replyingToComment, setReplyingToComment] =
+    useState<StudentComment | null>(null);
+  const [replyText, setReplyText] = useState("");
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedGrade, setSelectedGrade] = useState("");
+  const lastAutoOpenKeyRef = useRef<string>("");
 
   // Load students
   const loadStudents = useCallback(async () => {
@@ -75,6 +90,32 @@ const DailyCommentsAdmin: React.FC = () => {
     loadComments();
   }, [loadComments]);
 
+  useEffect(() => {
+    if (initialDate) {
+      setSelectedDate(initialDate);
+    }
+  }, [initialDate]);
+
+  useEffect(() => {
+    if (!autoOpenAddModal || !initialStudentId || students.length === 0) {
+      return;
+    }
+
+    const key = `${initialDate || ""}-${initialStudentId}-${autoOpenAddModal}`;
+    if (lastAutoOpenKeyRef.current === key) {
+      return;
+    }
+
+    const matchedStudent = students.find((s) => s.id === initialStudentId);
+    if (!matchedStudent) {
+      return;
+    }
+
+    setSelectedStudent(matchedStudent);
+    setShowAddModal(true);
+    lastAutoOpenKeyRef.current = key;
+  }, [autoOpenAddModal, initialStudentId, students, initialDate]);
+
   // Handle adding a new comment
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,6 +151,36 @@ const DailyCommentsAdmin: React.FC = () => {
     }
   };
 
+  const handleReplyComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!replyingToComment || !replyText.trim()) return;
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      const newReply = await commentsApi.createComment({
+        studentId: replyingToComment.studentId,
+        content: replyText.trim(),
+        date: selectedDate,
+        parentCommentId: replyingToComment.id,
+      });
+
+      setComments((prev) => [...prev, newReply]);
+      setReplyText("");
+      setReplyingToComment(null);
+      setShowReplyModal(false);
+      setSuccess(t("comments.replySuccess", "Reply added successfully"));
+
+      setTimeout(() => setSuccess(null), 3000);
+    } catch (error) {
+      console.error("Error replying to comment:", error);
+      setError(t("comments.replyError", "Failed to submit reply"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   // Filter students based on search and grade
   const filteredStudents = students.filter((student) => {
     const matchesSearch =
@@ -131,23 +202,26 @@ const DailyCommentsAdmin: React.FC = () => {
   ].sort();
 
   // Group comments by student
-  const commentsByStudent = comments.reduce((acc, comment) => {
-    const key = comment.studentId;
-    if (!acc[key]) {
-      acc[key] = [];
-    }
-    acc[key].push(comment);
-    return acc;
-  }, {} as Record<number, StudentComment[]>);
+  const commentsByStudent = comments.reduce(
+    (acc, comment) => {
+      const key = comment.studentId;
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(comment);
+      return acc;
+    },
+    {} as Record<number, StudentComment[]>,
+  );
 
   // Get students who already have comments for this date
   const studentsWithComments = students.filter(
-    (student) => commentsByStudent[student.id]?.length > 0
+    (student) => commentsByStudent[student.id]?.length > 0,
   );
 
   // Get students without comments for this date
   const studentsWithoutComments = filteredStudents.filter(
-    (student) => !commentsByStudent[student.id]?.length
+    (student) => !commentsByStudent[student.id]?.length,
   );
 
   const formatTime = (dateString: string) => {
@@ -197,7 +271,7 @@ const DailyCommentsAdmin: React.FC = () => {
                       {studentsWithComments.length}{" "}
                       {t(
                         "comments.studentsWithComments",
-                        "students with comments"
+                        "students with comments",
                       )}
                     </Badge>
                   </div>
@@ -271,6 +345,22 @@ const DailyCommentsAdmin: React.FC = () => {
                                         {t("comments.replies", "replies")}
                                       </small>
                                     )}
+
+                                  {!comment.parentCommentId && (
+                                    <div className="mt-2">
+                                      <Button
+                                        variant="outline-primary"
+                                        size="sm"
+                                        onClick={() => {
+                                          setReplyingToComment(comment);
+                                          setShowReplyModal(true);
+                                        }}
+                                      >
+                                        <i className="fas fa-reply me-1"></i>
+                                        {t("comments.reply", "Reply")}
+                                      </Button>
+                                    </div>
+                                  )}
                                 </div>
                               ))}
                             </div>
@@ -284,7 +374,7 @@ const DailyCommentsAdmin: React.FC = () => {
                       <p>
                         {t(
                           "comments.noCommentsForDate",
-                          "No comments for this date"
+                          "No comments for this date",
                         )}
                       </p>
                     </div>
@@ -323,7 +413,7 @@ const DailyCommentsAdmin: React.FC = () => {
                       type="text"
                       placeholder={t(
                         "comments.searchPlaceholder",
-                        "Search by name or grade..."
+                        "Search by name or grade...",
                       )}
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -367,11 +457,11 @@ const DailyCommentsAdmin: React.FC = () => {
                     {searchTerm || selectedGrade
                       ? t(
                           "comments.noMatchingStudents",
-                          "No matching students found"
+                          "No matching students found",
                         )
                       : t(
                           "comments.allStudentsHaveComments",
-                          "All students have comments for this date"
+                          "All students have comments for this date",
                         )}
                   </div>
                 ) : (
@@ -418,7 +508,7 @@ const DailyCommentsAdmin: React.FC = () => {
                 onChange={(e) => setCommentText(e.target.value)}
                 placeholder={t(
                   "comments.commentPlaceholder",
-                  "Type your comment here..."
+                  "Type your comment here...",
                 )}
                 required
                 disabled={!selectedStudent}
@@ -446,6 +536,58 @@ const DailyCommentsAdmin: React.FC = () => {
                 </>
               ) : (
                 t("comments.submitComment", "Submit Comment")
+              )}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Reply Comment Modal */}
+      <Modal show={showReplyModal} onHide={() => setShowReplyModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>
+            {t("comments.replyToComment", "Reply to Comment")}
+          </Modal.Title>
+        </Modal.Header>
+
+        <Form onSubmit={handleReplyComment}>
+          <Modal.Body>
+            <Form.Group>
+              <Form.Label>{t("comments.yourReply", "Your Reply")}</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={4}
+                value={replyText}
+                onChange={(e) => setReplyText(e.target.value)}
+                placeholder={t(
+                  "comments.replyPlaceholder",
+                  "Type your reply here...",
+                )}
+                required
+              />
+            </Form.Group>
+          </Modal.Body>
+
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => setShowReplyModal(false)}
+              disabled={submitting}
+            >
+              {t("common.cancel", "Cancel")}
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={submitting || !replyText.trim()}
+            >
+              {submitting ? (
+                <>
+                  <Spinner animation="border" size="sm" className="me-2" />
+                  {t("comments.submitting", "Submitting...")}
+                </>
+              ) : (
+                t("comments.submitReply", "Submit Reply")
               )}
             </Button>
           </Modal.Footer>

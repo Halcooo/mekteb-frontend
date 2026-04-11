@@ -27,14 +27,6 @@ const Profile: React.FC = () => {
     queryFn: () => profileApi.getCurrentProfile(),
   });
 
-  // Debug logging
-  useEffect(() => {
-    console.log("Profile component loaded");
-    console.log("isLoading:", isLoading);
-    console.log("queryError:", queryError);
-    console.log("profileData:", profileData);
-  }, [isLoading, queryError, profileData]);
-
   // Update profile mutation
   const updateMutation = useMutation({
     mutationFn: (data: { firstName: string; lastName: string }) =>
@@ -59,12 +51,7 @@ const Profile: React.FC = () => {
 
   // Update form data when profile data is loaded
   useEffect(() => {
-    console.log("useEffect triggered - profileData:", profileData);
     if (profileData) {
-      console.log("Setting formData with:", {
-        firstName: profileData.first_name,
-        lastName: profileData.last_name,
-      });
       setFormData({
         firstName: profileData.first_name || "",
         lastName: profileData.last_name || "",

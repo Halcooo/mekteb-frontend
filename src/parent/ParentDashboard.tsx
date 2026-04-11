@@ -13,6 +13,7 @@ import {
   Modal,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { useLocation } from "react-router-dom";
 import PageLayout from "../components/PageLayout";
 import { parentApi } from "../api/parentApi";
 import type {
@@ -32,6 +33,7 @@ interface ConnectedStudent extends ApiConnectedStudent {
 
 const ParentDashboard: React.FC = () => {
   const { t } = useTranslation();
+  const location = useLocation();
   const [studentKey, setStudentKey] = useState("");
   const [connectedStudents, setConnectedStudents] = useState<
     ConnectedStudent[]
@@ -79,6 +81,27 @@ const ParentDashboard: React.FC = () => {
   useEffect(() => {
     fetchConnectedStudents();
   }, [fetchConnectedStudents]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const openComments = params.get("openComments") === "1";
+    const dateFromQuery = params.get("date");
+    const studentIdFromQuery = parseInt(params.get("studentId") || "", 10);
+
+    if (!openComments || Number.isNaN(studentIdFromQuery)) {
+      return;
+    }
+
+    if (dateFromQuery) {
+      setSelectedDate(dateFromQuery);
+    }
+
+    const student = connectedStudents.find((s) => s.id === studentIdFromQuery);
+    if (student) {
+      setSelectedStudent(student);
+      setShowComments(true);
+    }
+  }, [location.search, connectedStudents]);
 
   const handleConnectStudent = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -282,6 +282,14 @@ i18n
             replies: "odgovora",
           },
 
+          notifications: {
+            title: "Obavještenja",
+            loading: "Učitavanje obavještenja...",
+            empty: "Nema obavještenja",
+            markAllAsRead: "Označi sve kao pročitano",
+            new: "Novo",
+          },
+
           // Students management
           studentsSearchPlaceholder: "Pretraži učenike po imenu ili ID-u...",
           studentCountLabel: "učenika",
@@ -703,6 +711,14 @@ i18n
             allStudentsHaveComments: "All students have comments for this date",
             errorLoadingStudents: "Failed to load students",
             replies: "replies",
+          },
+
+          notifications: {
+            title: "Notifications",
+            loading: "Loading notifications...",
+            empty: "No notifications",
+            markAllAsRead: "Mark all as read",
+            new: "New",
           },
 
           // Students management

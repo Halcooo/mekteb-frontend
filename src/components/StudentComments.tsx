@@ -20,6 +20,7 @@ interface StudentCommentsProps {
   studentName: string;
   selectedDate?: string;
   isParent?: boolean;
+  allowReplies?: boolean;
 }
 
 const StudentComments: React.FC<StudentCommentsProps> = ({
@@ -27,6 +28,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
   studentName,
   selectedDate,
   isParent = false,
+  allowReplies = false,
 }) => {
   const { t } = useTranslation();
   const [comments, setComments] = useState<StudentComment[]>([]);
@@ -107,18 +109,82 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
     return `${hours}:${minutes}`;
   };
 
-  // Group comments by parent/replies
-  const organizeComments = (comments: StudentComment[]) => {
-    const parentComments = comments.filter((c) => !c.parentCommentId);
-    const replies = comments.filter((c) => c.parentCommentId);
+  const canReply = isParent || allowReplies;
 
-    return parentComments.map((parent) => ({
-      parent,
-      replies: replies.filter((r) => r.parentCommentId === parent.id),
-    }));
+  // Group comments by thread root and include depth for nested chat rendering
+  const organizeThreads = (allComments: StudentComment[]) => {
+    const byId = new Map<number, StudentComment>();
+    allComments.forEach((c) => byId.set(c.id, c));
+
+    const getRootId = (comment: StudentComment): number => {
+      let current = comment;
+      const seen = new Set<number>();
+
+      while (current.parentCommentId && byId.has(current.parentCommentId)) {
+        if (seen.has(current.id)) break;
+        seen.add(current.id);
+        current = byId.get(current.parentCommentId)!;
+      }
+
+      return current.id;
+    };
+
+    const getDepth = (comment: StudentComment): number => {
+      let depth = 0;
+      let current = comment;
+      const seen = new Set<number>();
+
+      while (current.parentCommentId && byId.has(current.parentCommentId)) {
+        if (seen.has(current.id)) break;
+        seen.add(current.id);
+        depth += 1;
+        current = byId.get(current.parentCommentId)!;
+      }
+
+      return Math.min(depth, 4);
+    };
+
+    const threads = new Map<
+      number,
+      Array<{ comment: StudentComment; depth: number }>
+    >();
+
+    allComments.forEach((comment) => {
+      const rootId = getRootId(comment);
+      const depth = getDepth(comment);
+      const thread = threads.get(rootId) || [];
+      thread.push({ comment, depth });
+      threads.set(rootId, thread);
+    });
+
+    return Array.from(threads.values())
+      .map((thread) =>
+        thread.sort(
+          (a, b) =>
+            new Date(a.comment.createdAt).getTime() -
+            new Date(b.comment.createdAt).getTime(),
+        ),
+      )
+      .sort((a, b) => {
+        const aTime = new Date(a[0].comment.createdAt).getTime();
+        const bTime = new Date(b[0].comment.createdAt).getTime();
+        return bTime - aTime;
+      });
   };
 
-  const commentGroups = organizeComments(comments);
+  const commentThreads = organizeThreads(comments);
+
+  const roleVariant = (role: StudentComment["authorRole"]) => {
+    if (role === "admin") return "primary";
+    if (role === "teacher") return "secondary";
+    return "success";
+  };
+
+  const roleLabel = (role: StudentComment["authorRole"]) => {
+    if (role === "admin") return t("comments.admin", "Admin");
+    if (role === "teacher") return t("comments.teacher", "Teacher");
+    return t("comments.parent", "Parent");
+  };
 
   if (loading) {
     return (
@@ -153,85 +219,66 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
             </Alert>
           )}
 
-          {commentGroups.length === 0 ? (
+          {commentThreads.length === 0 ? (
             <div className="text-center text-muted py-3">
               <i className="fas fa-comment-slash fa-2x mb-2"></i>
               <p>{t("comments.noComments", "No comments for this date")}</p>
             </div>
           ) : (
             <ListGroup variant="flush">
-              {commentGroups.map(({ parent, replies }) => (
-                <ListGroup.Item key={parent.id} className="comment-thread">
-                  {/* Parent Comment */}
-                  <div className="comment parent-comment">
-                    <div className="comment-header d-flex justify-content-between align-items-start">
-                      <div>
-                        <Badge
-                          bg={
-                            parent.authorRole === "admin"
-                              ? "primary"
-                              : "secondary"
-                          }
-                          className="me-2"
-                        >
-                          {parent.authorRole === "admin"
-                            ? t("comments.admin", "Admin")
-                            : t("comments.teacher", "Teacher")}
-                        </Badge>
-                        <span className="author-name fw-bold">
-                          {parent.authorName}
-                        </span>
-                        <small className="text-muted ms-2">
-                          {formatTime(parent.createdAt)}
-                        </small>
-                      </div>
-                    </div>
-
-                    <div className="comment-content mt-2">{parent.content}</div>
-
-                    {isParent && (
-                      <div className="comment-actions mt-2">
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          onClick={() => {
-                            setReplyingTo(parent.id);
-                            setShowReplyModal(true);
-                          }}
-                        >
-                          <i className="fas fa-reply me-1"></i>
-                          {t("comments.reply", "Reply")}
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Replies */}
-                  {replies.length > 0 && (
-                    <div className="replies mt-3">
-                      {replies.map((reply) => (
-                        <div key={reply.id} className="comment reply-comment">
-                          <div className="comment-header d-flex justify-content-between align-items-start">
-                            <div>
-                              <Badge bg="success" className="me-2">
-                                {t("comments.parent", "Parent")}
-                              </Badge>
-                              <span className="author-name fw-bold">
-                                {reply.authorName}
-                              </span>
-                              <small className="text-muted ms-2">
-                                {formatTime(reply.createdAt)}
-                              </small>
-                            </div>
-                          </div>
-
-                          <div className="comment-content mt-2">
-                            {reply.content}
-                          </div>
+              {commentThreads.map((thread) => (
+                <ListGroup.Item
+                  key={thread[0].comment.id}
+                  className="comment-thread"
+                >
+                  {thread.map(({ comment, depth }) => (
+                    <div
+                      key={comment.id}
+                      className={
+                        depth === 0
+                          ? "comment parent-comment"
+                          : "comment reply-comment"
+                      }
+                      style={{ marginLeft: `${depth * 14}px` }}
+                    >
+                      <div className="comment-header d-flex justify-content-between align-items-start">
+                        <div>
+                          <Badge
+                            bg={roleVariant(comment.authorRole)}
+                            className="me-2"
+                          >
+                            {roleLabel(comment.authorRole)}
+                          </Badge>
+                          <span className="author-name fw-bold">
+                            {comment.authorName}
+                          </span>
+                          <small className="text-muted ms-2">
+                            {formatTime(comment.createdAt)}
+                          </small>
                         </div>
-                      ))}
+                      </div>
+
+                      <div className="comment-content mt-2">
+                        {comment.content}
+                      </div>
+
+                      {canReply && (
+                        <div className="comment-actions mt-2">
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => {
+                              setReplyingTo(comment.id);
+                              setShowReplyModal(true);
+                            }}
+                          >
+                            <i className="fas fa-reply me-1"></i>
+                            {t("comments.reply", "Reply")}
+                          </Button>
+                        </div>
+                      )}
                     </div>
-                  )}
+                  ))}
                 </ListGroup.Item>
               ))}
             </ListGroup>

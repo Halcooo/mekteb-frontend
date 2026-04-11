@@ -73,8 +73,6 @@ const RegisterJWT: React.FC = () => {
       return response;
     },
     onSuccess: (data) => {
-      console.log("Registration successful:", data);
-
       // Automatically log in the user after successful registration
       if (data.accessToken && data.refreshToken && data.user) {
         login(data.accessToken, data.refreshToken, data.user);
@@ -95,7 +93,7 @@ const RegisterJWT: React.FC = () => {
           setErrors(axiosError.response.data.errors);
         } else if (axiosError.response?.data?.error) {
           const translatedError = getTranslatedError(
-            axiosError.response.data.error
+            axiosError.response.data.error,
           );
           setErrors({ submit: translatedError });
         } else {
@@ -161,7 +159,7 @@ const RegisterJWT: React.FC = () => {
   const handleInputChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
