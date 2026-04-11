@@ -69,6 +69,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const getStoredUser = (rawUser: string | null): User | null => {
+    if (!rawUser) return null;
+    try {
+      return JSON.parse(rawUser) as User;
+    } catch {
+      return null;
+    }
+  };
+
   // Check if token is expired
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -134,13 +143,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
       const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
       const storedUser = localStorage.getItem(USER_KEY);
+      const parsedStoredUser = getStoredUser(storedUser);
 
       if (storedAccessToken && !isTokenExpired(storedAccessToken)) {
         setAccessToken(storedAccessToken);
         setRefreshToken(storedRefreshToken);
 
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
+        if (parsedStoredUser) {
+          setUser(parsedStoredUser);
         } else {
           const tokenUser = getUserFromToken(storedAccessToken);
           if (tokenUser) {
@@ -154,9 +164,19 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       if (storedRefreshToken && !isTokenExpired(storedRefreshToken)) {
+        const refreshTokenUser = getUserFromToken(storedRefreshToken);
+
         setAccessToken(null);
         setRefreshToken(storedRefreshToken);
-        setUser(storedUser ? JSON.parse(storedUser) : null);
+
+        if (parsedStoredUser) {
+          setUser(parsedStoredUser);
+        } else if (refreshTokenUser) {
+          setUser(refreshTokenUser);
+          localStorage.setItem(USER_KEY, JSON.stringify(refreshTokenUser));
+        } else {
+          setUser(null);
+        }
         return;
       }
 
