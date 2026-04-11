@@ -595,33 +595,33 @@ const EditableGrid: React.FC<EditableGridProps> = ({
         <Modal.Header closeButton>
           <Modal.Title>
             <i className="bi bi-person-plus me-2"></i>
-            Add New Student
+            {t("addStudent")}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form>
             <div className="row">
               <div className="col-md-6 mb-3">
-                <Form.Label>First Name</Form.Label>
+                <Form.Label>{t("firstName")}</Form.Label>
                 <Form.Control
                   type="text"
                   value={newStudentData.firstName}
                   onChange={(e) =>
                     handleNewStudentChange("firstName", e.target.value)
                   }
-                  placeholder="Enter first name"
+                  placeholder={t("enterFirstName")}
                   required
                 />
               </div>
               <div className="col-md-6 mb-3">
-                <Form.Label>Last Name</Form.Label>
+                <Form.Label>{t("lastName")}</Form.Label>
                 <Form.Control
                   type="text"
                   value={newStudentData.lastName}
                   onChange={(e) =>
                     handleNewStudentChange("lastName", e.target.value)
                   }
-                  placeholder="Enter last name"
+                  placeholder={t("enterLastName")}
                   required
                 />
               </div>
@@ -640,20 +640,20 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                 />
               </div>
               <div className="col-md-6 mb-3">
-                <Form.Label>Grade Level</Form.Label>
+                <Form.Label>{t("gradeLevel")}</Form.Label>
                 <Form.Control
                   type="text"
                   value={newStudentData.gradeLevel}
                   onChange={(e) =>
                     handleNewStudentChange("gradeLevel", e.target.value)
                   }
-                  placeholder="Enter grade level"
+                  placeholder={t("enterGradeLevel")}
                   required
                 />
               </div>
             </div>
             <div className="mb-3">
-              <Form.Label>Parent ID (Optional)</Form.Label>
+              <Form.Label>{t("parentIdOptional")}</Form.Label>
               <Form.Control
                 type="number"
                 value={newStudentData.parentId ?? ""}
@@ -663,11 +663,9 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                     e.target.value ? Number(e.target.value) : null,
                   )
                 }
-                placeholder="Enter parent ID (leave empty if no parent)"
+                placeholder={t("parentIdPlaceholder")}
               />
-              <Form.Text className="text-muted">
-                Leave empty if the student doesn't have a parent account yet.
-              </Form.Text>
+              <Form.Text className="text-muted">{t("parentIdHelp")}</Form.Text>
             </div>
           </Form>
         </Modal.Body>
@@ -678,7 +676,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
             disabled={isCreating}
           >
             <i className="bi bi-x-circle me-2"></i>
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             variant="success"
@@ -694,12 +692,12 @@ const EditableGrid: React.FC<EditableGridProps> = ({
             {isCreating ? (
               <>
                 <Spinner animation="border" size="sm" className="me-2" />
-                Creating...
+                {t("creating")}...
               </>
             ) : (
               <>
                 <i className="bi bi-check-circle me-2"></i>
-                Create Student
+                {t("createStudent")}
               </>
             )}
           </Button>

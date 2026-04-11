@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -54,6 +54,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Build user object from access token payload
+  const getUserFromToken = (token: string): User | null => {
+    try {
+      const decoded = jwtDecode<JwtPayload>(token);
+      return {
+        id: decoded.userId,
+        username: decoded.username,
+        email: decoded.email,
+        role: decoded.role,
+      };
+    } catch {
+      return null;
+    }
+  };
+
   // Check if token is expired
   const isTokenExpired = (token: string): boolean => {
     try {
@@ -79,7 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = (
     newAccessToken: string,
     newRefreshToken: string,
-    userData: User
+    userData: User,
   ) => {
     // Store in localStorage
     localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
@@ -113,43 +128,85 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setRefreshToken(newRefreshToken);
   };
 
-  // Initialize auth state from localStorage on mount
-  useEffect(() => {
-    const initializeAuth = () => {
-      try {
-        const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-        const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-        const storedUser = localStorage.getItem(USER_KEY);
+  // Restore auth state from localStorage (used on refresh and cross-tab sync)
+  const restoreAuthFromStorage = useCallback(() => {
+    try {
+      const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+      const storedUser = localStorage.getItem(USER_KEY);
 
-        if (storedAccessToken && storedRefreshToken && storedUser) {
-          // Check if access token is expired
-          if (!isTokenExpired(storedAccessToken)) {
-            // Token is valid, restore session
-            setAccessToken(storedAccessToken);
-            setRefreshToken(storedRefreshToken);
-            setUser(JSON.parse(storedUser));
+      if (storedAccessToken && !isTokenExpired(storedAccessToken)) {
+        setAccessToken(storedAccessToken);
+        setRefreshToken(storedRefreshToken);
+
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        } else {
+          const tokenUser = getUserFromToken(storedAccessToken);
+          if (tokenUser) {
+            setUser(tokenUser);
+            localStorage.setItem(USER_KEY, JSON.stringify(tokenUser));
           } else {
-            // Access token expired, check refresh token
-            if (!isTokenExpired(storedRefreshToken)) {
-              // Refresh token is valid, we'll handle refresh in axios interceptor
-              setRefreshToken(storedRefreshToken);
-              setUser(JSON.parse(storedUser));
-            } else {
-              // Both tokens expired, clear everything
-              logout();
-            }
+            setUser(null);
           }
         }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-        logout();
-      } finally {
-        setIsLoading(false);
+        return;
+      }
+
+      if (storedRefreshToken && !isTokenExpired(storedRefreshToken)) {
+        setAccessToken(null);
+        setRefreshToken(storedRefreshToken);
+        setUser(storedUser ? JSON.parse(storedUser) : null);
+        return;
+      }
+
+      setAccessToken(null);
+      setRefreshToken(null);
+      setUser(null);
+    } catch (error) {
+      console.error("Error restoring auth from storage:", error);
+      setAccessToken(null);
+      setRefreshToken(null);
+      setUser(null);
+    }
+  }, []);
+
+  // Initialize auth state from localStorage on mount
+  useEffect(() => {
+    restoreAuthFromStorage();
+    setIsLoading(false);
+  }, [restoreAuthFromStorage]);
+
+  // Keep auth state synced across tabs and with interceptor logout events
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      if (
+        event.key === ACCESS_TOKEN_KEY ||
+        event.key === REFRESH_TOKEN_KEY ||
+        event.key === USER_KEY ||
+        event.key === null
+      ) {
+        restoreAuthFromStorage();
       }
     };
 
-    initializeAuth();
-  }, []);
+    const handleForcedLogout = () => {
+      setAccessToken(null);
+      setRefreshToken(null);
+      setUser(null);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    window.addEventListener("auth:logout", handleForcedLogout as EventListener);
+
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+      window.removeEventListener(
+        "auth:logout",
+        handleForcedLogout as EventListener,
+      );
+    };
+  }, [restoreAuthFromStorage]);
 
   // Computed values
   const isAuthenticated = Boolean(user && (accessToken || refreshToken));

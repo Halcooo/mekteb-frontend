@@ -15,7 +15,11 @@ import {
 import { useTranslation } from "react-i18next";
 import PageLayout from "../components/PageLayout";
 import { parentApi } from "../api/parentApi";
-import type { ConnectedStudent as ApiConnectedStudent } from "../api/parentApi";
+import type {
+  ConnectedStudent as ApiConnectedStudent,
+  ParentAttendanceRecord,
+  ParentAttendanceStats,
+} from "../api/parentApi";
 import { validateParentKey } from "../utils/parentKeyUtils";
 import { formatBosnianDate } from "../utils/dateFormatter";
 import StudentComments from "../components/StudentComments";
@@ -38,6 +42,13 @@ const ParentDashboard: React.FC = () => {
   const [showAttendanceModal, setShowAttendanceModal] = useState(false);
   const [selectedStudent, setSelectedStudent] =
     useState<ConnectedStudent | null>(null);
+  const [attendanceRecords, setAttendanceRecords] = useState<
+    ParentAttendanceRecord[]
+  >([]);
+  const [attendanceStats, setAttendanceStats] =
+    useState<ParentAttendanceStats | null>(null);
+  const [attendanceLoading, setAttendanceLoading] = useState(false);
+  const [attendanceError, setAttendanceError] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
     new Date().toISOString().split("T")[0],
@@ -51,6 +62,7 @@ const ParentDashboard: React.FC = () => {
         students.map((student) => ({
           ...student,
           connectionDate:
+            student.connectedAt?.split("T")[0] ||
             student.createdAt?.split("T")[0] ||
             new Date().toISOString().split("T")[0],
         })),
@@ -74,12 +86,7 @@ const ParentDashboard: React.FC = () => {
 
     // Validate parent key format
     if (!validateParentKey(studentKey.trim())) {
-      setError(
-        t(
-          "parentDashboard.invalidKeyFormat",
-          "Invalid key format. Key should be in format YYYY-MMDD-XXXX",
-        ),
-      );
+      setError(t("parentDashboard.invalidKeyFormat"));
       return;
     }
 
@@ -97,12 +104,7 @@ const ParentDashboard: React.FC = () => {
         );
 
         if (alreadyConnected) {
-          setError(
-            t(
-              "parentDashboard.studentAlreadyConnected",
-              "Student is already connected to your account",
-            ),
-          );
+          setError(t("parentDashboard.studentAlreadyConnected"));
           return;
         }
 
@@ -129,27 +131,39 @@ const ParentDashboard: React.FC = () => {
           }
         }, 100);
       } else {
-        setError(
-          response.message ||
-            t(
-              "parentDashboard.invalidKey",
-              "Invalid student key. Please check the key and try again.",
-            ),
-        );
+        setError(response.message || t("parentDashboard.invalidKey"));
       }
     } catch (error: unknown) {
       console.error("Error connecting student:", error);
-      setError(
-        t("parentDashboard.networkError", "Network error. Please try again."),
-      );
+      setError(t("parentDashboard.networkError"));
     } finally {
       setLoading(false);
     }
   };
 
-  const handleViewAttendance = (student: ConnectedStudent) => {
+  const handleViewAttendance = async (student: ConnectedStudent) => {
     setSelectedStudent(student);
     setShowAttendanceModal(true);
+
+    setAttendanceLoading(true);
+    setAttendanceError(null);
+    setAttendanceRecords([]);
+    setAttendanceStats(null);
+
+    try {
+      const [records, stats] = await Promise.all([
+        parentApi.getStudentAttendance(student.id, 10),
+        parentApi.getStudentAttendanceStats(student.id),
+      ]);
+
+      setAttendanceRecords(records);
+      setAttendanceStats(stats);
+    } catch (error) {
+      console.error("Error loading attendance details:", error);
+      setAttendanceError(t("parentDashboard.errorLoadingAttendanceDetails"));
+    } finally {
+      setAttendanceLoading(false);
+    }
   };
 
   const handleViewComments = (student: ConnectedStudent) => {
@@ -162,7 +176,6 @@ const ParentDashboard: React.FC = () => {
       !window.confirm(
         t("parentDashboard.confirmDisconnect", {
           name: `${student.firstName} ${student.lastName}`,
-          defaultValue: `Are you sure you want to disconnect from ${student.firstName} ${student.lastName}?`,
         }),
       )
     ) {
@@ -179,17 +192,11 @@ const ParentDashboard: React.FC = () => {
       setSuccess(
         t("parentDashboard.studentDisconnectedSuccess", {
           name: student.firstName,
-          defaultValue: `Successfully disconnected from ${student.firstName}`,
         }),
       );
     } catch (error) {
       console.error("Error disconnecting student:", error);
-      setError(
-        t(
-          "parentDashboard.disconnectError",
-          "Failed to disconnect from student. Please try again.",
-        ),
-      );
+      setError(t("parentDashboard.disconnectError"));
     } finally {
       setLoading(false);
     }
@@ -199,6 +206,26 @@ const ParentDashboard: React.FC = () => {
     if (rate >= 90) return "success";
     if (rate >= 75) return "warning";
     return "danger";
+  };
+
+  const getAttendanceStatusBadgeVariant = (status: string) => {
+    const normalizedStatus = status.toUpperCase();
+
+    if (normalizedStatus === "PRESENT") return "success";
+    if (normalizedStatus === "LATE") return "warning";
+    if (normalizedStatus === "ABSENT") return "danger";
+    return "info";
+  };
+
+  const getAttendanceNote = (status: string) => {
+    const normalizedStatus = status.toUpperCase();
+
+    if (normalizedStatus === "PRESENT") return t("parentDashboard.onTime");
+    if (normalizedStatus === "LATE") {
+      return t("parentDashboard.arrivedLate", { minutes: "-" });
+    }
+    if (normalizedStatus === "ABSENT") return t("parentDashboard.sickLeave");
+    return t("parentDashboard.medicalAppointment");
   };
 
   return (
@@ -327,12 +354,12 @@ const ParentDashboard: React.FC = () => {
                   <Table hover>
                     <thead>
                       <tr>
-                        <th>{t("students.firstName")}</th>
-                        <th>{t("students.lastName")}</th>
-                        <th>{t("students.gradeLevel")}</th>
+                        <th>{t("firstName")}</th>
+                        <th>{t("lastName")}</th>
+                        <th>{t("gradeLevel")}</th>
                         <th>{t("parentDashboard.attendanceRate")}</th>
                         <th>{t("parentDashboard.connectedSince")}</th>
-                        <th>{t("common.actions")}</th>
+                        <th>{t("actions")}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -359,7 +386,7 @@ const ParentDashboard: React.FC = () => {
                               ? new Date(
                                   student.connectionDate,
                                 ).toLocaleDateString()
-                              : t("common.unknown", "Unknown")}
+                              : t("common.unknown")}
                           </td>
                           <td>
                             <div className="d-flex gap-2 flex-wrap">
@@ -417,128 +444,108 @@ const ParentDashboard: React.FC = () => {
         <Modal.Body>
           {selectedStudent && (
             <div className="attendance-details">
-              <div className="attendance-summary mb-4">
-                <Row>
-                  <Col md={4}>
-                    <Card className="text-center">
-                      <Card.Body>
-                        <h4 className="text-success">
-                          {(selectedStudent.attendanceRate || 0).toFixed(1)}%
-                        </h4>
-                        <small className="text-muted">Overall Attendance</small>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                  <Col md={4}>
-                    <Card className="text-center">
-                      <Card.Body>
-                        <h4 className="text-primary">18</h4>
-                        <small className="text-muted">Present Days</small>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                  <Col md={4}>
-                    <Card className="text-center">
-                      <Card.Body>
-                        <h4 className="text-warning">2</h4>
-                        <small className="text-muted">Absent Days</small>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                </Row>
-              </div>
+              {attendanceLoading ? (
+                <div className="text-center py-4">
+                  <Spinner animation="border" />
+                  <p className="mt-2 text-muted">
+                    {t("parentDashboard.loadingAttendanceDetails")}
+                  </p>
+                </div>
+              ) : attendanceError ? (
+                <Alert variant="danger" className="mb-0">
+                  {attendanceError}
+                </Alert>
+              ) : (
+                <>
+                  <div className="attendance-summary mb-4">
+                    <Row>
+                      <Col md={4}>
+                        <Card className="text-center">
+                          <Card.Body>
+                            <h4 className="text-success">
+                              {(attendanceStats?.attendanceRate || 0).toFixed(
+                                1,
+                              )}
+                              %
+                            </h4>
+                            <small className="text-muted">
+                              {t("parentDashboard.overallAttendance")}
+                            </small>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                      <Col md={4}>
+                        <Card className="text-center">
+                          <Card.Body>
+                            <h4 className="text-primary">
+                              {(attendanceStats?.presentDays || 0) +
+                                (attendanceStats?.lateDays || 0)}
+                            </h4>
+                            <small className="text-muted">
+                              {t("parentDashboard.presentDays")}
+                            </small>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                      <Col md={4}>
+                        <Card className="text-center">
+                          <Card.Body>
+                            <h4 className="text-warning">
+                              {attendanceStats?.absentDays || 0}
+                            </h4>
+                            <small className="text-muted">
+                              {t("parentDashboard.absentDays")}
+                            </small>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </div>
 
-              <h6 className="mb-3">
-                {t("recentAttendance", "Recent Attendance (Last 10 Days)")}
-              </h6>
-              <Table striped size="sm">
-                <thead>
-                  <tr>
-                    <th>{t("date", "Date")}</th>
-                    <th>{t("status", "Status")}</th>
-                    <th>{t("notes", "Notes")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    {
-                      date: "2025-10-12",
-                      status: "present",
-                      notes: t("onTime", "On time"),
-                    },
-                    {
-                      date: "2025-10-11",
-                      status: "present",
-                      notes: t("onTime", "On time"),
-                    },
-                    {
-                      date: "2025-10-10",
-                      status: "late",
-                      notes: t("arrivedLate", "Arrived {{minutes}} mins late", {
-                        minutes: 10,
-                      }),
-                    },
-                    {
-                      date: "2025-10-09",
-                      status: "present",
-                      notes: t("onTime", "On time"),
-                    },
-                    {
-                      date: "2025-10-08",
-                      status: "absent",
-                      notes: t("sickLeave", "Sick leave"),
-                    },
-                    {
-                      date: "2025-10-07",
-                      status: "present",
-                      notes: t("onTime", "On time"),
-                    },
-                    {
-                      date: "2025-10-06",
-                      status: "present",
-                      notes: t("onTime", "On time"),
-                    },
-                    {
-                      date: "2025-10-05",
-                      status: "present",
-                      notes: t("onTime", "On time"),
-                    },
-                    {
-                      date: "2025-10-04",
-                      status: "present",
-                      notes: t("onTime", "On time"),
-                    },
-                    {
-                      date: "2025-10-03",
-                      status: "excused",
-                      notes: t("medicalAppointment", "Medical appointment"),
-                    },
-                  ].map((record, index) => (
-                    <tr key={index}>
-                      <td>{formatBosnianDate(record.date)}</td>
-                      <td>
-                        <Badge
-                          bg={
-                            record.status === "present"
-                              ? "success"
-                              : record.status === "late"
-                                ? "warning"
-                                : record.status === "absent"
-                                  ? "danger"
-                                  : "info"
-                          }
-                        >
-                          {record.status.charAt(0).toUpperCase() +
-                            record.status.slice(1)}
-                        </Badge>
-                      </td>
-                      <td>
-                        <small className="text-muted">{record.notes}</small>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </Table>
+                  <h6 className="mb-3">
+                    {t("parentDashboard.recentAttendance")}
+                  </h6>
+
+                  {attendanceRecords.length === 0 ? (
+                    <Alert variant="info" className="mb-0">
+                      {t("parentDashboard.noAttendanceRecords")}
+                    </Alert>
+                  ) : (
+                    <Table striped size="sm">
+                      <thead>
+                        <tr>
+                          <th>{t("parentDashboard.date")}</th>
+                          <th>{t("parentDashboard.status")}</th>
+                          <th>{t("parentDashboard.notes")}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {attendanceRecords.map((record) => (
+                          <tr key={record.id}>
+                            <td>{formatBosnianDate(record.date)}</td>
+                            <td>
+                              <Badge
+                                bg={getAttendanceStatusBadgeVariant(
+                                  record.status,
+                                )}
+                              >
+                                {t(
+                                  `parentDashboard.statusValues.${record.status.toLowerCase()}`,
+                                )}
+                              </Badge>
+                            </td>
+                            <td>
+                              <small className="text-muted">
+                                {getAttendanceNote(record.status)}
+                              </small>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  )}
+                </>
+              )}
             </div>
           )}
         </Modal.Body>

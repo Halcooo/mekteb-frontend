@@ -70,23 +70,27 @@ function AppNavbar() {
                     </span>
                   </Nav.Link>
                 )}
-                <Nav.Link
-                  as={Link}
-                  to="/students"
-                  className={`fw-500 ${
-                    isRouteActive("/students")
-                      ? "active bg-primary text-white rounded"
-                      : ""
-                  }`}
-                >
-                  <i className="bi bi-people me-2"></i>
-                  <span className="d-lg-inline d-xl-inline">
-                    {t("students")}
-                  </span>
-                </Nav.Link>
+                {user?.role !== "user" && (
+                  <Nav.Link
+                    as={Link}
+                    to="/students"
+                    className={`fw-500 ${
+                      isRouteActive("/students")
+                        ? "active bg-primary text-white rounded"
+                        : ""
+                    }`}
+                  >
+                    <i className="bi bi-people me-2"></i>
+                    <span className="d-lg-inline d-xl-inline">
+                      {t("students")}
+                    </span>
+                  </Nav.Link>
+                )}
 
-                {/* Parent Dashboard - for parents and admins */}
-                {(user?.role === "parent" || user?.role === "admin") && (
+                {/* Parent Dashboard - for parents, admins and users */}
+                {(user?.role === "parent" ||
+                  user?.role === "admin" ||
+                  user?.role === "user") && (
                   <Nav.Link
                     as={Link}
                     to="/parent-dashboard"

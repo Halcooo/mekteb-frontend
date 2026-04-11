@@ -147,6 +147,12 @@ i18n
           studentId: "ID učenika",
           gradeLevel: "Razred",
           enterStudentId: "Unesite ID učenika",
+          enterGradeLevel: "Unesite razred",
+          parentIdOptional: "ID roditelja (opcionalno)",
+          parentIdPlaceholder:
+            "Unesite ID roditelja (ostavite prazno ako nema roditelja)",
+          parentIdHelp:
+            "Ostavite prazno ako učenik još nema roditeljski nalog.",
           selectGrade: "Izaberite razred",
           createStudent: "Stvori učenika",
 
@@ -200,6 +206,27 @@ i18n
               "Uspješno ste prekinuli vezu sa {{name}}",
             disconnectError:
               "Greška pri prekidanju veze sa učenikom. Pokušajte ponovo.",
+            overallAttendance: "Ukupno prisustvo",
+            presentDays: "Dani prisustva",
+            absentDays: "Dani odsustva",
+            recentAttendance: "Nedavno prisustvo (zadnjih 10 dana)",
+            date: "Datum",
+            status: "Status",
+            notes: "Bilješke",
+            onTime: "Na vrijeme",
+            arrivedLate: "Kasnio/la {{minutes}} min",
+            sickLeave: "Bolovanje",
+            medicalAppointment: "Ljekarski pregled",
+            loadingAttendanceDetails: "Učitavanje detalja prisustva...",
+            errorLoadingAttendanceDetails:
+              "Greška pri učitavanju detalja prisustva",
+            noAttendanceRecords: "Nema zapisa o prisustvu za ovog učenika",
+            statusValues: {
+              present: "Prisutan",
+              late: "Kasni",
+              absent: "Odsutan",
+              excused: "Opravdano",
+            },
           },
 
           // Profile Management
@@ -264,6 +291,9 @@ i18n
             showing: "Prikazuje",
             of: "od",
             page: "Stranica",
+            close: "Zatvori",
+            refresh: "Osvježi",
+            unknown: "Nepoznato",
           },
 
           // Search and pagination
@@ -543,6 +573,11 @@ i18n
           studentId: "Student ID",
           gradeLevel: "Grade Level",
           enterStudentId: "Enter student ID",
+          enterGradeLevel: "Enter grade level",
+          parentIdOptional: "Parent ID (Optional)",
+          parentIdPlaceholder: "Enter parent ID (leave empty if no parent)",
+          parentIdHelp:
+            "Leave empty if the student doesn't have a parent account yet.",
           selectGrade: "Select grade",
           createStudent: "Create Student",
 
@@ -596,6 +631,26 @@ i18n
               "Successfully disconnected from {{name}}",
             disconnectError:
               "Failed to disconnect from student. Please try again.",
+            overallAttendance: "Overall Attendance",
+            presentDays: "Present Days",
+            absentDays: "Absent Days",
+            recentAttendance: "Recent Attendance (Last 10 Days)",
+            date: "Date",
+            status: "Status",
+            notes: "Notes",
+            onTime: "On time",
+            arrivedLate: "Arrived {{minutes}} mins late",
+            sickLeave: "Sick leave",
+            medicalAppointment: "Medical appointment",
+            loadingAttendanceDetails: "Loading attendance details...",
+            errorLoadingAttendanceDetails: "Failed to load attendance details",
+            noAttendanceRecords: "No attendance records for this student",
+            statusValues: {
+              present: "Present",
+              late: "Late",
+              absent: "Absent",
+              excused: "Excused",
+            },
           },
 
           // Profile Management
@@ -659,6 +714,9 @@ i18n
             showing: "Showing",
             of: "of",
             page: "Page",
+            close: "Close",
+            refresh: "Refresh",
+            unknown: "Unknown",
           },
 
           // Search and pagination

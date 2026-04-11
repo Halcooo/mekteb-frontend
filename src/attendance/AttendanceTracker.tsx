@@ -165,9 +165,22 @@ function AttendanceTracker() {
   useEffect(() => {
     const newAttendanceData: Record<number, AttendanceStatus> = {};
 
-    // Set existing attendance
+    // Keep only latest attendance record per student (highest id)
+    const latestByStudent = new Map<
+      number,
+      (typeof existingAttendance)[number]
+    >();
+
     existingAttendance.forEach((record) => {
-      newAttendanceData[record.student_id] = record.status;
+      const current = latestByStudent.get(record.student_id);
+      if (!current || record.id > current.id) {
+        latestByStudent.set(record.student_id, record);
+      }
+    });
+
+    // Set existing attendance (latest only)
+    latestByStudent.forEach((record, studentId) => {
+      newAttendanceData[studentId] = record.status;
     });
 
     // Set default status for students without attendance record
@@ -204,9 +217,9 @@ function AttendanceTracker() {
       setSavingStudents((prev) => new Set(prev).add(studentId));
 
       // Check if attendance record already exists for this student and date
-      const existingRecord = existingAttendance.find(
-        (record) => record.student_id === studentId,
-      );
+      const existingRecord = existingAttendance
+        .filter((record) => record.student_id === studentId)
+        .sort((a, b) => b.id - a.id)[0];
 
       if (existingRecord) {
         // Update existing record
@@ -511,22 +524,12 @@ function AttendanceTracker() {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={2} className="text-end">
-                  <Button
-                    variant="success"
-                    size="sm"
-                    onClick={() => setShowAddStudent(true)}
-                  >
-                    <i className="bi bi-person-plus me-1"></i>
-                    {t("students.addStudent", "Add Student")}
-                  </Button>
-                </Col>
               </Row>
               {searchTerm && (
                 <div className="mt-2">
                   <small className="text-muted">
-                    {t("common.showing", "Showing")} {filteredStudents.length}{" "}
-                    {t("common.of", "of")} {studentsResponse?.data?.length || 0}{" "}
+                    {t("common.showing", "Showing")} {filteredStudents.length}
+                    {t("common.of", "of")} {studentsResponse?.data?.length || 0}
                     {t("studentCountLabel", "students")}
                     {filteredStudents.length > studentsPerPage && (
                       <>
