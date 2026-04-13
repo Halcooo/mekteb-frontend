@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Do not rewrite backend API requests
+  RewriteCond %{REQUEST_URI} !^/backend/
+
+  # Do not rewrite existing files/directories
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+
+  # SPA fallback
+  RewriteRule . /index.html [L]
+</IfModule>
