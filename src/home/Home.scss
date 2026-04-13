@@ -111,6 +111,11 @@
   flex-wrap: wrap;
   width: 100%;
 
+  @media (max-width: 767px) {
+    justify-content: center;
+    --bs-gutter-x: 0;
+  }
+
   @media (min-width: 768px) {
     gap: 1.5rem;
   }
@@ -129,8 +134,10 @@
 
     /* Mobile: 1 column */
     @media (max-width: 767px) {
-      flex: 0 0 100%;
-      max-width: 100%;
+      flex: 0 1 min(100%, 560px);
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
     }
   }
 }
