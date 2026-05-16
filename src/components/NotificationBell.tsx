@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge, Button, ListGroup, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -33,16 +33,16 @@ function NotificationBell() {
     unreadOnlyRef.current = unreadOnly;
   }, [unreadOnly]);
 
-  const loadUnreadCount = async () => {
+  const loadUnreadCount = useCallback(async () => {
     try {
       const count = await notificationsApi.getUnreadCount();
       setUnreadCount(count);
     } catch {
       setUnreadCount(0);
     }
-  };
+  }, []);
 
-  const loadNotifications = async (onlyUnread = unreadOnly) => {
+  const loadNotifications = useCallback(async (onlyUnread: boolean) => {
     setLoading(true);
     try {
       const items = await notificationsApi.getAll({
@@ -55,9 +55,9 @@ function NotificationBell() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const getNotificationsWsUrl = () => {
+  const getNotificationsWsUrl = useCallback(() => {
     try {
       if (!accessToken || !import.meta.env.VITE_API_URL) {
         return null;
@@ -69,7 +69,7 @@ function NotificationBell() {
     } catch {
       return null;
     }
-  };
+  }, [accessToken]);
 
   const formatRelativeTime = (value: string) => {
     const date = new Date(value);
@@ -103,7 +103,7 @@ function NotificationBell() {
     const interval = window.setInterval(loadUnreadCount, 20000);
 
     return () => window.clearInterval(interval);
-  }, [user]);
+  }, [user, loadUnreadCount]);
 
   useEffect(() => {
     if (!user || !accessToken) {
@@ -168,7 +168,13 @@ function NotificationBell() {
         wsRef.current = null;
       }
     };
-  }, [user, accessToken]);
+  }, [
+    user,
+    accessToken,
+    getNotificationsWsUrl,
+    loadNotifications,
+    loadUnreadCount,
+  ]);
 
   const handleOpen = async () => {
     setShowModal(true);
@@ -181,13 +187,38 @@ function NotificationBell() {
     }
 
     loadNotifications(unreadOnly);
-  }, [showModal, unreadOnly]);
+  }, [showModal, unreadOnly, loadNotifications]);
+
+  const isReplyNotification = (notification: NotificationItem) => {
+    const type = String(notification.type || "").toUpperCase();
+    if (type.includes("REPLIED")) {
+      return true;
+    }
+
+    const title = String(notification.title || "");
+    const message = String(notification.message || "");
+    return /replied|reply/i.test(title) || /replied|reply/i.test(message);
+  };
+
+  const isAddedNotification = (notification: NotificationItem) => {
+    const type = String(notification.type || "").toUpperCase();
+    if (type.includes("ADDED")) {
+      return true;
+    }
+
+    const title = String(notification.title || "");
+    const message = String(notification.message || "");
+    return (
+      /new attendance comment|new comment|comment added/i.test(title) ||
+      /new attendance comment|new comment|comment added/i.test(message)
+    );
+  };
 
   const getNotificationTitle = (notification: NotificationItem) => {
-    if (notification.type === "COMMENT_ADDED") {
+    if (isAddedNotification(notification)) {
       return t("notifications.commentAddedTitle", "New comment");
     }
-    if (notification.type === "COMMENT_REPLIED") {
+    if (isReplyNotification(notification)) {
       return t("notifications.commentRepliedTitle", "New reply");
     }
     return notification.title;
@@ -197,14 +228,14 @@ function NotificationBell() {
     const studentLabel =
       notification.studentName || t("common.unknown", "Unknown");
 
-    if (notification.type === "COMMENT_ADDED") {
+    if (isAddedNotification(notification)) {
       return t("notifications.commentAddedMessage", {
         student: studentLabel,
         defaultValue: "A new comment was added for {{student}}.",
       });
     }
 
-    if (notification.type === "COMMENT_REPLIED") {
+    if (isReplyNotification(notification)) {
       return t("notifications.commentRepliedMessage", {
         student: studentLabel,
         defaultValue: "A new reply was added in {{student}} comments.",
@@ -212,6 +243,27 @@ function NotificationBell() {
     }
 
     return notification.message;
+  };
+
+  const getNotificationActionHint = (notification: NotificationItem) => {
+    const hasStudent = Boolean(notification.studentId);
+    const hasCommentDate = Boolean(notification.commentDate);
+
+    if ((user?.role === "parent" || user?.role === "user") && hasStudent) {
+      return t(
+        "notifications.openParentCommentsHint",
+        "Click to open student comments",
+      );
+    }
+
+    if (hasStudent || hasCommentDate) {
+      return t(
+        "notifications.openAttendanceCommentsHint",
+        "Click to open attendance comments",
+      );
+    }
+
+    return "";
   };
 
   const handleNotificationClick = async (notification: NotificationItem) => {
@@ -237,30 +289,31 @@ function NotificationBell() {
     const normalizedCommentDate = notification.commentDate
       ? formatDateForInput(notification.commentDate)
       : null;
+    const hasStudent = Boolean(notification.studentId);
 
-    if (
-      (user?.role === "parent" || user?.role === "user") &&
-      notification.studentId &&
-      normalizedCommentDate
-    ) {
+    if ((user?.role === "parent" || user?.role === "user") && hasStudent) {
       const params = new URLSearchParams({
         openComments: "1",
         studentId: String(notification.studentId),
-        date: normalizedCommentDate,
         notificationId: String(notification.id),
         ts: navTimestamp,
       });
+      if (normalizedCommentDate) {
+        params.set("date", normalizedCommentDate);
+      }
       navigate(`/parent-dashboard?${params.toString()}`);
       return;
     }
 
-    if (normalizedCommentDate) {
+    if (normalizedCommentDate || hasStudent) {
       const params = new URLSearchParams({
-        commentsDate: normalizedCommentDate,
         notificationId: String(notification.id),
         ts: navTimestamp,
       });
-      if (notification.studentId) {
+      if (normalizedCommentDate) {
+        params.set("commentsDate", normalizedCommentDate);
+      }
+      if (hasStudent) {
         params.set("studentId", String(notification.studentId));
         params.set("openComments", "1");
       }
@@ -373,6 +426,12 @@ function NotificationBell() {
                       <small className="text-muted d-block notification-message">
                         {getNotificationMessage(notification)}
                       </small>
+                      {getNotificationActionHint(notification) && (
+                        <small className="notification-action-hint d-inline-flex align-items-center mt-1">
+                          <i className="bi bi-cursor-fill me-1"></i>
+                          {getNotificationActionHint(notification)}
+                        </small>
+                      )}
                       <small className="text-muted d-block mt-1">
                         <i className="bi bi-clock me-1"></i>
                         {formatRelativeTime(notification.createdAt)}

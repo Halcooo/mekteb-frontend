@@ -301,6 +301,9 @@ i18n
             commentRepliedTitle: "Novi odgovor",
             commentRepliedMessage:
               "Dodan je novi odgovor u komentarima za {{student}}.",
+            openParentCommentsHint: "Kliknite za otvaranje komentara učenika",
+            openAttendanceCommentsHint:
+              "Kliknite za otvaranje komentara prisustva",
             justNow: "Upravo sada",
             minutesAgo: "prije {{count}}m",
             hoursAgo: "prije {{count}}h",
@@ -750,6 +753,8 @@ i18n
             commentRepliedTitle: "New reply",
             commentRepliedMessage:
               "A new reply was added in {{student}} comments.",
+            openParentCommentsHint: "Click to open student comments",
+            openAttendanceCommentsHint: "Click to open attendance comments",
             justNow: "Just now",
             minutesAgo: "{{count}}m ago",
             hoursAgo: "{{count}}h ago",
