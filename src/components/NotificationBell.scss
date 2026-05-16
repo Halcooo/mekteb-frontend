@@ -76,10 +76,16 @@
 
   .notification-item-content {
     min-width: 0;
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
+  }
+
+  .notification-item-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 0.65rem;
   }
 
   .notification-title-row {
@@ -103,12 +109,27 @@
     word-break: break-word;
   }
 
-  .notification-item .d-flex {
-    align-items: flex-start !important;
-    gap: 0.65rem !important;
+  .nb-meta-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    min-height: 1.1rem;
+    position: static;
+    inset: auto;
   }
 
-  .notification-item .badge {
+  .nb-time-label {
+    display: block;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    position: static !important;
+    inset: auto !important;
+    margin: 0;
+  }
+
+  .notification-new-badge {
+    align-self: start;
     flex-shrink: 0;
   }
 
@@ -150,9 +171,13 @@
       gap: 0.2rem;
     }
 
-    .notification-item .d-flex {
-      flex-direction: column;
-      gap: 0.45rem !important;
+    .notification-item-layout {
+      grid-template-columns: 1fr;
+      gap: 0.45rem;
+    }
+
+    .notification-new-badge {
+      justify-self: start;
     }
   }
 }

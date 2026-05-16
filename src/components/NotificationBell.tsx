@@ -432,7 +432,7 @@ function NotificationBell() {
                     notification.isRead ? "is-read" : "is-unread"
                   }`}
                 >
-                  <div className="d-flex justify-content-between align-items-start gap-2">
+                  <div className="notification-item-layout">
                     <div className="notification-item-content">
                       <div className="notification-title-row">
                         <span className="notification-title">
@@ -454,13 +454,19 @@ function NotificationBell() {
                           {getNotificationActionHint(notification)}
                         </small>
                       )}
-                      <small className="text-muted d-block mt-1">
-                        <i className="bi bi-clock me-1"></i>
-                        {formatRelativeTime(notification.createdAt)}
-                      </small>
+                      <div className="nb-meta-row">
+                        <small className="text-muted nb-time-label">
+                          <i className="bi bi-clock me-1"></i>
+                          {formatRelativeTime(notification.createdAt)}
+                        </small>
+                      </div>
                     </div>
                     {!notification.isRead && (
-                      <Badge bg="primary" pill>
+                      <Badge
+                        bg="primary"
+                        pill
+                        className="notification-new-badge"
+                      >
                         {t("notifications.new", "New")}
                       </Badge>
                     )}
