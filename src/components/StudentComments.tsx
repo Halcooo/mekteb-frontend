@@ -73,15 +73,21 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
       return;
     }
 
-    const target = commentsContainerRef.current.querySelector(
-      `[data-comment-id="${focusCommentId}"]`,
-    ) as HTMLElement | null;
+    const scrollToTarget = () => {
+      const target = commentsContainerRef.current?.querySelector(
+        `[data-comment-id="${focusCommentId}"]`,
+      ) as HTMLElement | null;
 
-    if (!target) {
-      return;
-    }
+      if (!target) {
+        return;
+      }
 
-    target.scrollIntoView({ behavior: "smooth", block: "center" });
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    };
+
+    scrollToTarget();
+    const retryTimeout = window.setTimeout(scrollToTarget, 180);
+    return () => window.clearTimeout(retryTimeout);
   }, [focusCommentId, comments]);
 
   // Handle reply submission

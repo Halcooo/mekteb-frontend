@@ -359,12 +359,14 @@ function AttendanceTracker() {
     setCommentText("");
     setCommentError(null);
 
-    setTimeout(() => {
-      const chatSection = document.getElementById("attendance-comments-chat");
-      if (chatSection) {
-        chatSection.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 50);
+    if (Number.isNaN(parsedCommentId)) {
+      setTimeout(() => {
+        const chatSection = document.getElementById("attendance-comments-chat");
+        if (chatSection) {
+          chatSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 50);
+    }
   }, [location.search, studentsResponse?.data]);
 
   const handleSubmitComment = async () => {

@@ -90,6 +90,7 @@ const ParentDashboard: React.FC = () => {
     const dateFromQuery = params.get("date");
     const studentIdFromQuery = parseInt(params.get("studentId") || "", 10);
     const commentIdFromQuery = parseInt(params.get("commentId") || "", 10);
+    const hasTargetComment = !Number.isNaN(commentIdFromQuery);
 
     if (!openComments || Number.isNaN(studentIdFromQuery)) {
       return;
@@ -107,6 +108,20 @@ const ParentDashboard: React.FC = () => {
     if (student) {
       setSelectedStudent(student);
       setShowComments(true);
+
+      if (!hasTargetComment) {
+        setTimeout(() => {
+          const commentsPanel = document.getElementById(
+            "parent-comments-panel",
+          );
+          if (commentsPanel) {
+            commentsPanel.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
+        }, 50);
+      }
     }
   }, [location.search, connectedStudents]);
 
@@ -465,7 +480,7 @@ const ParentDashboard: React.FC = () => {
       {showComments && selectedStudent && (
         <Row className="mt-4 parent-comments-row">
           <Col>
-            <Card className="parent-comments-card">
+            <Card className="parent-comments-card" id="parent-comments-panel">
               <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h5 className="mb-0">
                   <i className="fas fa-comments me-2"></i>
