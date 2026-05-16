@@ -9,13 +9,14 @@
 
 .notifications-modal {
   .modal-dialog {
-    max-width: 700px;
+    max-width: 740px;
   }
 
   .modal-content {
     border-radius: 14px;
     border: 1px solid #e8edf2;
     box-shadow: 0 14px 36px rgba(13, 24, 38, 0.12);
+    max-height: 88vh;
   }
 
   .modal-header {
@@ -25,6 +26,9 @@
 
   .notifications-modal-body {
     padding: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   .notifications-toolbar {
@@ -38,13 +42,13 @@
   .notifications-list {
     border: 1px solid #eef2f6;
     border-radius: 12px;
-    max-height: min(60vh, 560px);
+    max-height: min(62vh, 580px);
     overflow-y: auto;
-    padding: 0.45rem;
+    padding: 0.5rem;
     background: #f8fafc;
     display: flex;
     flex-direction: column;
-    gap: 0.55rem;
+    gap: 0.6rem;
   }
 
   .notification-item {
@@ -52,7 +56,8 @@
     border: 1px solid #e7edf4;
     border-radius: 10px;
     margin: 0;
-    padding: 0.85rem 0.95rem;
+    padding: 1rem;
+    min-height: 118px;
     position: relative;
     isolation: isolate;
     transition:
@@ -78,7 +83,7 @@
     min-width: 0;
     display: flex;
     flex-direction: column;
-    gap: 0.35rem;
+    gap: 0.45rem;
   }
 
   .notification-header-row {
@@ -105,11 +110,13 @@
 
   .notification-title {
     font-weight: 600;
+    font-size: 1.12rem;
     color: #1f2a37;
     overflow-wrap: anywhere;
   }
 
   .notification-message {
+    display: block;
     white-space: normal;
     line-height: 1.35;
     overflow-wrap: anywhere;
@@ -130,6 +137,7 @@
   .notification-new-badge {
     align-self: start;
     flex-shrink: 0;
+    margin-top: 0.1rem;
   }
 
   .notification-action-hint {
@@ -145,11 +153,32 @@
   }
 }
 
-@media (max-width: 575px) {
+@media (max-width: 767px) {
   .notifications-modal {
     .modal-dialog {
-      max-width: none;
-      margin: 0.5rem;
+      max-width: 100vw;
+      margin: 0;
+      min-height: 100dvh;
+    }
+
+    .modal-content {
+      min-height: 100dvh;
+      max-height: 100dvh;
+      border-radius: 0;
+      border-left: none;
+      border-right: none;
+    }
+
+    .modal-header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    .notifications-modal-body {
+      padding: 0.8rem;
+      min-height: 0;
+      flex: 1;
     }
 
     .notifications-toolbar {
@@ -161,13 +190,18 @@
     }
 
     .notification-item {
-      padding: 0.75rem 0.8rem;
+      padding: 0.9rem;
+      min-height: 112px;
     }
 
     .notification-title-row {
       flex-direction: column;
       align-items: flex-start;
       gap: 0.2rem;
+    }
+
+    .notification-title {
+      font-size: 1.05rem;
     }
 
     .notification-header-row {
@@ -183,6 +217,16 @@
 
     .notification-new-badge {
       justify-self: start;
+    }
+
+    .nb-time-label {
+      white-space: normal;
+    }
+
+    .notifications-list {
+      max-height: none;
+      height: calc(100dvh - 180px);
+      padding-bottom: max(0.65rem, env(safe-area-inset-bottom));
     }
   }
 }
