@@ -49,6 +49,7 @@ function AttendanceTracker() {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [selectedCommentStudent, setSelectedCommentStudent] =
     useState<Student | null>(null);
+  const [focusCommentId, setFocusCommentId] = useState<number | null>(null);
   const [commentText, setCommentText] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [commentError, setCommentError] = useState<string | null>(null);
@@ -298,6 +299,7 @@ function AttendanceTracker() {
     if (!student) return;
 
     setSelectedCommentStudent(student);
+    setFocusCommentId(null);
     setCommentText("");
     setCommentError(null);
     setTimeout(() => {
@@ -316,10 +318,14 @@ function AttendanceTracker() {
       : null;
     const openComments = params.get("openComments") === "1";
     const studentIdParam = params.get("studentId");
+    const commentIdParam = params.get("commentId");
+    const parsedCommentId = commentIdParam
+      ? Number.parseInt(commentIdParam, 10)
+      : NaN;
     const parsedStudentId = studentIdParam
       ? Number.parseInt(studentIdParam, 10)
       : NaN;
-    const key = `${params.get("notificationId") || ""}:${params.get("ts") || ""}:${commentsDate || ""}:${studentIdParam || ""}:${openComments}`;
+    const key = `${params.get("notificationId") || ""}:${params.get("ts") || ""}:${commentsDate || ""}:${studentIdParam || ""}:${commentIdParam || ""}:${openComments}`;
 
     if (!commentsDate && !openComments) {
       return;
@@ -332,6 +338,8 @@ function AttendanceTracker() {
     if (commentsDate) {
       setSelectedDate(commentsDate);
     }
+
+    setFocusCommentId(Number.isNaN(parsedCommentId) ? null : parsedCommentId);
 
     if (!openComments || Number.isNaN(parsedStudentId)) {
       handledNotificationKeyRef.current = key;
@@ -940,6 +948,7 @@ function AttendanceTracker() {
                   studentName={`${selectedCommentStudent.firstName} ${selectedCommentStudent.lastName}`}
                   selectedDate={selectedDate}
                   allowReplies={true}
+                  focusCommentId={focusCommentId}
                 />
               </Card.Body>
             </Card>

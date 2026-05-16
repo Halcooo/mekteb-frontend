@@ -314,6 +314,9 @@ function NotificationBell() {
         notificationId: String(notification.id),
         ts: navTimestamp,
       });
+      if (notification.commentId) {
+        params.set("commentId", String(notification.commentId));
+      }
       if (normalizedCommentDate) {
         params.set("date", normalizedCommentDate);
       }
@@ -326,6 +329,9 @@ function NotificationBell() {
         notificationId: String(notification.id),
         ts: navTimestamp,
       });
+      if (notification.commentId) {
+        params.set("commentId", String(notification.commentId));
+      }
       if (normalizedCommentDate) {
         params.set("commentsDate", normalizedCommentDate);
       }

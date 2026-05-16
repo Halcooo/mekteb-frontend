@@ -53,6 +53,7 @@ const ParentDashboard: React.FC = () => {
   const [attendanceLoading, setAttendanceLoading] = useState(false);
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
+  const [focusCommentId, setFocusCommentId] = useState<number | null>(null);
   const [selectedDate, setSelectedDate] = useState(
     formatDateForInput(new Date()),
   );
@@ -88,6 +89,7 @@ const ParentDashboard: React.FC = () => {
     const openComments = params.get("openComments") === "1";
     const dateFromQuery = params.get("date");
     const studentIdFromQuery = parseInt(params.get("studentId") || "", 10);
+    const commentIdFromQuery = parseInt(params.get("commentId") || "", 10);
 
     if (!openComments || Number.isNaN(studentIdFromQuery)) {
       return;
@@ -96,6 +98,10 @@ const ParentDashboard: React.FC = () => {
     if (dateFromQuery) {
       setSelectedDate(formatDateForInput(dateFromQuery));
     }
+
+    setFocusCommentId(
+      Number.isNaN(commentIdFromQuery) ? null : commentIdFromQuery,
+    );
 
     const student = connectedStudents.find((s) => s.id === studentIdFromQuery);
     if (student) {
@@ -193,6 +199,7 @@ const ParentDashboard: React.FC = () => {
   const handleViewComments = (student: ConnectedStudent) => {
     setSelectedStudent(student);
     setShowComments(true);
+    setFocusCommentId(null);
   };
 
   const handleDisconnectStudent = async (student: ConnectedStudent) => {
@@ -493,6 +500,7 @@ const ParentDashboard: React.FC = () => {
                   studentName={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
                   selectedDate={selectedDate}
                   isParent={true}
+                  focusCommentId={focusCommentId}
                 />
               </Card.Body>
             </Card>

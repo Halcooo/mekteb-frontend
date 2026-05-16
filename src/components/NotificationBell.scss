@@ -8,6 +8,10 @@
 }
 
 .notifications-modal {
+  .modal-dialog {
+    max-width: 700px;
+  }
+
   .modal-content {
     border-radius: 14px;
     border: 1px solid #e8edf2;
@@ -34,25 +38,26 @@
   .notifications-list {
     border: 1px solid #eef2f6;
     border-radius: 12px;
-    overflow: hidden;
     max-height: min(60vh, 560px);
     overflow-y: auto;
     padding: 0.45rem;
     background: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
   }
 
   .notification-item {
+    display: block;
     border: 1px solid #e7edf4;
     border-radius: 10px;
-    margin-bottom: 0.45rem;
+    margin: 0;
     padding: 0.85rem 0.95rem;
+    position: relative;
+    isolation: isolate;
     transition:
       background-color 0.18s ease,
       border-color 0.18s ease;
-
-    &:last-child {
-      margin-bottom: 0;
-    }
 
     &:hover {
       background-color: #f6f9ff;
@@ -74,24 +79,37 @@
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.35rem;
   }
 
   .notification-title-row {
     display: flex;
     align-items: center;
     flex-wrap: wrap;
-    row-gap: 0.25rem;
+    column-gap: 0.35rem;
+    row-gap: 0.2rem;
   }
 
   .notification-title {
     font-weight: 600;
     color: #1f2a37;
+    overflow-wrap: anywhere;
   }
 
   .notification-message {
     white-space: normal;
     line-height: 1.35;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .notification-item .d-flex {
+    align-items: flex-start !important;
+    gap: 0.65rem !important;
+  }
+
+  .notification-item .badge {
+    flex-shrink: 0;
   }
 
   .notification-action-hint {
@@ -109,12 +127,32 @@
 
 @media (max-width: 575px) {
   .notifications-modal {
+    .modal-dialog {
+      max-width: none;
+      margin: 0.5rem;
+    }
+
     .notifications-toolbar {
       align-items: stretch;
     }
 
     .notifications-toolbar .btn {
       width: 100%;
+    }
+
+    .notification-item {
+      padding: 0.75rem 0.8rem;
+    }
+
+    .notification-title-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.2rem;
+    }
+
+    .notification-item .d-flex {
+      flex-direction: column;
+      gap: 0.45rem !important;
     }
   }
 }

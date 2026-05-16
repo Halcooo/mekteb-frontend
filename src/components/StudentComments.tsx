@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   Card,
   Button,
@@ -21,6 +21,7 @@ interface StudentCommentsProps {
   selectedDate?: string;
   isParent?: boolean;
   allowReplies?: boolean;
+  focusCommentId?: number | null;
 }
 
 const StudentComments: React.FC<StudentCommentsProps> = ({
@@ -29,6 +30,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
   selectedDate,
   isParent = false,
   allowReplies = false,
+  focusCommentId = null,
 }) => {
   const { t } = useTranslation();
   const [comments, setComments] = useState<StudentComment[]>([]);
@@ -37,6 +39,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
   const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
   const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const commentsContainerRef = useRef<HTMLDivElement | null>(null);
 
   // Load comments
   const loadComments = useCallback(async () => {
@@ -60,6 +63,26 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
   useEffect(() => {
     loadComments();
   }, [loadComments]);
+
+  useEffect(() => {
+    if (
+      !focusCommentId ||
+      comments.length === 0 ||
+      !commentsContainerRef.current
+    ) {
+      return;
+    }
+
+    const target = commentsContainerRef.current.querySelector(
+      `[data-comment-id="${focusCommentId}"]`,
+    ) as HTMLElement | null;
+
+    if (!target) {
+      return;
+    }
+
+    target.scrollIntoView({ behavior: "smooth", block: "center" });
+  }, [focusCommentId, comments]);
 
   // Handle reply submission
   const handleReplySubmit = async (
@@ -187,7 +210,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
   }
 
   return (
-    <div className="student-comments">
+    <div className="student-comments" ref={commentsContainerRef}>
       <Card className="comments-card">
         <Card.Header className="comments-card-header">
           <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap">
@@ -227,7 +250,10 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                       key={comment.id}
                       className={`comment ${
                         depth === 0 ? "parent-comment" : "reply-comment"
-                      } depth-${depth}`}
+                      } depth-${depth} ${
+                        focusCommentId === comment.id ? "focused-comment" : ""
+                      }`}
+                      data-comment-id={comment.id}
                     >
                       <div className="comment-header d-flex justify-content-between align-items-start gap-2">
                         <div className="comment-meta">
