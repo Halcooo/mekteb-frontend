@@ -38,7 +38,7 @@ function NotificationBell() {
       const count = await notificationsApi.getUnreadCount();
       setUnreadCount(count);
     } catch {
-      setUnreadCount(0);
+      // Keep the current value on transient failures.
     }
   }, []);
 
@@ -129,12 +129,28 @@ function NotificationBell() {
         try {
           const payload = JSON.parse(event.data as string) as {
             type?: string;
+            recipientUserId?: number;
           };
 
           if (
-            payload.type === "notification:new" ||
-            payload.type === "notification:update"
+            typeof payload.recipientUserId === "number" &&
+            user?.id &&
+            payload.recipientUserId !== user.id
           ) {
+            return;
+          }
+
+          if (payload.type === "notification:new") {
+            // Instant visual feedback, then sync from API.
+            setUnreadCount((prev) => prev + 1);
+            void loadUnreadCount();
+            if (showModalRef.current) {
+              void loadNotifications(unreadOnlyRef.current);
+            }
+            return;
+          }
+
+          if (payload.type === "notification:update") {
             void loadUnreadCount();
             if (showModalRef.current) {
               void loadNotifications(unreadOnlyRef.current);

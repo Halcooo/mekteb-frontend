@@ -17,7 +17,6 @@ import { useLocation } from "react-router-dom";
 import {
   attendanceApi,
   type AttendanceStatus,
-  type BulkAttendanceData,
   type AttendanceSummary,
   getStatusColor,
   getStatusIcon,
@@ -205,17 +204,6 @@ function AttendanceTracker() {
     setAttendanceData(newAttendanceData);
   }, [existingAttendance, students]);
 
-  // Bulk save mutation
-  const saveMutation = useMutation({
-    mutationFn: (bulkData: BulkAttendanceData) =>
-      attendanceApi.createBulk(bulkData),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["attendance"] });
-      queryClient.invalidateQueries({ queryKey: ["attendance-summary"] });
-      refetchAttendance();
-    },
-  });
-
   // Individual attendance auto-save mutation
   const autoSaveMutation = useMutation({
     mutationFn: async ({
@@ -302,20 +290,6 @@ function AttendanceTracker() {
 
     // Auto-save the attendance change
     autoSaveMutation.mutate({ studentId, status });
-  };
-
-  const handleSaveAttendance = () => {
-    const attendanceRecords = students.map((student) => ({
-      student_id: student.id,
-      date: selectedDate,
-      status: attendanceData[student.id] || "ABSENT",
-    }));
-
-    const bulkData: BulkAttendanceData = {
-      attendanceList: attendanceRecords,
-    };
-
-    saveMutation.mutate(bulkData);
   };
 
   const handleAddCommentForStudent = (studentId: number) => {
@@ -540,34 +514,9 @@ function AttendanceTracker() {
         )}
       </Row>
 
-      {/* Auto-save Status and Actions */}
+      {/* Actions */}
       <Row className="mb-3">
-        <Col md={8}>
-          <Alert variant="info" className="mb-2 py-2">
-            <div className="d-flex align-items-center">
-              <i className="bi bi-cloud-check me-2"></i>
-              <small>
-                {t(
-                  "attendanceTracker.autoSaveEnabled",
-                  "Auto-save enabled - changes are saved automatically",
-                )}
-                {savingStudents.size > 0 && (
-                  <>
-                    {" • "}
-                    <Spinner
-                      as="span"
-                      animation="border"
-                      size="sm"
-                      className="saving-spinner"
-                    />
-                    {t("attendanceTracker.savingChanges", "Saving changes...")}
-                  </>
-                )}
-              </small>
-            </div>
-          </Alert>
-        </Col>
-        <Col md={4} className="text-end">
+        <Col className="text-center">
           <Button
             variant="outline-primary"
             size="sm"
@@ -576,35 +525,6 @@ function AttendanceTracker() {
           >
             <i className="bi bi-arrow-clockwise me-1"></i>
             {t("attendanceTracker.refresh", "Refresh")}
-          </Button>
-
-          <Button
-            variant="outline-success"
-            size="sm"
-            onClick={handleSaveAttendance}
-            disabled={saveMutation.isPending || attendanceLoading}
-            className="ms-2"
-            title={t(
-              "attendanceTracker.bulkSaveTooltip",
-              "Save all current attendance at once",
-            )}
-          >
-            {saveMutation.isPending ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  className="loading-spinner me-1"
-                />
-                {t("attendanceTracker.saving", "Saving...")}
-              </>
-            ) : (
-              <>
-                <i className="bi bi-download me-1"></i>
-                {t("attendanceTracker.bulkSave", "Bulk Save")}
-              </>
-            )}
           </Button>
         </Col>
       </Row>
@@ -665,7 +585,7 @@ function AttendanceTracker() {
                 <>
                   {/* Desktop Table View */}
                   <div className="table-responsive d-none d-md-block">
-                    <Table hover className="mb-0">
+                    <Table hover className="mb-0 attendance-grid-table">
                       <thead className="table-light">
                         <tr>
                           <th>{t("students.name", "Name")}</th>
@@ -695,7 +615,7 @@ function AttendanceTracker() {
                           return (
                             <tr key={student.id}>
                               <td>
-                                <div className="d-flex align-items-center">
+                                <div className="d-flex align-items-center justify-content-center">
                                   <strong>
                                     {student.firstName} {student.lastName}
                                   </strong>
@@ -1025,24 +945,6 @@ function AttendanceTracker() {
             </Card>
           </Col>
         </Row>
-      )}
-
-      {/* Success/Error Messages */}
-      {saveMutation.isSuccess && (
-        <Alert variant="success" className="mt-3">
-          <i className="bi bi-check-circle me-2"></i>
-          {t("attendanceTracker.saveSuccess", "Attendance saved successfully!")}
-        </Alert>
-      )}
-
-      {saveMutation.isError && (
-        <Alert variant="danger" className="mt-3">
-          <i className="bi bi-exclamation-triangle me-2"></i>
-          {t(
-            "attendanceTracker.saveError",
-            "Error saving attendance. Please try again.",
-          )}
-        </Alert>
       )}
 
       {commentSuccess && (
