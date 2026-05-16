@@ -17,6 +17,7 @@ import { commentsApi } from "../api/commentsApi";
 import { studentApi } from "../students/studentApi";
 import type { StudentComment } from "../api/commentsApi";
 import type { Student } from "../students/studentApi";
+import { formatDateForInput } from "../utils/dateFormatter";
 import DateBox from "./DateBox";
 import "./DailyCommentsAdmin.scss";
 
@@ -33,7 +34,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
 }) => {
   const { t } = useTranslation();
   const [selectedDate, setSelectedDate] = useState(
-    initialDate || new Date().toISOString().split("T")[0],
+    initialDate || formatDateForInput(new Date()),
   );
   const [comments, setComments] = useState<StudentComment[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
@@ -272,7 +273,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                       type="date"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      max={new Date().toISOString().split("T")[0]}
+                      max={formatDateForInput(new Date())}
                     />
                   </Form.Group>
                 </Col>
@@ -340,7 +341,11 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                               {commentsByStudent[student.id]?.map((comment) => (
                                 <div
                                   key={comment.id}
-                                  className="comment-content admin-comment-bubble mb-2"
+                                  className={`comment-content admin-comment-bubble mb-2 ${
+                                    comment.parentCommentId
+                                      ? "admin-reply-bubble"
+                                      : "admin-parent-bubble"
+                                  }`}
                                 >
                                   <div className="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-1">
                                     <div className="comment-author-meta">

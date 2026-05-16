@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { commentsApi } from "../api/commentsApi";
 import type { StudentComment } from "../api/commentsApi";
+import { formatDateForInput } from "../utils/dateFormatter";
 import DateBox from "./DateBox";
 import "./StudentComments.scss";
 
@@ -76,7 +77,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
       const newReply = await commentsApi.createComment({
         studentId,
         content: replyText,
-        date: selectedDate || new Date().toISOString().split("T")[0],
+        date: selectedDate || formatDateForInput(new Date()),
         parentCommentId,
       });
 
@@ -224,12 +225,9 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                   {thread.map(({ comment, depth }) => (
                     <div
                       key={comment.id}
-                      className={
-                        depth === 0
-                          ? "comment parent-comment"
-                          : "comment reply-comment"
-                      }
-                      style={{ marginLeft: `${depth * 14}px` }}
+                      className={`comment ${
+                        depth === 0 ? "parent-comment" : "reply-comment"
+                      } depth-${depth}`}
                     >
                       <div className="comment-header d-flex justify-content-between align-items-start gap-2">
                         <div className="comment-meta">

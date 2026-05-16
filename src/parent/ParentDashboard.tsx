@@ -22,7 +22,7 @@ import type {
   ParentAttendanceStats,
 } from "../api/parentApi";
 import { validateParentKey } from "../utils/parentKeyUtils";
-import { formatBosnianDate } from "../utils/dateFormatter";
+import { formatBosnianDate, formatDateForInput } from "../utils/dateFormatter";
 import StudentComments from "../components/StudentComments";
 import DateBox from "../components/DateBox";
 import "./ParentDashboard.scss";
@@ -54,7 +54,7 @@ const ParentDashboard: React.FC = () => {
   const [attendanceError, setAttendanceError] = useState<string | null>(null);
   const [showComments, setShowComments] = useState(false);
   const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().split("T")[0],
+    formatDateForInput(new Date()),
   );
 
   const fetchConnectedStudents = useCallback(async () => {
@@ -67,7 +67,7 @@ const ParentDashboard: React.FC = () => {
           connectionDate:
             student.connectedAt?.split("T")[0] ||
             student.createdAt?.split("T")[0] ||
-            new Date().toISOString().split("T")[0],
+            formatDateForInput(new Date()),
         })),
       );
     } catch (error) {
@@ -456,10 +456,10 @@ const ParentDashboard: React.FC = () => {
       </Row>
 
       {showComments && selectedStudent && (
-        <Row className="mt-4">
+        <Row className="mt-4 parent-comments-row">
           <Col>
-            <Card>
-              <Card.Header className="d-flex justify-content-between align-items-center">
+            <Card className="parent-comments-card">
+              <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h5 className="mb-0">
                   <i className="fas fa-comments me-2"></i>
                   {t("comments.title")} - {selectedStudent.firstName}{" "}
@@ -474,7 +474,7 @@ const ParentDashboard: React.FC = () => {
                 </Button>
               </Card.Header>
               <Card.Body>
-                <div className="mb-3">
+                <div className="mb-3 parent-comments-date-filter">
                   <Form.Group>
                     <Form.Label>
                       {t("comments.selectDate", "Select Date")}
@@ -483,7 +483,7 @@ const ParentDashboard: React.FC = () => {
                       type="date"
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      max={new Date().toISOString().split("T")[0]}
+                      max={formatDateForInput(new Date())}
                     />
                   </Form.Group>
                 </div>

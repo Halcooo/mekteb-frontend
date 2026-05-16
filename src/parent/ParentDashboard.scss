@@ -41,6 +41,21 @@
     }
   }
 
+  .parent-comments-card {
+    border: 1px solid #e8edf2;
+    border-radius: 14px;
+    box-shadow: 0 10px 26px rgba(13, 24, 38, 0.06);
+
+    .card-header {
+      background: linear-gradient(180deg, #f8fbff 0%, #f4f6f9 100%);
+      border-bottom: 1px solid #e9ecef;
+    }
+  }
+
+  .parent-comments-date-filter {
+    max-width: 320px;
+  }
+
   // Demo keys styling
   .demo-keys {
     border-top: 1px solid var(--bs-border-color);
@@ -120,6 +135,10 @@
           align-self: flex-end;
         }
       }
+    }
+
+    .parent-comments-date-filter {
+      max-width: 100%;
     }
   }
 

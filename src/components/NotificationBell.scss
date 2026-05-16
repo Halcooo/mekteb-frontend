@@ -35,19 +35,30 @@
     border: 1px solid #eef2f6;
     border-radius: 12px;
     overflow: hidden;
+    max-height: min(60vh, 560px);
+    overflow-y: auto;
   }
 
   .notification-item {
     border: none;
     border-bottom: 1px solid #f0f3f6;
     padding: 0.8rem 0.9rem;
+    transition:
+      background-color 0.18s ease,
+      transform 0.18s ease;
 
     &:last-child {
       border-bottom: none;
     }
 
+    &:hover {
+      background-color: #f6f9ff;
+      transform: translateY(-1px);
+    }
+
     &.is-unread {
       background-color: #f7faff;
+      box-shadow: inset 3px 0 0 #0d6efd;
     }
 
     &.is-read {

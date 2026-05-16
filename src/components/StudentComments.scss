@@ -38,6 +38,12 @@
   }
 
   .comment {
+    margin-top: 0.6rem;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
     &.parent-comment {
       background-color: #f8fafc;
       padding: 1rem;
@@ -52,8 +58,8 @@
       border-radius: 10px;
       border: 1px solid #edf1f5;
       border-left: 3px solid #198754;
-      margin-left: 1.5rem;
       position: relative;
+      margin-left: 0.9rem;
 
       &::before {
         content: "";
@@ -68,6 +74,19 @@
       &:not(:last-child) {
         margin-bottom: 0.75rem;
       }
+    }
+
+    &.depth-1 {
+      margin-left: 1rem;
+    }
+
+    &.depth-2 {
+      margin-left: 2rem;
+    }
+
+    &.depth-3,
+    &.depth-4 {
+      margin-left: 2.6rem;
     }
   }
 
@@ -129,7 +148,17 @@
 
     .comment {
       &.reply-comment {
-        margin-left: 0.75rem;
+        margin-left: 0.55rem;
+      }
+
+      &.depth-1 {
+        margin-left: 0.6rem;
+      }
+
+      &.depth-2,
+      &.depth-3,
+      &.depth-4 {
+        margin-left: 1rem;
       }
     }
 

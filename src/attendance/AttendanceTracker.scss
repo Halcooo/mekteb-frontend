@@ -72,6 +72,24 @@
       color: var(--bs-dark, #212529);
     }
   }
+
+  .attendance-comments-chat-card {
+    border: 1px solid #e8edf2;
+    border-radius: 14px;
+    box-shadow: 0 10px 26px rgba(13, 24, 38, 0.06);
+
+    .card-header {
+      background: linear-gradient(180deg, #f8fbff 0%, #f4f6f9 100%);
+      border-bottom: 1px solid #e9ecef;
+    }
+  }
+
+  .attendance-comment-composer {
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0.9rem;
+    background: #fbfcfe;
+  }
 }
 
 // Student Creation Modal Styles
@@ -91,6 +109,18 @@
 
     &:focus {
       box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .attendance-tracker {
+    .attendance-comments-chat-card .card-header h5 {
+      font-size: 1rem;
+    }
+
+    .attendance-comment-composer {
+      padding: 0.75rem;
     }
   }
 }

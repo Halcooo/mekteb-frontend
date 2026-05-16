@@ -15,12 +15,22 @@ function NotificationBell() {
   const navigate = useNavigate();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
+  const showModalRef = useRef(false);
+  const unreadOnlyRef = useRef(false);
 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadOnly, setUnreadOnly] = useState(false);
+
+  useEffect(() => {
+    showModalRef.current = showModal;
+  }, [showModal]);
+
+  useEffect(() => {
+    unreadOnlyRef.current = unreadOnly;
+  }, [unreadOnly]);
 
   const loadUnreadCount = async () => {
     try {
@@ -125,8 +135,8 @@ function NotificationBell() {
             payload.type === "notification:update"
           ) {
             void loadUnreadCount();
-            if (showModal) {
-              void loadNotifications(unreadOnly);
+            if (showModalRef.current) {
+              void loadNotifications(unreadOnlyRef.current);
             }
           }
         } catch {
@@ -157,7 +167,7 @@ function NotificationBell() {
         wsRef.current = null;
       }
     };
-  }, [user, accessToken, showModal, unreadOnly]);
+  }, [user, accessToken]);
 
   const handleOpen = async () => {
     setShowModal(true);
@@ -174,14 +184,24 @@ function NotificationBell() {
 
   const handleNotificationClick = async (notification: NotificationItem) => {
     if (!notification.isRead) {
-      await notificationsApi.markAsRead(notification.id);
+      try {
+        await notificationsApi.markAsRead(notification.id);
+      } catch {
+        // Continue navigation even if mark-as-read fails
+      }
       setNotifications((prev) =>
         prev.map((n) => (n.id === notification.id ? { ...n, isRead: 1 } : n)),
       );
-      setUnreadCount((prev) => Math.max(0, prev - 1));
+    }
+
+    await loadUnreadCount();
+    if (showModalRef.current) {
+      await loadNotifications(unreadOnlyRef.current);
     }
 
     setShowModal(false);
+
+    const navTimestamp = String(Date.now());
 
     if (
       (user?.role === "parent" || user?.role === "user") &&
@@ -192,6 +212,8 @@ function NotificationBell() {
         openComments: "1",
         studentId: String(notification.studentId),
         date: notification.commentDate,
+        notificationId: String(notification.id),
+        ts: navTimestamp,
       });
       navigate(`/parent-dashboard?${params.toString()}`);
       return;
@@ -200,7 +222,13 @@ function NotificationBell() {
     if (notification.commentDate) {
       const params = new URLSearchParams({
         commentsDate: notification.commentDate,
+        notificationId: String(notification.id),
+        ts: navTimestamp,
       });
+      if (notification.studentId) {
+        params.set("studentId", String(notification.studentId));
+        params.set("openComments", "1");
+      }
       navigate(`/attendance?${params.toString()}`);
       return;
     }

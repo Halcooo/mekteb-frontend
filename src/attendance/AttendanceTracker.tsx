@@ -12,7 +12,8 @@ import {
 } from "react-bootstrap";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import {
   attendanceApi,
   type AttendanceStatus,
@@ -34,6 +35,8 @@ import "./AttendanceTracker.scss";
 function AttendanceTracker() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const location = useLocation();
+  const handledNotificationKeyRef = useRef("");
 
   const [selectedDate, setSelectedDate] = useState(
     formatDateForInput(new Date()),
@@ -316,7 +319,8 @@ function AttendanceTracker() {
   };
 
   const handleAddCommentForStudent = (studentId: number) => {
-    const student = students.find((s) => s.id === studentId);
+    const allStudents = studentsResponse?.data || [];
+    const student = allStudents.find((s) => s.id === studentId);
     if (!student) return;
 
     setSelectedCommentStudent(student);
@@ -329,6 +333,54 @@ function AttendanceTracker() {
       }
     }, 50);
   };
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const commentsDate = params.get("commentsDate") || params.get("date");
+    const openComments = params.get("openComments") === "1";
+    const studentIdParam = params.get("studentId");
+    const parsedStudentId = studentIdParam
+      ? Number.parseInt(studentIdParam, 10)
+      : NaN;
+    const key = `${params.get("notificationId") || ""}:${params.get("ts") || ""}:${commentsDate || ""}:${studentIdParam || ""}:${openComments}`;
+
+    if (!commentsDate && !openComments) {
+      return;
+    }
+
+    if (handledNotificationKeyRef.current === key) {
+      return;
+    }
+
+    if (commentsDate) {
+      setSelectedDate(commentsDate);
+    }
+
+    if (!openComments || Number.isNaN(parsedStudentId)) {
+      handledNotificationKeyRef.current = key;
+      return;
+    }
+
+    const allStudents = studentsResponse?.data || [];
+    const student = allStudents.find((s) => s.id === parsedStudentId);
+
+    if (!student) {
+      return;
+    }
+
+    handledNotificationKeyRef.current = key;
+
+    setSelectedCommentStudent(student);
+    setCommentText("");
+    setCommentError(null);
+
+    setTimeout(() => {
+      const chatSection = document.getElementById("attendance-comments-chat");
+      if (chatSection) {
+        chatSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
+  }, [location.search, studentsResponse?.data]);
 
   const handleSubmitComment = async () => {
     if (!selectedCommentStudent || !commentText.trim()) {
@@ -901,10 +953,13 @@ function AttendanceTracker() {
       </Row>
 
       {selectedCommentStudent && (
-        <Row className="mt-4" id="attendance-comments-chat">
+        <Row
+          className="mt-4 attendance-comments-chat-row"
+          id="attendance-comments-chat"
+        >
           <Col>
-            <Card>
-              <Card.Header className="d-flex justify-content-between align-items-center">
+            <Card className="attendance-comments-chat-card">
+              <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h5 className="mb-0">
                   <i className="bi bi-chat-left-text me-2"></i>
                   {t("comments.title", "Daily Comments")} -{" "}
@@ -921,7 +976,7 @@ function AttendanceTracker() {
               </Card.Header>
               <Card.Body>
                 <Form
-                  className="mb-3"
+                  className="mb-3 attendance-comment-composer"
                   onSubmit={(e) => {
                     e.preventDefault();
                     void handleSubmitComment();
@@ -1067,7 +1122,7 @@ function AttendanceTracker() {
                     label={t("students.dateOfBirth", "Date of Birth")}
                     placeholder={t("datePicker.selectDate", "Select date")}
                     required
-                    maxDate={new Date().toISOString().split("T")[0]} // Can't be in the future
+                    maxDate={formatDateForInput(new Date())} // Can't be in the future
                   />
                 </Form.Group>
               </Col>

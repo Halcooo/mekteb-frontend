@@ -61,6 +61,27 @@
     padding: 0.85rem;
   }
 
+  .admin-parent-bubble {
+    margin-left: 0;
+  }
+
+  .admin-reply-bubble {
+    margin-left: 1rem;
+    border-left-color: #198754;
+    background: #ffffff;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 0.5rem;
+      bottom: 0.5rem;
+      width: 1px;
+      background: #dfe6ee;
+    }
+  }
+
   .comment-author-meta {
     display: flex;
     align-items: center;
@@ -124,6 +145,10 @@
 
     .comment-content {
       font-size: 0.9rem;
+    }
+
+    .admin-reply-bubble {
+      margin-left: 0.5rem;
     }
 
     .student-item {

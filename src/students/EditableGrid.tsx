@@ -23,6 +23,7 @@ import type {
   CreateStudentData,
 } from "./studentApi";
 import { formatDate, calculateAge } from "../utils/dateUtils";
+import { formatDateForInput } from "../utils/dateFormatter";
 
 interface EditableGridProps {
   students: Student[];
@@ -648,7 +649,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                   label={t("dateOfBirth", "Date of Birth")}
                   placeholder={t("datePicker.selectDate", "Select date")}
                   required
-                  maxDate={new Date().toISOString().split("T")[0]} // Can't be in the future
+                  maxDate={formatDateForInput(new Date())} // Can't be in the future
                 />
               </div>
               <div className="col-md-6 mb-3">

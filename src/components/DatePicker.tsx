@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Form, InputGroup, Dropdown, Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { formatBosnianDate } from "../utils/dateFormatter";
+import { formatBosnianDate, formatDateForInput } from "../utils/dateFormatter";
 import "./DatePicker.scss";
 
 interface DatePickerProps {
@@ -73,7 +73,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       viewMonth.getMonth(),
       day,
     );
-    const dateString = selectedDateObj.toISOString().split("T")[0];
+    const dateString = formatDateForInput(selectedDateObj);
 
     if (minDate && dateString < minDate) return;
     if (maxDate && dateString > maxDate) return;
@@ -120,9 +120,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
         viewMonth.getMonth(),
         day,
       );
-      const dayString = dayDate.toISOString().split("T")[0];
+      const dayString = formatDateForInput(dayDate);
       const isSelected = dayString === selectedDate;
-      const isToday = dayString === new Date().toISOString().split("T")[0];
+      const isToday = dayString === formatDateForInput(new Date());
       const isDisabled =
         (minDate && dayString < minDate) || (maxDate && dayString > maxDate);
 
@@ -239,7 +239,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
               variant="outline-secondary"
               size="sm"
               onClick={() => {
-                const today = new Date().toISOString().split("T")[0];
+                const today = formatDateForInput(new Date());
                 setSelectedDate(today);
                 onChange(today);
                 setShowCalendar(false);
