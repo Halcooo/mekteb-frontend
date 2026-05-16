@@ -1,4 +1,24 @@
 .daily-comments-admin {
+  .daily-comments-card {
+    border: 1px solid #e9ecef;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(13, 24, 38, 0.06);
+  }
+
+  .daily-comments-header {
+    background: linear-gradient(180deg, #f8fbff 0%, #f4f6f9 100%);
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  .add-comment-btn {
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
+  .student-count-pill {
+    font-weight: 600;
+  }
+
   .comment-item {
     border: none !important;
 
@@ -20,13 +40,49 @@
     }
   }
 
+  .student-comments-row {
+    padding: 1rem 0.25rem;
+  }
+
+  .student-comments-name {
+    font-weight: 700;
+    color: #1f2a37;
+  }
+
+  .grade-badge {
+    font-weight: 600;
+  }
+
+  .admin-comment-bubble {
+    background: #f8fafc;
+    border: 1px solid #e8edf2;
+    border-left: 4px solid #0d6efd;
+    border-radius: 10px;
+    padding: 0.85rem;
+  }
+
+  .comment-author-meta {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    row-gap: 0.25rem;
+  }
+
+  .reply-btn {
+    border-radius: 999px;
+    font-weight: 600;
+  }
+
   .student-list {
     border: 1px solid var(--bs-border-color);
-    border-radius: 6px;
+    border-radius: 10px;
     padding: 0.5rem;
+    max-height: 220px;
+    overflow-y: auto;
 
     .student-item {
       transition: all 0.2s ease;
+      border-radius: 8px;
 
       &:hover {
         background-color: var(--bs-primary) !important;
@@ -46,8 +102,26 @@
     }
   }
 
+  .daily-comments-modal {
+    .modal-content {
+      border-radius: 14px;
+    }
+
+    .form-control {
+      border-radius: 10px;
+    }
+  }
+
   // Mobile responsiveness
   @media (max-width: 768px) {
+    .daily-comments-header h5 {
+      font-size: 1rem;
+    }
+
+    .student-comments-row {
+      padding: 0.75rem 0;
+    }
+
     .comment-content {
       font-size: 0.9rem;
     }

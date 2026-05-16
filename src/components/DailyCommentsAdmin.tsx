@@ -231,19 +231,35 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
     });
   };
 
+  const roleVariant = (role: StudentComment["authorRole"]) => {
+    if (role === "admin") return "primary";
+    if (role === "teacher") return "secondary";
+    return "success";
+  };
+
+  const roleLabel = (role: StudentComment["authorRole"]) => {
+    if (role === "admin") return t("comments.admin", "Admin");
+    if (role === "teacher") return t("comments.teacher", "Teacher");
+    return t("comments.parent", "Parent");
+  };
+
   return (
     <div className="daily-comments-admin">
       <Row>
         <Col>
-          <Card>
-            <Card.Header>
-              <div className="d-flex justify-content-between align-items-center">
+          <Card className="daily-comments-card">
+            <Card.Header className="daily-comments-header">
+              <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap">
                 <h5 className="mb-0">
-                  <i className="fas fa-comments me-2"></i>
+                  <i className="bi bi-chat-left-text me-2"></i>
                   {t("comments.dailyManagement", "Daily Comments Management")}
                 </h5>
-                <Button variant="primary" onClick={() => setShowAddModal(true)}>
-                  <i className="fas fa-plus me-2"></i>
+                <Button
+                  variant="primary"
+                  onClick={() => setShowAddModal(true)}
+                  className="add-comment-btn"
+                >
+                  <i className="bi bi-plus-lg me-2"></i>
                   {t("comments.addComment", "Add Comment")}
                 </Button>
               </div>
@@ -266,8 +282,8 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                   </Form.Group>
                 </Col>
                 <Col md={6}>
-                  <div className="d-flex align-items-end">
-                    <Badge bg="info" className="fs-6">
+                  <div className="d-flex align-items-end justify-content-md-end h-100">
+                    <Badge bg="info" className="fs-6 student-count-pill">
                       {studentsWithComments.length}{" "}
                       {t(
                         "comments.studentsWithComments",
@@ -312,13 +328,16 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                       {studentsWithComments.map((student) => (
                         <ListGroup.Item
                           key={student.id}
-                          className="comment-item"
+                          className="comment-item student-comments-row"
                         >
-                          <div className="d-flex justify-content-between align-items-start">
+                          <div className="d-flex justify-content-between align-items-start gap-2">
                             <div className="flex-grow-1">
-                              <h6 className="mb-1">
+                              <h6 className="mb-2 student-comments-name">
                                 {student.firstName} {student.lastName}
-                                <Badge bg="secondary" className="ms-2">
+                                <Badge
+                                  bg="secondary"
+                                  className="ms-2 grade-badge"
+                                >
                                   {student.gradeLevel}
                                 </Badge>
                               </h6>
@@ -326,21 +345,33 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                               {commentsByStudent[student.id]?.map((comment) => (
                                 <div
                                   key={comment.id}
-                                  className="comment-content mb-2"
+                                  className="comment-content admin-comment-bubble mb-2"
                                 >
-                                  <div className="d-flex justify-content-between align-items-start">
-                                    <p className="mb-1">{comment.content}</p>
-                                    <small className="text-muted">
-                                      {comment.authorName} -{" "}
+                                  <div className="d-flex justify-content-between align-items-start gap-2 flex-wrap mb-1">
+                                    <div className="comment-author-meta">
+                                      <Badge
+                                        bg={roleVariant(comment.authorRole)}
+                                        className="me-2"
+                                      >
+                                        {roleLabel(comment.authorRole)}
+                                      </Badge>
+                                      <span className="fw-semibold">
+                                        {comment.authorName}
+                                      </span>
+                                    </div>
+                                    <small className="text-muted comment-time">
+                                      <i className="bi bi-clock me-1"></i>
                                       {formatTime(comment.createdAt)}
                                     </small>
                                   </div>
 
+                                  <p className="mb-1">{comment.content}</p>
+
                                   {/* Show replies count if any */}
                                   {comment.repliesCount &&
                                     comment.repliesCount > 0 && (
-                                      <small className="text-success">
-                                        <i className="fas fa-reply me-1"></i>
+                                      <small className="text-success d-inline-flex align-items-center">
+                                        <i className="bi bi-reply me-1"></i>
                                         {comment.repliesCount}{" "}
                                         {t("comments.replies", "replies")}
                                       </small>
@@ -351,12 +382,13 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                                       <Button
                                         variant="outline-primary"
                                         size="sm"
+                                        className="reply-btn"
                                         onClick={() => {
                                           setReplyingToComment(comment);
                                           setShowReplyModal(true);
                                         }}
                                       >
-                                        <i className="fas fa-reply me-1"></i>
+                                        <i className="bi bi-reply me-1"></i>
                                         {t("comments.reply", "Reply")}
                                       </Button>
                                     </div>
@@ -370,7 +402,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                     </ListGroup>
                   ) : (
                     <div className="text-center text-muted py-4">
-                      <i className="fas fa-comment-slash fa-2x mb-2"></i>
+                      <i className="bi bi-chat-square-text display-6 mb-2"></i>
                       <p>
                         {t(
                           "comments.noCommentsForDate",
@@ -391,6 +423,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
         show={showAddModal}
         onHide={() => setShowAddModal(false)}
         size="lg"
+        className="daily-comments-modal"
       >
         <Modal.Header closeButton>
           <Modal.Title>{t("comments.addComment", "Add Comment")}</Modal.Title>
@@ -448,10 +481,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
               <Form.Label>
                 {t("comments.selectStudent", "Select Student")}
               </Form.Label>
-              <div
-                className="student-list"
-                style={{ maxHeight: "200px", overflowY: "auto" }}
-              >
+              <div className="student-list">
                 {studentsWithoutComments.length === 0 ? (
                   <div className="text-center text-muted py-3">
                     {searchTerm || selectedGrade
@@ -476,7 +506,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                       onClick={() => setSelectedStudent(student)}
                       style={{ cursor: "pointer" }}
                     >
-                      <div className="d-flex justify-content-between">
+                      <div className="d-flex justify-content-between align-items-center gap-2">
                         <span>
                           {student.firstName} {student.lastName}
                         </span>
@@ -543,7 +573,11 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
       </Modal>
 
       {/* Reply Comment Modal */}
-      <Modal show={showReplyModal} onHide={() => setShowReplyModal(false)}>
+      <Modal
+        show={showReplyModal}
+        onHide={() => setShowReplyModal(false)}
+        className="daily-comments-modal"
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             {t("comments.replyToComment", "Reply to Comment")}

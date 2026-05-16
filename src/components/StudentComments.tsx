@@ -188,7 +188,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
 
   if (loading) {
     return (
-      <Card>
+      <Card className="comments-card comments-loading-card">
         <Card.Body className="text-center py-4">
           <Spinner animation="border" size="sm" className="me-2" />
           {t("comments.loading", "Loading comments...")}
@@ -199,20 +199,22 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
 
   return (
     <div className="student-comments">
-      <Card>
-        <Card.Header>
-          <div className="d-flex justify-content-between align-items-center">
-            <h6 className="mb-0">
-              <i className="fas fa-comments me-2"></i>
+      <Card className="comments-card">
+        <Card.Header className="comments-card-header">
+          <div className="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+            <h6 className="mb-0 comments-title">
+              <i className="bi bi-chat-left-text me-2"></i>
               {t("comments.title", "Daily Comments")} - {studentName}
             </h6>
             {selectedDate && (
-              <Badge bg="info">{formatDate(selectedDate)}</Badge>
+              <Badge bg="info" className="comments-date-badge">
+                {formatDate(selectedDate)}
+              </Badge>
             )}
           </div>
         </Card.Header>
 
-        <Card.Body>
+        <Card.Body className="comments-card-body">
           {error && (
             <Alert variant="danger" dismissible onClose={() => setError(null)}>
               {error}
@@ -220,12 +222,12 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
           )}
 
           {commentThreads.length === 0 ? (
-            <div className="text-center text-muted py-3">
-              <i className="fas fa-comment-slash fa-2x mb-2"></i>
+            <div className="comments-empty-state text-center text-muted py-3">
+              <i className="bi bi-chat-square-text display-6 mb-2"></i>
               <p>{t("comments.noComments", "No comments for this date")}</p>
             </div>
           ) : (
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" className="comment-thread-list">
               {commentThreads.map((thread) => (
                 <ListGroup.Item
                   key={thread[0].comment.id}
@@ -241,11 +243,11 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                       }
                       style={{ marginLeft: `${depth * 14}px` }}
                     >
-                      <div className="comment-header d-flex justify-content-between align-items-start">
-                        <div>
+                      <div className="comment-header d-flex justify-content-between align-items-start gap-2">
+                        <div className="comment-meta">
                           <Badge
                             bg={roleVariant(comment.authorRole)}
-                            className="me-2"
+                            className="me-2 comment-role-badge"
                           >
                             {roleLabel(comment.authorRole)}
                           </Badge>
@@ -253,6 +255,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                             {comment.authorName}
                           </span>
                           <small className="text-muted ms-2">
+                            <i className="bi bi-clock me-1"></i>
                             {formatTime(comment.createdAt)}
                           </small>
                         </div>
@@ -267,12 +270,13 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                           <Button
                             variant="outline-primary"
                             size="sm"
+                            className="comment-reply-btn"
                             onClick={() => {
                               setReplyingTo(comment.id);
                               setShowReplyModal(true);
                             }}
                           >
-                            <i className="fas fa-reply me-1"></i>
+                            <i className="bi bi-reply me-1"></i>
                             {t("comments.reply", "Reply")}
                           </Button>
                         </div>
@@ -287,7 +291,11 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
       </Card>
 
       {/* Reply Modal */}
-      <Modal show={showReplyModal} onHide={() => setShowReplyModal(false)}>
+      <Modal
+        show={showReplyModal}
+        onHide={() => setShowReplyModal(false)}
+        className="comments-reply-modal"
+      >
         <Modal.Header closeButton>
           <Modal.Title>
             {t("comments.replyToComment", "Reply to Comment")}

@@ -12,7 +12,6 @@ export interface RegisterData {
   username: string;
   email: string;
   password: string;
-  role: "student" | "teacher" | "admin";
 }
 
 export interface User {
@@ -44,7 +43,7 @@ export const authApi = {
   login: async (credentials: LoginCredentials): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>(
       `${import.meta.env.VITE_API_URL}/auth/login`,
-      credentials
+      credentials,
     );
     return response.data;
   },
@@ -53,7 +52,7 @@ export const authApi = {
   register: async (userData: RegisterData): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>(
       `${import.meta.env.VITE_API_URL}/auth/register`,
-      userData
+      userData,
     );
     return response.data;
   },
@@ -62,7 +61,7 @@ export const authApi = {
   refreshToken: async (refreshToken: string): Promise<AuthResponse> => {
     const response = await axios.post<AuthResponse>(
       `${import.meta.env.VITE_API_URL}/auth/refresh`,
-      { refreshToken }
+      { refreshToken },
     );
     return response.data;
   },
@@ -70,7 +69,7 @@ export const authApi = {
   // Logout
   logout: async (): Promise<ApiResponse<null>> => {
     const response = await axios.post<ApiResponse<null>>(
-      `${import.meta.env.VITE_API_URL}/auth/logout`
+      `${import.meta.env.VITE_API_URL}/auth/logout`,
     );
     return response.data;
   },

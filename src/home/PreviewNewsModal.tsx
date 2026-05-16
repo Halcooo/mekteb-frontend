@@ -19,7 +19,13 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Modal show={show} onHide={onHide} size="lg" centered>
+    <Modal
+      show={show}
+      onHide={onHide}
+      size="lg"
+      centered
+      className="preview-news-modal"
+    >
       <Modal.Header closeButton>
         <Modal.Title className="d-flex align-items-center">
           <i className="bi bi-newspaper me-2"></i>
@@ -64,7 +70,7 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                 </div>
 
                 {selectedNews.images.length === 1 ? (
-                  <div className="text-center">
+                  <div className="text-center preview-image-frame">
                     <img
                       src={`https://api.mekteb-pazaric.com/backend${
                         selectedNews.images[0].url ||
@@ -73,25 +79,21 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                           .pop()}`
                       }`}
                       alt={selectedNews.title}
-                      className="gallery-image img-fluid rounded"
+                      className="gallery-image preview-modal-image"
                     />
                   </div>
                 ) : (
                   <Carousel>
                     {selectedNews.images.map((image, index) => (
                       <Carousel.Item key={image.id}>
-                        <div className="text-center">
+                        <div className="text-center preview-image-frame">
                           <img
                             src={`https://api.mekteb-pazaric.com/backend${
                               image.url ||
                               `/api/images/${image.imagePath?.split("/").pop()}`
                             }`}
                             alt={`${selectedNews.title} ${index + 1}`}
-                            className="img-fluid rounded"
-                            style={{
-                              maxHeight: "400px",
-                              objectFit: "contain",
-                            }}
+                            className="preview-modal-image"
                           />
                         </div>
                         <Carousel.Caption className="bg-dark bg-opacity-75 rounded">

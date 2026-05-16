@@ -14,7 +14,6 @@ const API_BASE_URL = VITE_API_URL.endsWith("/api")
 interface NewsCardProps {
   item: NewsItem;
   isAdmin: boolean;
-  onPreview: (item: NewsItem) => void;
   onEdit: (item: NewsItem) => void;
   onDelete: (item: NewsItem) => void;
 }
@@ -22,16 +21,22 @@ interface NewsCardProps {
 const NewsCard: React.FC<NewsCardProps> = ({
   item,
   isAdmin,
-  onPreview,
   onEdit,
   onDelete,
 }) => {
   const { t } = useTranslation();
   const [showGallery, setShowGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const imageCount = item.images?.length || 0;
+  const canOpenGallery = imageCount > 0 || item.text.trim().length > 0;
 
   const handlePreviewClick = () => {
-    onPreview(item);
+    if (!canOpenGallery) {
+      return;
+    }
+
+    setCurrentImageIndex(0);
+    setShowGallery(true);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -42,12 +47,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onDelete(item);
-  };
-
-  const handleImageClick = (e: React.MouseEvent, index: number) => {
-    e.stopPropagation();
-    setCurrentImageIndex(index);
-    setShowGallery(true);
   };
 
   const handlePrevImage = () => {
@@ -64,14 +63,13 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
   return (
     <>
-      <Card className="news-card">
+      <Card
+        className="news-card"
+        onClick={handlePreviewClick}
+        style={{ cursor: canOpenGallery ? "pointer" : "default" }}
+      >
         {/* Image Display */}
-        <div
-          className="news-card-image-container"
-          onClick={(e) => item.images?.length && handleImageClick(e, 0)}
-          role={item.images?.length ? "button" : undefined}
-          style={{ cursor: item.images?.length ? "pointer" : "default" }}
-        >
+        <div className="news-card-image-container">
           {item.images && item.images.length > 0 ? (
             <>
               <Card.Img
@@ -99,12 +97,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
 
         <Card.Body className="news-card-body">
           <div className="news-card-header">
-            <Card.Title
-              onClick={handlePreviewClick}
-              className="news-card-title"
-            >
-              {item.title}
-            </Card.Title>
+            <Card.Title className="news-card-title">{item.title}</Card.Title>
             {isAdmin && (
               <div className="news-card-admin-buttons">
                 <OverlayTrigger
@@ -143,18 +136,6 @@ const NewsCard: React.FC<NewsCardProps> = ({
               : item.text}
           </Card.Text>
 
-          {item.text.length > 120 && (
-            <div className="news-card-read-more">
-              <button
-                className="news-card-read-more-btn"
-                onClick={handlePreviewClick}
-              >
-                <i className="bi bi-arrow-right news-card-icon me-2"></i>
-                {t("readMore", "Read more")}
-              </button>
-            </div>
-          )}
-
           {/* Timestamp - always at bottom */}
           <div className="news-card-footer">
             <div className="footer-content">
@@ -180,6 +161,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
         show={showGallery}
         onHide={() => setShowGallery(false)}
         size="lg"
+        scrollable
         centered
         className="news-gallery-modal"
       >
@@ -194,28 +176,36 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 alt={`${item.title} - ${currentImageIndex + 1}`}
                 className="gallery-image"
               />
-              {item.images.length > 1 && (
-                <div className="gallery-controls">
-                  <Button
-                    variant="secondary"
-                    onClick={handlePrevImage}
-                    className="gallery-btn-prev"
-                  >
-                    <i className="bi bi-chevron-left"></i>
-                  </Button>
-                  <span className="gallery-counter">
-                    {currentImageIndex + 1} / {item.images.length}
-                  </span>
-                  <Button
-                    variant="secondary"
-                    onClick={handleNextImage}
-                    className="gallery-btn-next"
-                  >
-                    <i className="bi bi-chevron-right"></i>
-                  </Button>
-                </div>
-              )}
+              <div className="gallery-controls">
+                <Button
+                  variant="secondary"
+                  onClick={handlePrevImage}
+                  className="gallery-btn-prev"
+                  disabled={imageCount <= 1}
+                >
+                  <i className="bi bi-chevron-left"></i>
+                </Button>
+                <span className="gallery-counter">
+                  {currentImageIndex + 1} / {imageCount}
+                </span>
+                <Button
+                  variant="secondary"
+                  onClick={handleNextImage}
+                  className="gallery-btn-next"
+                  disabled={imageCount <= 1}
+                >
+                  <i className="bi bi-chevron-right"></i>
+                </Button>
+              </div>
             </>
+          )}
+
+          {item.text.trim().length > 0 && (
+            <div className="gallery-text-block mt-1">
+              {item.text.split("\n").map((paragraph, index) => (
+                <p key={`${item.id}-text-${index}`}>{paragraph}</p>
+              ))}
+            </div>
           )}
         </Modal.Body>
       </Modal>

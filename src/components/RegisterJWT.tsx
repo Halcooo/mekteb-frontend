@@ -22,7 +22,6 @@ interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  role: "student" | "teacher" | "admin";
 }
 
 interface RegisterErrors {
@@ -32,7 +31,6 @@ interface RegisterErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
-  role?: string;
   submit?: string;
 }
 
@@ -62,7 +60,6 @@ const RegisterJWT: React.FC = () => {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "student",
   });
 
   const [errors, setErrors] = useState<RegisterErrors>({});
@@ -147,19 +144,12 @@ const RegisterJWT: React.FC = () => {
       newErrors.confirmPassword = t("passwordsMustMatch");
     }
 
-    // Role validation
-    if (!formData.role) {
-      newErrors.role = t("roleRequired");
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -269,23 +259,6 @@ const RegisterJWT: React.FC = () => {
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.email}
-                  </Form.Control.Feedback>
-                </Form.Group>
-
-                <Form.Group className="mb-3">
-                  <Form.Label>{t("role")}</Form.Label>
-                  <Form.Select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleInputChange}
-                    isInvalid={!!errors.role}
-                  >
-                    <option value="student">{t("student")}</option>
-                    <option value="teacher">{t("teacher")}</option>
-                    <option value="admin">{t("admin")}</option>
-                  </Form.Select>
-                  <Form.Control.Feedback type="invalid">
-                    {errors.role}
                   </Form.Control.Feedback>
                 </Form.Group>
 

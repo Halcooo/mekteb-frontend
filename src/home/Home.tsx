@@ -9,7 +9,6 @@ import { useAuth } from "../hooks/useAuth";
 import NewsCard from "./NewsCard";
 import AddEditNewsModal from "./AddEditNewsModal";
 import DeleteNewsModal from "./DeleteNewsModal";
-import PreviewNewsModal from "./PreviewNewsModal";
 import { useNewsOperations } from "./useNewsOperations";
 import "./Home.scss";
 
@@ -24,7 +23,6 @@ function Home() {
     showAddModal,
     showEditModal,
     showDeleteModal,
-    showPreviewModal,
 
     // Data states
     selectedNews,
@@ -45,10 +43,8 @@ function Home() {
     handleAddNews,
     handleEditNews,
     handleDeleteNews,
-    handlePreviewNews,
     handleAddEditModalClose,
     handleDeleteModalClose,
-    handlePreviewModalClose,
     handleConfirmDelete,
   } = useNewsOperations();
 
@@ -168,7 +164,6 @@ function Home() {
                     <NewsCard
                       item={item}
                       isAdmin={isAdmin}
-                      onPreview={handlePreviewNews}
                       onEdit={handleEditNews}
                       onDelete={handleDeleteNews}
                     />
@@ -186,7 +181,7 @@ function Home() {
                     <p className="empty-description">
                       {t(
                         "noNewsDescription",
-                        "Trenutno nema objavljenih vijesti. Provjerite kasnije."
+                        "Trenutno nema objavljenih vijesti. Provjerite kasnije.",
                       )}
                     </p>
                     {isAdmin && (
@@ -239,13 +234,6 @@ function Home() {
         isLoading={isDeletingNews}
         onHide={handleDeleteModalClose}
         onConfirmDelete={handleConfirmDelete}
-      />
-
-      {/* News Preview Modal */}
-      <PreviewNewsModal
-        show={showPreviewModal}
-        selectedNews={selectedNews}
-        onHide={handlePreviewModalClose}
       />
     </>
   );
