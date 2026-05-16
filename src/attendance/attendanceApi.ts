@@ -1,4 +1,5 @@
 import apiClient from "../api/apiClient";
+import { formatBosnianDate } from "../utils/dateFormatter";
 
 export type AttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";
 
@@ -209,12 +210,7 @@ export const getStatusIcon = (status: AttendanceStatus): string => {
 };
 
 export const formatDate = (date: string | Date): string => {
-  const d = new Date(date);
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  return formatBosnianDate(date);
 };
 
 export const formatDateForInput = (date: string | Date): string => {

@@ -17,6 +17,7 @@ import { commentsApi } from "../api/commentsApi";
 import { studentApi } from "../students/studentApi";
 import type { StudentComment } from "../api/commentsApi";
 import type { Student } from "../students/studentApi";
+import DateBox from "./DateBox";
 import "./DailyCommentsAdmin.scss";
 
 interface DailyCommentsAdminProps {
@@ -45,10 +46,8 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [commentText, setCommentText] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [showReplyModal, setShowReplyModal] = useState(false);
-  const [replyingToComment, setReplyingToComment] =
-    useState<StudentComment | null>(null);
-  const [replyText, setReplyText] = useState("");
+  const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
+  const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
 
   // Search and filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -151,25 +150,28 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
     }
   };
 
-  const handleReplyComment = async (e: React.FormEvent) => {
+  const handleReplyComment = async (
+    e: React.FormEvent,
+    parentComment: StudentComment,
+  ) => {
     e.preventDefault();
-    if (!replyingToComment || !replyText.trim()) return;
+    const replyText = (replyTexts[parentComment.id] || "").trim();
+    if (!replyText) return;
 
     setSubmitting(true);
     setError(null);
 
     try {
       const newReply = await commentsApi.createComment({
-        studentId: replyingToComment.studentId,
-        content: replyText.trim(),
+        studentId: parentComment.studentId,
+        content: replyText,
         date: selectedDate,
-        parentCommentId: replyingToComment.id,
+        parentCommentId: parentComment.id,
       });
 
       setComments((prev) => [...prev, newReply]);
-      setReplyText("");
-      setReplyingToComment(null);
-      setShowReplyModal(false);
+      setReplyTexts((prev) => ({ ...prev, [parentComment.id]: "" }));
+      setActiveReplyId(null);
       setSuccess(t("comments.replySuccess", "Reply added successfully"));
 
       setTimeout(() => setSuccess(null), 3000);
@@ -223,13 +225,6 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
   const studentsWithoutComments = filteredStudents.filter(
     (student) => !commentsByStudent[student.id]?.length,
   );
-
-  const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
 
   const roleVariant = (role: StudentComment["authorRole"]) => {
     if (role === "admin") return "primary";
@@ -361,7 +356,10 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                                     </div>
                                     <small className="text-muted comment-time">
                                       <i className="bi bi-clock me-1"></i>
-                                      {formatTime(comment.createdAt)}
+                                      <DateBox
+                                        value={comment.createdAt}
+                                        mode="time"
+                                      />
                                     </small>
                                   </div>
 
@@ -384,8 +382,11 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                                         size="sm"
                                         className="reply-btn"
                                         onClick={() => {
-                                          setReplyingToComment(comment);
-                                          setShowReplyModal(true);
+                                          setActiveReplyId(
+                                            activeReplyId === comment.id
+                                              ? null
+                                              : comment.id,
+                                          );
                                         }}
                                       >
                                         <i className="bi bi-reply me-1"></i>
@@ -393,6 +394,68 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                                       </Button>
                                     </div>
                                   )}
+
+                                  {!comment.parentCommentId &&
+                                    activeReplyId === comment.id && (
+                                      <Form
+                                        className="mt-2"
+                                        onSubmit={(e) =>
+                                          handleReplyComment(e, comment)
+                                        }
+                                      >
+                                        <Form.Group>
+                                          <Form.Control
+                                            as="textarea"
+                                            rows={2}
+                                            value={replyTexts[comment.id] || ""}
+                                            onChange={(e) =>
+                                              setReplyTexts((prev) => ({
+                                                ...prev,
+                                                [comment.id]: e.target.value,
+                                              }))
+                                            }
+                                            placeholder={t(
+                                              "comments.replyPlaceholder",
+                                              "Type your reply here...",
+                                            )}
+                                            required
+                                          />
+                                        </Form.Group>
+                                        <div className="d-flex justify-content-end gap-2 mt-2">
+                                          <Button
+                                            variant="outline-secondary"
+                                            size="sm"
+                                            onClick={() =>
+                                              setActiveReplyId(null)
+                                            }
+                                            disabled={submitting}
+                                          >
+                                            {t("common.cancel", "Cancel")}
+                                          </Button>
+                                          <Button
+                                            variant="primary"
+                                            size="sm"
+                                            type="submit"
+                                            disabled={
+                                              submitting ||
+                                              !(
+                                                replyTexts[comment.id] || ""
+                                              ).trim()
+                                            }
+                                          >
+                                            {submitting
+                                              ? t(
+                                                  "comments.submitting",
+                                                  "Submitting...",
+                                                )
+                                              : t(
+                                                  "comments.submitReply",
+                                                  "Submit Reply",
+                                                )}
+                                          </Button>
+                                        </div>
+                                      </Form>
+                                    )}
                                 </div>
                               ))}
                             </div>
@@ -566,62 +629,6 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
                 </>
               ) : (
                 t("comments.submitComment", "Submit Comment")
-              )}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      {/* Reply Comment Modal */}
-      <Modal
-        show={showReplyModal}
-        onHide={() => setShowReplyModal(false)}
-        className="daily-comments-modal"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {t("comments.replyToComment", "Reply to Comment")}
-          </Modal.Title>
-        </Modal.Header>
-
-        <Form onSubmit={handleReplyComment}>
-          <Modal.Body>
-            <Form.Group>
-              <Form.Label>{t("comments.yourReply", "Your Reply")}</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                placeholder={t(
-                  "comments.replyPlaceholder",
-                  "Type your reply here...",
-                )}
-                required
-              />
-            </Form.Group>
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowReplyModal(false)}
-              disabled={submitting}
-            >
-              {t("common.cancel", "Cancel")}
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={submitting || !replyText.trim()}
-            >
-              {submitting ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2" />
-                  {t("comments.submitting", "Submitting...")}
-                </>
-              ) : (
-                t("comments.submitReply", "Submit Reply")
               )}
             </Button>
           </Modal.Footer>

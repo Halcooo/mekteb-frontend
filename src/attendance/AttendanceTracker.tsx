@@ -25,6 +25,7 @@ import {
 import { studentApi } from "../students/studentApi";
 import type { Student } from "../students/studentApi";
 import { commentsApi } from "../api/commentsApi";
+import StudentComments from "../components/StudentComments";
 import DatePicker from "../components/DatePicker";
 import PageLayout from "../components/PageLayout";
 import { formatBosnianDate } from "../utils/dateFormatter";
@@ -44,7 +45,6 @@ function AttendanceTracker() {
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage] = useState(20);
   const [showAddStudent, setShowAddStudent] = useState(false);
-  const [showCommentModal, setShowCommentModal] = useState(false);
   const [selectedCommentStudent, setSelectedCommentStudent] =
     useState<Student | null>(null);
   const [commentText, setCommentText] = useState("");
@@ -322,12 +322,15 @@ function AttendanceTracker() {
     setSelectedCommentStudent(student);
     setCommentText("");
     setCommentError(null);
-    setShowCommentModal(true);
+    setTimeout(() => {
+      const chatSection = document.getElementById("attendance-comments-chat");
+      if (chatSection) {
+        chatSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 50);
   };
 
-  const handleSubmitComment = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmitComment = async () => {
     if (!selectedCommentStudent || !commentText.trim()) {
       return;
     }
@@ -342,7 +345,6 @@ function AttendanceTracker() {
         date: selectedDate,
       });
 
-      setShowCommentModal(false);
       setCommentText("");
       setCommentSuccess(
         t("comments.commentSuccess", "Comment added successfully"),
@@ -366,7 +368,10 @@ function AttendanceTracker() {
 
   if (studentsLoading) {
     return (
-      <PageLayout title="Attendance Tracker" className="attendance-tracker">
+      <PageLayout
+        title={t("attendanceTracker.title", "Attendance Tracker")}
+        className="attendance-tracker"
+      >
         <div className="text-center">
           <Spinner animation="border" className="me-2" />
           {t("loadingStudents", "Loading students...")}
@@ -377,7 +382,10 @@ function AttendanceTracker() {
 
   if (studentsError) {
     return (
-      <PageLayout title="Attendance Tracker" className="attendance-tracker">
+      <PageLayout
+        title={t("attendanceTracker.title", "Attendance Tracker")}
+        className="attendance-tracker"
+      >
         <Alert variant="danger">
           {t(
             "errorLoadingStudents",
@@ -892,6 +900,75 @@ function AttendanceTracker() {
         </Col>
       </Row>
 
+      {selectedCommentStudent && (
+        <Row className="mt-4" id="attendance-comments-chat">
+          <Col>
+            <Card>
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0">
+                  <i className="bi bi-chat-left-text me-2"></i>
+                  {t("comments.title", "Daily Comments")} -{" "}
+                  {selectedCommentStudent.firstName}{" "}
+                  {selectedCommentStudent.lastName}
+                </h5>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => setSelectedCommentStudent(null)}
+                >
+                  {t("common.close", "Close")}
+                </Button>
+              </Card.Header>
+              <Card.Body>
+                <Form
+                  className="mb-3"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void handleSubmitComment();
+                  }}
+                >
+                  <Form.Group>
+                    <Form.Label>
+                      {t("comments.commentContent", "Comment Content")}
+                    </Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={commentText}
+                      onChange={(e) => setCommentText(e.target.value)}
+                      placeholder={t(
+                        "comments.commentPlaceholder",
+                        "Type your comment here...",
+                      )}
+                      required
+                    />
+                  </Form.Group>
+                  <div className="d-flex justify-content-end mt-2">
+                    <Button
+                      variant="primary"
+                      type="submit"
+                      disabled={commentSubmitting || !commentText.trim()}
+                    >
+                      {commentSubmitting
+                        ? t("comments.submitting", "Submitting...")
+                        : t("comments.submitComment", "Submit Comment")}
+                    </Button>
+                  </div>
+                </Form>
+
+                <StudentComments
+                  key={`${selectedCommentStudent.id}-${selectedDate}-${commentSuccess || ""}`}
+                  studentId={selectedCommentStudent.id}
+                  studentName={`${selectedCommentStudent.firstName} ${selectedCommentStudent.lastName}`}
+                  selectedDate={selectedDate}
+                  allowReplies={true}
+                />
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      )}
+
       {/* Success/Error Messages */}
       {saveMutation.isSuccess && (
         <Alert variant="success" className="mt-3">
@@ -928,76 +1005,6 @@ function AttendanceTracker() {
           {commentError}
         </Alert>
       )}
-
-      {/* Add Comment Modal */}
-      <Modal
-        show={showCommentModal}
-        onHide={() => setShowCommentModal(false)}
-        centered
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <i className="bi bi-chat-left-text me-2"></i>
-            {t("comments.addComment", "Add Comment")}
-          </Modal.Title>
-        </Modal.Header>
-
-        <Form onSubmit={handleSubmitComment}>
-          <Modal.Body>
-            <p className="mb-2">
-              <strong>
-                {selectedCommentStudent?.firstName}{" "}
-                {selectedCommentStudent?.lastName}
-              </strong>
-              {" • "}
-              <span className="text-muted">
-                {formatBosnianDate(selectedDate)}
-              </span>
-            </p>
-
-            <Form.Group>
-              <Form.Label>
-                {t("comments.commentContent", "Comment Content")}
-              </Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                value={commentText}
-                onChange={(e) => setCommentText(e.target.value)}
-                placeholder={t(
-                  "comments.commentPlaceholder",
-                  "Type your comment here...",
-                )}
-                required
-              />
-            </Form.Group>
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowCommentModal(false)}
-              disabled={commentSubmitting}
-            >
-              {t("common.cancel", "Cancel")}
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={commentSubmitting || !commentText.trim()}
-            >
-              {commentSubmitting ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2" />
-                  {t("comments.submitting", "Submitting...")}
-                </>
-              ) : (
-                t("comments.submitComment", "Submit Comment")
-              )}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
 
       {/* Add Student Modal */}
       <Modal show={showAddStudent} onHide={() => setShowAddStudent(false)}>
@@ -1081,18 +1088,15 @@ function AttendanceTracker() {
                     <option value="">
                       {t("students.selectGrade", "Select grade")}
                     </option>
-                    <option value="1">1st Grade</option>
-                    <option value="2">2nd Grade</option>
-                    <option value="3">3rd Grade</option>
-                    <option value="4">4th Grade</option>
-                    <option value="5">5th Grade</option>
-                    <option value="6">6th Grade</option>
-                    <option value="7">7th Grade</option>
-                    <option value="8">8th Grade</option>
-                    <option value="9">9th Grade</option>
-                    <option value="10">10th Grade</option>
-                    <option value="11">11th Grade</option>
-                    <option value="12">12th Grade</option>
+                    {Array.from({ length: 12 }, (_, idx) => idx + 1).map(
+                      (grade) => (
+                        <option key={grade} value={String(grade)}>
+                          {t("gradeOptionLabel", "Grade {{grade}}", {
+                            grade,
+                          })}
+                        </option>
+                      ),
+                    )}
                   </Form.Select>
                 </Form.Group>
               </Col>

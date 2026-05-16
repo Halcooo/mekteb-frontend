@@ -155,6 +155,11 @@ i18n
             "Ostavite prazno ako učenik još nema roditeljski nalog.",
           selectGrade: "Izaberite razred",
           createStudent: "Stvori učenika",
+          createStudentError:
+            "Kreiranje učenika nije uspjelo. Molimo pokušajte ponovo.",
+          confirmDeleteStudentWithName:
+            "Jeste li sigurni da želite obrisati {{name}}? Ova radnja se ne može poništiti.",
+          gradeOptionLabel: "Razred {{grade}}",
 
           // Parent Key Management
           parentKey: {
@@ -237,6 +242,7 @@ i18n
             updateError: "Greška pri ažuriranju profila",
             nameLengthError: "Ime i prezime su obavezni",
             emailCannotChange: "Email ne može biti promijenjen",
+            noData: "Podaci profila nisu dostupni",
           },
 
           // Comments System
@@ -288,6 +294,13 @@ i18n
             empty: "Nema obavještenja",
             markAllAsRead: "Označi sve kao pročitano",
             new: "Novo",
+            unread: "Nepročitano",
+            showAll: "Prikaži sve",
+            showUnread: "Prikaži nepročitano",
+            justNow: "Upravo sada",
+            minutesAgo: "prije {{count}}m",
+            hoursAgo: "prije {{count}}h",
+            daysAgo: "prije {{count}}d",
           },
 
           // Students management
@@ -302,6 +315,8 @@ i18n
             close: "Zatvori",
             refresh: "Osvježi",
             unknown: "Nepoznato",
+            loading: "Učitavanje...",
+            notAvailable: "N/A",
           },
 
           // Search and pagination
@@ -588,6 +603,10 @@ i18n
             "Leave empty if the student doesn't have a parent account yet.",
           selectGrade: "Select grade",
           createStudent: "Create Student",
+          createStudentError: "Failed to create student. Please try again.",
+          confirmDeleteStudentWithName:
+            "Are you sure you want to delete {{name}}? This action cannot be undone.",
+          gradeOptionLabel: "Grade {{grade}}",
 
           // Parent Key Management
           parentKey: {
@@ -669,6 +688,7 @@ i18n
             updateError: "Failed to update profile",
             nameLengthError: "First and last name are required",
             emailCannotChange: "Email cannot be changed",
+            noData: "No profile data available",
           },
 
           // Comments System
@@ -719,6 +739,13 @@ i18n
             empty: "No notifications",
             markAllAsRead: "Mark all as read",
             new: "New",
+            unread: "Unread",
+            showAll: "Show all",
+            showUnread: "Show unread",
+            justNow: "Just now",
+            minutesAgo: "{{count}}m ago",
+            hoursAgo: "{{count}}h ago",
+            daysAgo: "{{count}}d ago",
           },
 
           // Students management
@@ -733,6 +760,8 @@ i18n
             close: "Close",
             refresh: "Refresh",
             unknown: "Unknown",
+            loading: "Loading...",
+            notAvailable: "N/A",
           },
 
           // Search and pagination

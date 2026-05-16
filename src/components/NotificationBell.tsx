@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Badge, Button, ListGroup, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -11,8 +11,10 @@ import "./NotificationBell.scss";
 
 function NotificationBell() {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, accessToken } = useAuth();
   const navigate = useNavigate();
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectTimeoutRef = useRef<number | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,20 @@ function NotificationBell() {
       setNotifications([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const getNotificationsWsUrl = () => {
+    try {
+      if (!accessToken || !import.meta.env.VITE_API_URL) {
+        return null;
+      }
+
+      const apiUrl = new URL(import.meta.env.VITE_API_URL as string);
+      const wsProtocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
+      return `${wsProtocol}//${apiUrl.host}/backend/ws/notifications?token=${encodeURIComponent(accessToken)}`;
+    } catch {
+      return null;
     }
   };
 
@@ -77,6 +93,71 @@ function NotificationBell() {
 
     return () => window.clearInterval(interval);
   }, [user]);
+
+  useEffect(() => {
+    if (!user || !accessToken) {
+      return;
+    }
+
+    const wsUrl = getNotificationsWsUrl();
+    if (!wsUrl) {
+      return;
+    }
+
+    let active = true;
+
+    const connect = () => {
+      if (!active) {
+        return;
+      }
+
+      const socket = new WebSocket(wsUrl);
+      wsRef.current = socket;
+
+      socket.onmessage = (event) => {
+        try {
+          const payload = JSON.parse(event.data as string) as {
+            type?: string;
+          };
+
+          if (
+            payload.type === "notification:new" ||
+            payload.type === "notification:update"
+          ) {
+            void loadUnreadCount();
+            if (showModal) {
+              void loadNotifications(unreadOnly);
+            }
+          }
+        } catch {
+          // Ignore malformed websocket payloads
+        }
+      };
+
+      socket.onclose = () => {
+        if (!active) {
+          return;
+        }
+
+        reconnectTimeoutRef.current = window.setTimeout(connect, 3000);
+      };
+    };
+
+    connect();
+
+    return () => {
+      active = false;
+      if (reconnectTimeoutRef.current !== null) {
+        window.clearTimeout(reconnectTimeoutRef.current);
+        reconnectTimeoutRef.current = null;
+      }
+
+      if (wsRef.current) {
+        wsRef.current.close();
+        wsRef.current = null;
+      }
+    };
+  }, [user, accessToken, showModal, unreadOnly]);
 
   const handleOpen = async () => {
     setShowModal(true);

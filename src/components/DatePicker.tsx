@@ -29,7 +29,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   minDate,
   maxDate,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [showCalendar, setShowCalendar] = useState(false);
   const [selectedDate, setSelectedDate] = useState(value || "");
   const [viewMonth, setViewMonth] = useState(new Date());
@@ -42,43 +42,16 @@ const DatePicker: React.FC<DatePickerProps> = ({
     }
   }, [value]);
 
-  const months = {
-    bs: [
-      "Januar",
-      "Februar",
-      "Mart",
-      "April",
-      "Maj",
-      "Juni",
-      "Juli",
-      "August",
-      "Septembar",
-      "Oktobar",
-      "Novembar",
-      "Decembar",
-    ],
-    en: [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
-  };
+  const monthNames = t(
+    "datePicker.monthNames",
+    "January,February,March,April,May,June,July,August,September,October,November,December",
+  )
+    .split(",")
+    .map((item) => item.trim());
 
-  const weekDays = {
-    bs: ["Pon", "Uto", "Sri", "Čet", "Pet", "Sub", "Ned"],
-    en: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-  };
-
-  const currentLang = i18n.language as "bs" | "en";
+  const weekDayNames = t("datePicker.weekDays", "Mon,Tue,Wed,Thu,Fri,Sat,Sun")
+    .split(",")
+    .map((item) => item.trim());
 
   const formatDisplayDate = (dateStr: string) => {
     if (!dateStr) return "";
@@ -225,7 +198,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
               <div className="month-year-display">
                 <span className="month">
-                  {months[currentLang][viewMonth.getMonth()]}
+                  {monthNames[viewMonth.getMonth()]}
                 </span>
                 <span className="year">{viewMonth.getFullYear()}</span>
               </div>
@@ -251,7 +224,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
           <div className="calendar-content">
             <div className="weekdays">
-              {weekDays[currentLang].map((day) => (
+              {weekDayNames.map((day) => (
                 <div key={day} className="weekday">
                   {day}
                 </div>

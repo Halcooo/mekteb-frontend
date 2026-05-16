@@ -124,7 +124,9 @@ const Profile: React.FC = () => {
     return (
       <PageLayout>
         <Container className="py-5">
-          <Alert variant="warning">No profile data available</Alert>
+          <Alert variant="warning">
+            {t("profileSettings.noData", "No profile data available")}
+          </Alert>
         </Container>
       </PageLayout>
     );

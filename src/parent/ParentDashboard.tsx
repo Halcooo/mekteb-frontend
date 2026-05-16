@@ -24,6 +24,7 @@ import type {
 import { validateParentKey } from "../utils/parentKeyUtils";
 import { formatBosnianDate } from "../utils/dateFormatter";
 import StudentComments from "../components/StudentComments";
+import DateBox from "../components/DateBox";
 import "./ParentDashboard.scss";
 
 // Local interface that extends the API interface
@@ -405,11 +406,14 @@ const ParentDashboard: React.FC = () => {
                             </Badge>
                           </td>
                           <td>
-                            {student.connectionDate
-                              ? new Date(
-                                  student.connectionDate,
-                                ).toLocaleDateString()
-                              : t("common.unknown")}
+                            {student.connectionDate ? (
+                              <DateBox
+                                value={student.connectionDate}
+                                mode="date"
+                              />
+                            ) : (
+                              t("common.unknown")
+                            )}
                           </td>
                           <td>
                             <div className="d-flex gap-2 flex-wrap">
@@ -450,6 +454,51 @@ const ParentDashboard: React.FC = () => {
           </Card>
         </Col>
       </Row>
+
+      {showComments && selectedStudent && (
+        <Row className="mt-4">
+          <Col>
+            <Card>
+              <Card.Header className="d-flex justify-content-between align-items-center">
+                <h5 className="mb-0">
+                  <i className="fas fa-comments me-2"></i>
+                  {t("comments.title")} - {selectedStudent.firstName}{" "}
+                  {selectedStudent.lastName}
+                </h5>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={() => setShowComments(false)}
+                >
+                  {t("common.close")}
+                </Button>
+              </Card.Header>
+              <Card.Body>
+                <div className="mb-3">
+                  <Form.Group>
+                    <Form.Label>
+                      {t("comments.selectDate", "Select Date")}
+                    </Form.Label>
+                    <Form.Control
+                      type="date"
+                      value={selectedDate}
+                      onChange={(e) => setSelectedDate(e.target.value)}
+                      max={new Date().toISOString().split("T")[0]}
+                    />
+                  </Form.Group>
+                </div>
+
+                <StudentComments
+                  studentId={selectedStudent.id}
+                  studentName={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
+                  selectedDate={selectedDate}
+                  isParent={true}
+                />
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      )}
 
       {/* Attendance Detail Modal */}
       <Modal
@@ -577,48 +626,6 @@ const ParentDashboard: React.FC = () => {
             variant="secondary"
             onClick={() => setShowAttendanceModal(false)}
           >
-            {t("common.close")}
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      {/* Comments Modal */}
-      <Modal
-        show={showComments}
-        onHide={() => setShowComments(false)}
-        size="lg"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            <i className="fas fa-comments me-2"></i>
-            {t("comments.title")} - {selectedStudent?.firstName}{" "}
-            {selectedStudent?.lastName}
-          </Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <div className="mb-3">
-            <Form.Group>
-              <Form.Label>{t("comments.selectDate", "Select Date")}</Form.Label>
-              <Form.Control
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                max={new Date().toISOString().split("T")[0]}
-              />
-            </Form.Group>
-          </div>
-
-          {selectedStudent && (
-            <StudentComments
-              studentId={selectedStudent.id}
-              studentName={`${selectedStudent.firstName} ${selectedStudent.lastName}`}
-              selectedDate={selectedDate}
-              isParent={true}
-            />
-          )}
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowComments(false)}>
             {t("common.close")}
           </Button>
         </Modal.Footer>

@@ -6,13 +6,12 @@ import {
   Alert,
   Badge,
   Spinner,
-  Modal,
   ListGroup,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { commentsApi } from "../api/commentsApi";
 import type { StudentComment } from "../api/commentsApi";
-import { formatBosnianDate } from "../utils/dateFormatter";
+import DateBox from "./DateBox";
 import "./StudentComments.scss";
 
 interface StudentCommentsProps {
@@ -34,9 +33,8 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
   const [comments, setComments] = useState<StudentComment[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [replyText, setReplyText] = useState("");
-  const [replyingTo, setReplyingTo] = useState<number | null>(null);
-  const [showReplyModal, setShowReplyModal] = useState(false);
+  const [replyTexts, setReplyTexts] = useState<Record<number, string>>({});
+  const [activeReplyId, setActiveReplyId] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   // Load comments
@@ -63,9 +61,13 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
   }, [loadComments]);
 
   // Handle reply submission
-  const handleReplySubmit = async (e: React.FormEvent) => {
+  const handleReplySubmit = async (
+    e: React.FormEvent,
+    parentCommentId: number,
+  ) => {
     e.preventDefault();
-    if (!replyText.trim() || !replyingTo) return;
+    const replyText = (replyTexts[parentCommentId] || "").trim();
+    if (!replyText) return;
 
     setSubmitting(true);
     setError(null);
@@ -73,18 +75,17 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
     try {
       const newReply = await commentsApi.createComment({
         studentId,
-        content: replyText.trim(),
+        content: replyText,
         date: selectedDate || new Date().toISOString().split("T")[0],
-        parentCommentId: replyingTo,
+        parentCommentId,
       });
 
       // Add the new reply to the comments list
       setComments((prev) => [...prev, newReply]);
 
       // Reset form
-      setReplyText("");
-      setReplyingTo(null);
-      setShowReplyModal(false);
+      setReplyTexts((prev) => ({ ...prev, [parentCommentId]: "" }));
+      setActiveReplyId(null);
 
       // Optionally reload to get updated reply counts
       await loadComments();
@@ -94,19 +95,6 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    return formatBosnianDate(dateString);
-  };
-
-  // Format time for display
-  const formatTime = (dateString: string) => {
-    const d = new Date(dateString);
-    const hours = d.getHours().toString().padStart(2, "0");
-    const minutes = d.getMinutes().toString().padStart(2, "0");
-    return `${hours}:${minutes}`;
   };
 
   const canReply = isParent || allowReplies;
@@ -208,7 +196,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
             </h6>
             {selectedDate && (
               <Badge bg="info" className="comments-date-badge">
-                {formatDate(selectedDate)}
+                <DateBox value={selectedDate} mode="date" />
               </Badge>
             )}
           </div>
@@ -256,7 +244,7 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                           </span>
                           <small className="text-muted ms-2">
                             <i className="bi bi-clock me-1"></i>
-                            {formatTime(comment.createdAt)}
+                            <DateBox value={comment.createdAt} mode="time" />
                           </small>
                         </div>
                       </div>
@@ -272,14 +260,66 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
                             size="sm"
                             className="comment-reply-btn"
                             onClick={() => {
-                              setReplyingTo(comment.id);
-                              setShowReplyModal(true);
+                              setActiveReplyId(
+                                activeReplyId === comment.id
+                                  ? null
+                                  : comment.id,
+                              );
                             }}
                           >
                             <i className="bi bi-reply me-1"></i>
                             {t("comments.reply", "Reply")}
                           </Button>
                         </div>
+                      )}
+
+                      {canReply && activeReplyId === comment.id && (
+                        <Form
+                          className="mt-2"
+                          onSubmit={(e) => handleReplySubmit(e, comment.id)}
+                        >
+                          <Form.Group>
+                            <Form.Control
+                              as="textarea"
+                              rows={2}
+                              value={replyTexts[comment.id] || ""}
+                              onChange={(e) =>
+                                setReplyTexts((prev) => ({
+                                  ...prev,
+                                  [comment.id]: e.target.value,
+                                }))
+                              }
+                              placeholder={t(
+                                "comments.replyPlaceholder",
+                                "Type your reply here...",
+                              )}
+                              required
+                            />
+                          </Form.Group>
+                          <div className="d-flex justify-content-end gap-2 mt-2">
+                            <Button
+                              variant="outline-secondary"
+                              size="sm"
+                              onClick={() => setActiveReplyId(null)}
+                              disabled={submitting}
+                            >
+                              {t("common.cancel", "Cancel")}
+                            </Button>
+                            <Button
+                              variant="primary"
+                              size="sm"
+                              type="submit"
+                              disabled={
+                                submitting ||
+                                !(replyTexts[comment.id] || "").trim()
+                              }
+                            >
+                              {submitting
+                                ? t("comments.submitting", "Submitting...")
+                                : t("comments.submitReply", "Submit Reply")}
+                            </Button>
+                          </div>
+                        </Form>
                       )}
                     </div>
                   ))}
@@ -289,62 +329,6 @@ const StudentComments: React.FC<StudentCommentsProps> = ({
           )}
         </Card.Body>
       </Card>
-
-      {/* Reply Modal */}
-      <Modal
-        show={showReplyModal}
-        onHide={() => setShowReplyModal(false)}
-        className="comments-reply-modal"
-      >
-        <Modal.Header closeButton>
-          <Modal.Title>
-            {t("comments.replyToComment", "Reply to Comment")}
-          </Modal.Title>
-        </Modal.Header>
-
-        <Form onSubmit={handleReplySubmit}>
-          <Modal.Body>
-            <Form.Group>
-              <Form.Label>{t("comments.yourReply", "Your Reply")}</Form.Label>
-              <Form.Control
-                as="textarea"
-                rows={4}
-                value={replyText}
-                onChange={(e) => setReplyText(e.target.value)}
-                placeholder={t(
-                  "comments.replyPlaceholder",
-                  "Type your reply here...",
-                )}
-                required
-              />
-            </Form.Group>
-          </Modal.Body>
-
-          <Modal.Footer>
-            <Button
-              variant="secondary"
-              onClick={() => setShowReplyModal(false)}
-              disabled={submitting}
-            >
-              {t("common.cancel", "Cancel")}
-            </Button>
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={submitting || !replyText.trim()}
-            >
-              {submitting ? (
-                <>
-                  <Spinner animation="border" size="sm" className="me-2" />
-                  {t("comments.submitting", "Submitting...")}
-                </>
-              ) : (
-                t("comments.submitReply", "Submit Reply")
-              )}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
     </div>
   );
 };

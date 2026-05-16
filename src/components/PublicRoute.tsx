@@ -2,6 +2,7 @@ import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../hooks/useAuth";
 import { Spinner } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 import "./RouteComponents.scss";
 
 interface PublicRouteProps {
@@ -13,6 +14,7 @@ const PublicRoute: React.FC<PublicRouteProps> = ({
   children,
   redirectTo = "/",
 }) => {
+  const { t } = useTranslation();
   const { isAuthenticated, isLoading } = useAuth();
   const location = useLocation();
 
@@ -21,7 +23,9 @@ const PublicRoute: React.FC<PublicRouteProps> = ({
     return (
       <div className="route-container">
         <Spinner animation="border" role="status" className="loading-spinner">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">
+            {t("common.loading", "Loading...")}
+          </span>
         </Spinner>
       </div>
     );

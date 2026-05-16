@@ -235,7 +235,13 @@ const EditableGrid: React.FC<EditableGridProps> = ({
     async (studentId: number, studentName: string) => {
       if (
         window.confirm(
-          `Are you sure you want to delete ${studentName}? This action cannot be undone.`,
+          t(
+            "confirmDeleteStudentWithName",
+            "Are you sure you want to delete {{name}}? This action cannot be undone.",
+            {
+              name: studentName,
+            },
+          ),
         )
       ) {
         try {
@@ -245,7 +251,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
         }
       }
     },
-    [onDelete],
+    [onDelete, t],
   );
 
   // Handle new student creation
@@ -263,11 +269,13 @@ const EditableGrid: React.FC<EditableGridProps> = ({
       setShowAddModal(false);
     } catch (error) {
       console.error("Error creating student:", error);
-      alert("Failed to create student. Please try again.");
+      alert(
+        t("createStudentError", "Failed to create student. Please try again."),
+      );
     } finally {
       setIsCreating(false);
     }
-  }, [onCreate, newStudentData]);
+  }, [onCreate, newStudentData, t]);
 
   // Handle input change for new student form
   const handleNewStudentChange = useCallback(
@@ -316,14 +324,16 @@ const EditableGrid: React.FC<EditableGridProps> = ({
       return <span>{formatDate(String(currentValue))}</span>;
     }
 
-    return <span>{currentValue ?? "N/A"}</span>;
+    return <span>{currentValue ?? t("common.notAvailable", "N/A")}</span>;
   };
 
   if (loading) {
     return (
       <div className="text-center p-4">
         <Spinner animation="border" role="status">
-          <span className="visually-hidden">Loading...</span>
+          <span className="visually-hidden">
+            {t("common.loading", "Loading...")}
+          </span>
         </Spinner>
       </div>
     );
@@ -392,7 +402,9 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                       />
                     </td>
                     <td>{renderEditableCell(student, "parentId", "number")}</td>
-                    <td>{student.parentName || "N/A"}</td>
+                    <td>
+                      {student.parentName || t("common.notAvailable", "N/A")}
+                    </td>
                     <td>
                       <ButtonGroup size="sm">
                         {isEditing ? (
@@ -426,7 +438,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                               onClick={() => startEditing(student)}
                             >
                               <i className="bi bi-pencil-square me-1"></i>
-                              Edit
+                              {t("edit", "Edit")}
                             </Button>
                             <Button
                               variant="danger"
@@ -439,7 +451,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                               }
                             >
                               <i className="bi bi-trash3 me-1"></i>
-                              Delete
+                              {t("delete", "Delete")}
                             </Button>
                           </>
                         )}
