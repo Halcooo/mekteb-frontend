@@ -434,16 +434,22 @@ function NotificationBell() {
                 >
                   <div className="notification-item-layout">
                     <div className="notification-item-content">
-                      <div className="notification-title-row">
-                        <span className="notification-title">
-                          {getNotificationTitle(notification)}
-                        </span>
-                        {notification.studentName && (
-                          <small className="text-muted ms-2">
-                            <i className="bi bi-person-vcard me-1"></i>
-                            {notification.studentName}
-                          </small>
-                        )}
+                      <div className="notification-header-row">
+                        <div className="notification-title-row">
+                          <span className="notification-title">
+                            {getNotificationTitle(notification)}
+                          </span>
+                          {notification.studentName && (
+                            <small className="text-muted ms-2">
+                              <i className="bi bi-person-vcard me-1"></i>
+                              {notification.studentName}
+                            </small>
+                          )}
+                        </div>
+                        <small className="text-muted nb-time-label">
+                          <i className="bi bi-clock me-1"></i>
+                          {formatRelativeTime(notification.createdAt)}
+                        </small>
                       </div>
                       <small className="text-muted d-block notification-message">
                         {getNotificationMessage(notification)}
@@ -454,12 +460,6 @@ function NotificationBell() {
                           {getNotificationActionHint(notification)}
                         </small>
                       )}
-                      <div className="nb-meta-row">
-                        <small className="text-muted nb-time-label">
-                          <i className="bi bi-clock me-1"></i>
-                          {formatRelativeTime(notification.createdAt)}
-                        </small>
-                      </div>
                     </div>
                     {!notification.isRead && (
                       <Badge

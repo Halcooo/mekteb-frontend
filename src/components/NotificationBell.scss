@@ -81,6 +81,13 @@
     gap: 0.35rem;
   }
 
+  .notification-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+  }
+
   .notification-item-layout {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -109,16 +116,6 @@
     word-break: break-word;
   }
 
-  .nb-meta-row {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 0.35rem;
-    min-height: 1.1rem;
-    position: static;
-    inset: auto;
-  }
-
   .nb-time-label {
     display: block;
     line-height: 1.25;
@@ -126,6 +123,8 @@
     position: static !important;
     inset: auto !important;
     margin: 0;
+    white-space: nowrap;
+    flex-shrink: 0;
   }
 
   .notification-new-badge {
@@ -169,6 +168,12 @@
       flex-direction: column;
       align-items: flex-start;
       gap: 0.2rem;
+    }
+
+    .notification-header-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.25rem;
     }
 
     .notification-item-layout {
