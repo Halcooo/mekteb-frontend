@@ -336,7 +336,10 @@ function AttendanceTracker() {
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
-    const commentsDate = params.get("commentsDate") || params.get("date");
+    const rawCommentsDate = params.get("commentsDate") || params.get("date");
+    const commentsDate = rawCommentsDate
+      ? formatDateForInput(rawCommentsDate)
+      : null;
     const openComments = params.get("openComments") === "1";
     const studentIdParam = params.get("studentId");
     const parsedStudentId = studentIdParam

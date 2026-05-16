@@ -7,6 +7,7 @@ import {
   type NotificationItem,
 } from "../api/notificationsApi";
 import { useAuth } from "../hooks/useAuth";
+import { formatDateForInput } from "../utils/dateFormatter";
 import "./NotificationBell.scss";
 
 function NotificationBell() {
@@ -182,6 +183,37 @@ function NotificationBell() {
     loadNotifications(unreadOnly);
   }, [showModal, unreadOnly]);
 
+  const getNotificationTitle = (notification: NotificationItem) => {
+    if (notification.type === "COMMENT_ADDED") {
+      return t("notifications.commentAddedTitle", "New comment");
+    }
+    if (notification.type === "COMMENT_REPLIED") {
+      return t("notifications.commentRepliedTitle", "New reply");
+    }
+    return notification.title;
+  };
+
+  const getNotificationMessage = (notification: NotificationItem) => {
+    const studentLabel =
+      notification.studentName || t("common.unknown", "Unknown");
+
+    if (notification.type === "COMMENT_ADDED") {
+      return t("notifications.commentAddedMessage", {
+        student: studentLabel,
+        defaultValue: "A new comment was added for {{student}}.",
+      });
+    }
+
+    if (notification.type === "COMMENT_REPLIED") {
+      return t("notifications.commentRepliedMessage", {
+        student: studentLabel,
+        defaultValue: "A new reply was added in {{student}} comments.",
+      });
+    }
+
+    return notification.message;
+  };
+
   const handleNotificationClick = async (notification: NotificationItem) => {
     if (!notification.isRead) {
       try {
@@ -202,16 +234,19 @@ function NotificationBell() {
     setShowModal(false);
 
     const navTimestamp = String(Date.now());
+    const normalizedCommentDate = notification.commentDate
+      ? formatDateForInput(notification.commentDate)
+      : null;
 
     if (
       (user?.role === "parent" || user?.role === "user") &&
       notification.studentId &&
-      notification.commentDate
+      normalizedCommentDate
     ) {
       const params = new URLSearchParams({
         openComments: "1",
         studentId: String(notification.studentId),
-        date: notification.commentDate,
+        date: normalizedCommentDate,
         notificationId: String(notification.id),
         ts: navTimestamp,
       });
@@ -219,9 +254,9 @@ function NotificationBell() {
       return;
     }
 
-    if (notification.commentDate) {
+    if (normalizedCommentDate) {
       const params = new URLSearchParams({
-        commentsDate: notification.commentDate,
+        commentsDate: normalizedCommentDate,
         notificationId: String(notification.id),
         ts: navTimestamp,
       });
@@ -326,7 +361,7 @@ function NotificationBell() {
                     <div className="notification-item-content">
                       <div className="notification-title-row">
                         <span className="notification-title">
-                          {notification.title}
+                          {getNotificationTitle(notification)}
                         </span>
                         {notification.studentName && (
                           <small className="text-muted ms-2">
@@ -336,7 +371,7 @@ function NotificationBell() {
                         )}
                       </div>
                       <small className="text-muted d-block notification-message">
-                        {notification.message}
+                        {getNotificationMessage(notification)}
                       </small>
                       <small className="text-muted d-block mt-1">
                         <i className="bi bi-clock me-1"></i>

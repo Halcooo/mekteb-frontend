@@ -94,7 +94,7 @@ const ParentDashboard: React.FC = () => {
     }
 
     if (dateFromQuery) {
-      setSelectedDate(dateFromQuery);
+      setSelectedDate(formatDateForInput(dateFromQuery));
     }
 
     const student = connectedStudents.find((s) => s.id === studentIdFromQuery);

@@ -76,19 +76,40 @@ export interface BulkAttendanceData {
   }[];
 }
 
+const normalizeDateParam = (value?: string): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const normalized = formatDateForInput(value);
+  return normalized || undefined;
+};
+
 // API functions
 export const attendanceApi = {
   // Get all attendance records (optional date filter)
   getAll: async (date?: string): Promise<ApiResponse<Attendance[]>> => {
-    const url = date ? `/attendance?date=${date}` : "/attendance";
+    const normalizedDate = normalizeDateParam(date);
+    const url = normalizedDate
+      ? `/attendance?date=${normalizedDate}`
+      : "/attendance";
     const response = await apiClient.get<ApiResponse<Attendance[]>>(url);
     return response.data;
   },
 
   // Get attendance by date
   getByDate: async (date: string): Promise<ApiResponse<Attendance[]>> => {
+    const normalizedDate = normalizeDateParam(date);
+    if (!normalizedDate) {
+      throw new Error("Invalid date format");
+    }
+
     const response = await apiClient.get<ApiResponse<Attendance[]>>(
-      `/attendance/date/${date}`,
+      `/attendance/date/${normalizedDate}`,
     );
     return response.data;
   },
@@ -97,8 +118,13 @@ export const attendanceApi = {
   getSummaryByDate: async (
     date: string,
   ): Promise<ApiResponse<AttendanceSummary>> => {
+    const normalizedDate = normalizeDateParam(date);
+    if (!normalizedDate) {
+      throw new Error("Invalid date format");
+    }
+
     const response = await apiClient.get<ApiResponse<AttendanceSummary>>(
-      `/attendance/date/${date}/summary`,
+      `/attendance/date/${normalizedDate}/summary`,
     );
     return response.data;
   },
@@ -111,8 +137,10 @@ export const attendanceApi = {
   ): Promise<ApiResponse<Attendance[]>> => {
     let url = `/attendance/student/${studentId}`;
     const params = new URLSearchParams();
-    if (startDate) params.append("startDate", startDate);
-    if (endDate) params.append("endDate", endDate);
+    const normalizedStartDate = normalizeDateParam(startDate);
+    const normalizedEndDate = normalizeDateParam(endDate);
+    if (normalizedStartDate) params.append("startDate", normalizedStartDate);
+    if (normalizedEndDate) params.append("endDate", normalizedEndDate);
     if (params.toString()) url += `?${params}`;
 
     const response = await apiClient.get<ApiResponse<Attendance[]>>(url);
@@ -127,8 +155,10 @@ export const attendanceApi = {
   ): Promise<ApiResponse<AttendanceStats>> => {
     let url = `/attendance/student/${studentId}/stats`;
     const params = new URLSearchParams();
-    if (startDate) params.append("startDate", startDate);
-    if (endDate) params.append("endDate", endDate);
+    const normalizedStartDate = normalizeDateParam(startDate);
+    const normalizedEndDate = normalizeDateParam(endDate);
+    if (normalizedStartDate) params.append("startDate", normalizedStartDate);
+    if (normalizedEndDate) params.append("endDate", normalizedEndDate);
     if (params.toString()) url += `?${params}`;
 
     const response = await apiClient.get<ApiResponse<AttendanceStats>>(url);
@@ -139,9 +169,17 @@ export const attendanceApi = {
   create: async (
     attendanceData: CreateAttendanceData,
   ): Promise<ApiResponse<Attendance>> => {
+    const normalizedDate = normalizeDateParam(attendanceData.date);
+    if (!normalizedDate) {
+      throw new Error("Invalid date format");
+    }
+
     const response = await apiClient.post<ApiResponse<Attendance>>(
       "/attendance",
-      attendanceData,
+      {
+        ...attendanceData,
+        date: normalizedDate,
+      },
     );
     return response.data;
   },
@@ -150,9 +188,17 @@ export const attendanceApi = {
   createBulk: async (
     bulkData: BulkAttendanceData,
   ): Promise<ApiResponse<Attendance[]>> => {
+    const normalizedAttendanceList = bulkData.attendanceList.map((record) => ({
+      ...record,
+      date: normalizeDateParam(record.date) || record.date,
+    }));
+
     const response = await apiClient.post<ApiResponse<Attendance[]>>(
       "/attendance/bulk",
-      bulkData,
+      {
+        ...bulkData,
+        attendanceList: normalizedAttendanceList,
+      },
     );
     return response.data;
   },
@@ -215,6 +261,9 @@ export const formatDate = (date: string | Date): string => {
 
 export const formatDateForInput = (date: string | Date): string => {
   const d = new Date(date);
+  if (Number.isNaN(d.getTime())) {
+    return "";
+  }
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
   const day = String(d.getDate()).padStart(2, "0");

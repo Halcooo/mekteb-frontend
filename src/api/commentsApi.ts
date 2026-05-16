@@ -1,4 +1,5 @@
 import apiClient from "./apiClient";
+import { formatDateForInput } from "../utils/dateFormatter";
 
 export interface StudentComment {
   id: number;
@@ -47,17 +48,32 @@ export interface ApiResponse<T> {
   };
 }
 
+const normalizeDateParam = (value?: string): string | undefined => {
+  if (!value) {
+    return undefined;
+  }
+
+  // Already date-only, keep it untouched.
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  const normalized = formatDateForInput(value);
+  return normalized || undefined;
+};
+
 // Comments API functions
 export const commentsApi = {
   // Get comments for a student on a specific date or date range
   getComments: async (
-    params: GetCommentsParams = {}
+    params: GetCommentsParams = {},
   ): Promise<StudentComment[]> => {
     const queryParams = new URLSearchParams();
 
     if (params.studentId)
       queryParams.append("studentId", params.studentId.toString());
-    if (params.date) queryParams.append("date", params.date);
+    const normalizedDate = normalizeDateParam(params.date);
+    if (normalizedDate) queryParams.append("date", normalizedDate);
     if (params.authorRole) queryParams.append("authorRole", params.authorRole);
     if (params.page) queryParams.append("page", params.page.toString());
     if (params.limit) queryParams.append("limit", params.limit.toString());
@@ -70,10 +86,11 @@ export const commentsApi = {
   // Get comments for a specific student (for parents)
   getStudentComments: async (
     studentId: number,
-    date?: string
+    date?: string,
   ): Promise<StudentComment[]> => {
     const queryParams = new URLSearchParams();
-    if (date) queryParams.append("date", date);
+    const normalizedDate = normalizeDateParam(date);
+    if (normalizedDate) queryParams.append("date", normalizedDate);
 
     const url = `/comments/student/${studentId}?${queryParams}`;
     const response = await apiClient.get<ApiResponse<StudentComment[]>>(url);
@@ -82,11 +99,19 @@ export const commentsApi = {
 
   // Create a new comment (admin/teacher) or reply (parent)
   createComment: async (
-    commentData: CreateCommentRequest
+    commentData: CreateCommentRequest,
   ): Promise<StudentComment> => {
+    const normalizedDate = normalizeDateParam(commentData.date);
+    if (!normalizedDate) {
+      throw new Error("Invalid date format");
+    }
+
     const response = await apiClient.post<ApiResponse<StudentComment>>(
       "/comments",
-      commentData
+      {
+        ...commentData,
+        date: normalizedDate,
+      },
     );
     return response.data.data;
   },
@@ -94,11 +119,11 @@ export const commentsApi = {
   // Update a comment (only by author)
   updateComment: async (
     id: number,
-    content: string
+    content: string,
   ): Promise<StudentComment> => {
     const response = await apiClient.put<ApiResponse<StudentComment>>(
       `/comments/${id}`,
-      { content }
+      { content },
     );
     return response.data.data;
   },
@@ -110,8 +135,13 @@ export const commentsApi = {
 
   // Get daily comments for all students (admin view)
   getDailyComments: async (date: string): Promise<StudentComment[]> => {
+    const normalizedDate = normalizeDateParam(date);
+    if (!normalizedDate) {
+      throw new Error("Invalid date format");
+    }
+
     const response = await apiClient.get<ApiResponse<StudentComment[]>>(
-      `/comments/daily/${date}`
+      `/comments/daily/${normalizedDate}`,
     );
     return response.data.data;
   },

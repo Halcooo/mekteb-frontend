@@ -296,6 +296,11 @@ i18n
             unread: "Nepročitano",
             showAll: "Prikaži sve",
             showUnread: "Prikaži nepročitano",
+            commentAddedTitle: "Novi komentar",
+            commentAddedMessage: "Dodan je novi komentar za {{student}}.",
+            commentRepliedTitle: "Novi odgovor",
+            commentRepliedMessage:
+              "Dodan je novi odgovor u komentarima za {{student}}.",
             justNow: "Upravo sada",
             minutesAgo: "prije {{count}}m",
             hoursAgo: "prije {{count}}h",
@@ -740,6 +745,11 @@ i18n
             unread: "Unread",
             showAll: "Show all",
             showUnread: "Show unread",
+            commentAddedTitle: "New comment",
+            commentAddedMessage: "A new comment was added for {{student}}.",
+            commentRepliedTitle: "New reply",
+            commentRepliedMessage:
+              "A new reply was added in {{student}} comments.",
             justNow: "Just now",
             minutesAgo: "{{count}}m ago",
             hoursAgo: "{{count}}h ago",
