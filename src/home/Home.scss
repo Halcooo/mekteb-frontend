@@ -5,6 +5,14 @@
   background-color: #f8f9fa;
   border-bottom: 1px solid #dee2e6;
 
+  // On mobile, reduce the right padding
+  @media (max-width: 767px) {
+    > .container-fluid.px-4 {
+      padding-right: 0.75rem !important;
+      padding-left: 0.75rem !important;
+    }
+  }
+
   h1 {
     font-size: 2rem;
     font-weight: 600;
@@ -47,6 +55,14 @@
     max-width: 100%;
     margin: 0 auto;
     width: 100%;
+  }
+
+  // On mobile, reduce the right padding
+  @media (max-width: 767px) {
+    > .px-4 {
+      padding-right: 0.75rem !important;
+      padding-left: 0.75rem !important;
+    }
   }
 }
 
