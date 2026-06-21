@@ -55,6 +55,8 @@
     max-width: 100%;
     margin: 0 auto;
     width: 100%;
+    display: flex;
+    justify-content: center;
   }
 
   // On mobile, reduce the right padding
