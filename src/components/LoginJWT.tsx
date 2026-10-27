@@ -12,7 +12,6 @@ import {
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import { authApi } from "../api/authApi";
 import { useAuth } from "../hooks/useAuth";
 import type { LoginCredentials } from "../api/authApi";
 
@@ -38,7 +37,7 @@ const LoginJWT: React.FC = () => {
       "Access denied": "accessDenied",
     };
 
-    return errorMap[backendError] ? t(errorMap[backendError]) : backendError;
+    return errorMap[backendError] ? t(errorMap[backendError]) : t("loginFailed");
   };
 
   const [formData, setFormData] = useState<LoginCredentials>({
@@ -50,18 +49,14 @@ const LoginJWT: React.FC = () => {
 
   // Login mutation
   const loginMutation = useMutation({
-    mutationFn: authApi.login,
-    onSuccess: (response) => {
+    mutationFn: login,
+    onSuccess: () => {
       // Clear any errors
       setErrors({});
 
-      // Login user with the response data
-      login(response.accessToken, response.refreshToken, response.user);
-
       // Redirect to the page they came from or dashboard
-      const from =
-        (location.state as { from?: { pathname: string } })?.from?.pathname ||
-        "/";
+      const target=(location.state as {from?:{pathname:string;search?:string}})?.from;
+      const from=target?.pathname?.startsWith('/')&&!target.pathname.startsWith('//')?target.pathname+(target.search??''):'/';
       navigate(from, { replace: true });
     },
     onError: (error: unknown) => {
@@ -132,7 +127,7 @@ const LoginJWT: React.FC = () => {
   return (
     <Container
       fluid
-      className="min-vh-100 d-flex align-items-center justify-content-center bg-light"
+      className="auth-page d-flex align-items-center justify-content-center"
     >
       <Row className="w-100">
         <Col xs={12} sm={8} md={6} lg={4} className="mx-auto">
@@ -152,11 +147,11 @@ const LoginJWT: React.FC = () => {
               )}
 
               <Form onSubmit={handleSubmit}>
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="login-username">
                   <Form.Label>{t("username")}</Form.Label>
                   <Form.Control
                     type="text"
-                    name="username"
+                    name="username" autoComplete="username"
                     value={formData.username}
                     onChange={handleChange}
                     isInvalid={!!errors.username}
@@ -168,11 +163,11 @@ const LoginJWT: React.FC = () => {
                   </Form.Control.Feedback>
                 </Form.Group>
 
-                <Form.Group className="mb-3">
+                <Form.Group className="mb-3" controlId="login-password">
                   <Form.Label>{t("password")}</Form.Label>
                   <Form.Control
                     type="password"
-                    name="password"
+                    name="password" autoComplete="current-password"
                     value={formData.password}
                     onChange={handleChange}
                     isInvalid={!!errors.password}

@@ -1,0 +1,78 @@
+{
+  "date": "27.10.2026.",
+  "environment": "marked isolated MySQL; synthetic data only",
+  "method": "mysqldump single transaction; restore into separate empty database; compare every row",
+  "tables": [
+    {
+      "table": "attendance",
+      "rows": 16,
+      "status": "identical"
+    },
+    {
+      "table": "auth_refresh_history",
+      "rows": 1,
+      "status": "identical"
+    },
+    {
+      "table": "auth_sessions",
+      "rows": 1,
+      "status": "identical"
+    },
+    {
+      "table": "migration_attempts",
+      "rows": 7,
+      "status": "identical"
+    },
+    {
+      "table": "migrations",
+      "rows": 7,
+      "status": "identical"
+    },
+    {
+      "table": "news",
+      "rows": 1,
+      "status": "identical"
+    },
+    {
+      "table": "news_images",
+      "rows": 0,
+      "status": "identical"
+    },
+    {
+      "table": "notifications",
+      "rows": 360,
+      "status": "identical"
+    },
+    {
+      "table": "parent_students",
+      "rows": 5,
+      "status": "identical"
+    },
+    {
+      "table": "push_deliveries",
+      "rows": 0,
+      "status": "identical"
+    },
+    {
+      "table": "push_subscriptions",
+      "rows": 0,
+      "status": "identical"
+    },
+    {
+      "table": "student_comments",
+      "rows": 463,
+      "status": "identical"
+    },
+    {
+      "table": "students",
+      "rows": 120,
+      "status": "identical"
+    },
+    {
+      "table": "users",
+      "rows": 6,
+      "status": "identical"
+    }
+  ],
+  "status": "passed"
+}

@@ -1,7 +1,7 @@
 import apiClient from "../api/apiClient";
 import type { Student } from "../students/studentApi";
 
-export interface ConnectedStudent extends Student {
+export interface ConnectedStudent extends Omit<Student, "parentKey"> {
   connectedAt?: string;
   lastAttendanceDate?: string;
   attendanceRate?: number;
@@ -14,7 +14,7 @@ export interface ConnectStudentRequest {
 export interface ConnectStudentResponse {
   success: boolean;
   message: string;
-  student?: Student;
+  student?: Omit<Student, "parentKey">;
 }
 
 export type ParentAttendanceStatus = "PRESENT" | "ABSENT" | "LATE" | "EXCUSED";

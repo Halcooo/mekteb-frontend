@@ -1,169 +1,65 @@
-import { format, parseISO, isValid } from "date-fns";
-import { bs, enUS } from "date-fns/locale";
+import { format, formatDistanceToNow, isValid, parseISO } from 'date-fns';
+import { bs, enUS } from 'date-fns/locale';
 
-// Date format configurations for different locales
-const DATE_FORMATS = {
-  bs: {
-    short: "dd.MM.yyyy",
-    long: "dd. MMMM yyyy",
-    dateTime: "dd.MM.yyyy HH:mm",
-    time: "HH:mm",
-  },
-  en: {
-    short: "MM/dd/yyyy",
-    long: "MMMM dd, yyyy",
-    dateTime: "MM/dd/yyyy HH:mm",
-    time: "HH:mm",
-  },
+export type DateValue = string | Date | number | null | undefined;
+export type DateFormatType = 'short' | 'long' | 'dateTime' | 'time' | 'withDay' | 'compact';
+export const dateLanguage = (language = 'bs') => language.toLowerCase().startsWith('en') ? 'en' : 'bs';
+const patterns = {
+  bs: { short:'dd.MM.yyyy.', long:'dd.MM.yyyy.', dateTime:'dd.MM.yyyy. HH:mm', time:'HH:mm', withDay:'EEEE, dd.MM.yyyy.', compact:'dd.MM.yyyy.' },
+  en: { short:'dd.MM.yyyy.', long:'dd.MM.yyyy.', dateTime:'dd.MM.yyyy. HH:mm', time:'HH:mm', withDay:'EEEE, dd.MM.yyyy.', compact:'dd.MM.yyyy.' },
 };
 
-const DATE_LOCALES = {
-  bs: bs,
-  en: enUS,
-};
-
-export type DateFormatType = "short" | "long" | "dateTime" | "time";
-
-/**
- * Format a date string or Date object according to locale and format type
- * @param date - Date string (ISO format) or Date object
- * @param formatType - Type of format to apply
- * @param locale - Locale code (defaults to 'bs')
- * @returns Formatted date string or original string if invalid
- */
-export function formatDate(
-  date: string | Date | null | undefined,
-  formatType: DateFormatType = "short",
-  locale: "bs" | "en" = "bs"
-): string {
-  if (!date) return "";
-
-  try {
-    let dateObj: Date;
-
-    if (typeof date === "string") {
-      // Handle both ISO strings and date strings
-      dateObj = date.includes("T") ? parseISO(date) : new Date(date);
-    } else {
-      dateObj = date;
-    }
-
-    if (!isValid(dateObj)) {
-      console.warn("Invalid date provided to formatDate:", date);
-      return typeof date === "string" ? date : "";
-    }
-
-    const formatString = DATE_FORMATS[locale][formatType];
-    const localeObj = DATE_LOCALES[locale];
-
-    return format(dateObj, formatString, { locale: localeObj });
-  } catch (error) {
-    console.error("Error formatting date:", error);
-    return typeof date === "string" ? date : "";
-  }
+/** Calendar dates are local dates, never UTC instants. Reject overflow such as February 30. */
+export function parseDate(value: DateValue): Date | null {
+  if (value === null || value === undefined || value === '') return null;
+  let result: Date;
+  if (typeof value === 'string') {
+    const calendar = /^(\d{4})-(\d{2})-(\d{2})(?:$|T| )/.exec(value);
+    if (!calendar) return null;
+    const [,year,month,day] = calendar.map(Number);
+    const check = new Date(0);
+    check.setFullYear(year, month - 1, day);
+    check.setHours(0, 0, 0, 0);
+    if (check.getFullYear() !== year || check.getMonth() !== month - 1 || check.getDate() !== day) return null;
+    result = value.length === 10 ? check : parseISO(value);
+  } else result = new Date(value);
+  return isValid(result) ? result : null;
 }
 
-/**
- * Format date for input fields (always returns YYYY-MM-DD format)
- * @param date - Date string or Date object
- * @returns Date string in YYYY-MM-DD format or empty string
- */
-export function formatDateForInput(
-  date: string | Date | null | undefined
-): string {
-  if (!date) return "";
-
-  try {
-    let dateObj: Date;
-
-    if (typeof date === "string") {
-      dateObj = date.includes("T") ? parseISO(date) : new Date(date);
-    } else {
-      dateObj = date;
-    }
-
-    if (!isValid(dateObj)) {
-      return "";
-    }
-
-    return format(dateObj, "yyyy-MM-dd");
-  } catch (error) {
-    console.error("Error formatting date for input:", error);
-    return "";
-  }
+export function formatDate(value: DateValue, type: DateFormatType = 'short', language = 'bs'): string {
+  const date = parseDate(value);
+  if (!date) return '';
+  const lng = dateLanguage(language);
+  return format(date, patterns[lng][type], {locale: lng === 'en' ? enUS : bs});
 }
 
-/**
- * Get age from date of birth
- * @param dateOfBirth - Date of birth string or Date object
- * @returns Age in years or null if invalid date
- */
-export function calculateAge(
-  dateOfBirth: string | Date | null | undefined
-): number | null {
-  if (!dateOfBirth) return null;
-
-  try {
-    let birthDate: Date;
-
-    if (typeof dateOfBirth === "string") {
-      birthDate = dateOfBirth.includes("T")
-        ? parseISO(dateOfBirth)
-        : new Date(dateOfBirth);
-    } else {
-      birthDate = dateOfBirth;
-    }
-
-    if (!isValid(birthDate)) {
-      return null;
-    }
-
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-
-    return age;
-  } catch (error) {
-    console.error("Error calculating age:", error);
-    return null;
-  }
+export function formatDateForInput(value: DateValue): string {
+  const date = parseDate(value);
+  return date ? format(date, 'yyyy-MM-dd') : '';
 }
 
-/**
- * Check if a date is in the past
- * @param date - Date string or Date object
- * @returns Boolean indicating if date is in the past
- */
-export function isPastDate(date: string | Date | null | undefined): boolean {
+export function formatRelativeTime(value: DateValue, language = 'bs'): string {
+  const date = parseDate(value);
+  return date ? formatDistanceToNow(date, {addSuffix:true, locale:dateLanguage(language) === 'en' ? enUS : bs}) : '';
+}
+
+export function calculateAge(value: DateValue, today = new Date()): number | null {
+  const birthDate = parseDate(value);
+  if (!birthDate || birthDate > today) return null;
+  let age = today.getFullYear() - birthDate.getFullYear();
+  if (today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) age--;
+  return age;
+}
+
+export function isPastDate(value: DateValue): boolean {
+  const date = parseDate(value), today = new Date();
   if (!date) return false;
+  today.setHours(0,0,0,0);
+  date.setHours(0,0,0,0);
+  return date < today;
+}
 
-  try {
-    let dateObj: Date;
-
-    if (typeof date === "string") {
-      dateObj = date.includes("T") ? parseISO(date) : new Date(date);
-    } else {
-      dateObj = date;
-    }
-
-    if (!isValid(dateObj)) {
-      return false;
-    }
-
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Reset time to start of day
-    dateObj.setHours(0, 0, 0, 0);
-
-    return dateObj < today;
-  } catch (error) {
-    console.error("Error checking if date is in past:", error);
-    return false;
-  }
+/** Always navigate from the first day, including when the selection is January 31 or February 29. */
+export function shiftCalendarMonth(value: Date, months: number): Date {
+  return new Date(value.getFullYear(), value.getMonth() + months, 1);
 }

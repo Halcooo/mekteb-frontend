@@ -1,0 +1,46 @@
+{
+  "migrations": 7,
+  "realPushTested": false,
+  "productionActivated": true,
+  "releaseId": "20261027T202834552Z-cpanel",
+  "scenarios": [
+    {
+      "scenario": "MariaDB migrations, health and anonymous access gate",
+      "passed": true
+    },
+    {
+      "scenario": "Login for three roles, Secure HttpOnly cookie and durable refresh rotation",
+      "passed": true
+    },
+    {
+      "scenario": "Teacher inbox, parent ownership and calendar birthday",
+      "passed": true
+    },
+    {
+      "scenario": "Concurrent idempotent chat, Bosnian text and one in-app notification",
+      "passed": true
+    },
+    {
+      "scenario": "MariaDB SKIP LOCKED concurrent queue claims; transport mocked, zero external push traffic",
+      "passed": true
+    },
+    {
+      "scenario": "Read marker, logout and revoked session denial",
+      "passed": true
+    },
+    {
+      "scenario": "All original copied records unchanged after synthetic test cleanup",
+      "passed": true
+    }
+  ],
+  "date": "27.10.2026.",
+  "backupRestoreVerified": true,
+  "originalRecordsPreserved": true,
+  "environment": "cPanel isolated MariaDB 10.11.10 / Node 24.6.0",
+  "legacyDDLStatements": 35,
+  "sha256": "0ccc5eca8a231fb01a4f9a1bef558726aff4f8769668351a87548c5e970fd0e6",
+  "publicHttpsChecksPassed": 8,
+  "backgroundCronVerified": true,
+  "exposedDatabaseCredentialRotated": true,
+  "phoneTestDeferredByOwner": true
+}

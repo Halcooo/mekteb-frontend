@@ -1,0 +1,23 @@
+{
+  "date": "27.10.2026.",
+  "manuals": [
+    {
+      "file": "Uputstvo-za-efendiju.pdf",
+      "pages": 8,
+      "bytes": 1644233,
+      "sha256": "78a3c23deab94993d886c0d055e868a6394711562d2de8f277026ae1026e0465",
+      "unicode": "passed",
+      "text": "passed",
+      "visualReview": "all final pages rendered and inspected"
+    },
+    {
+      "file": "Kratko-uputstvo-za-roditelje.pdf",
+      "pages": 2,
+      "bytes": 473541,
+      "sha256": "05ace240380005abfd1d1fafa4ad5f363cccdeb1aa6709459e9f0cc63da0d14a",
+      "unicode": "passed",
+      "text": "passed",
+      "visualReview": "all final pages rendered and inspected"
+    }
+  ]
+}

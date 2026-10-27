@@ -1,250 +1,81 @@
-import React, { createContext, useCallback, useEffect, useState } from "react";
+import { createContext, Fragment, useEffect, useLayoutEffect, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
-import { jwtDecode } from "jwt-decode";
+import { useQueryClient } from "@tanstack/react-query";
+import { Alert, Button, Spinner } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
+import { authSession, authCoordinator } from "../auth/browserSession";
+import { getTokenExpiration, isTokenExpired, sessionScope } from "../auth/sessionStore";
+import type { SessionUser } from "../auth/sessionStore";
+import type { LoginCredentials, RegisterData } from "../api/authApi";
 
-// User interface
-interface User {
-  id: number;
-  username: string;
-  email: string;
-  role: string;
-  createdAt?: string;
-}
-
-// JWT payload interface
-interface JwtPayload {
-  userId: number;
-  username: string;
-  email: string;
-  role: string;
-  exp: number;
-  iat: number;
-}
-
-// Auth context interface
 interface AuthContextType {
-  user: User | null;
+  user: SessionUser | null;
   accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (accessToken: string, refreshToken: string, user: User) => void;
-  logout: () => void;
-  updateTokens: (accessToken: string, refreshToken: string) => void;
+  isSigningOut: boolean;
+  login: (credentials: LoginCredentials) => Promise<void>;
+  register: (details: RegisterData) => Promise<void>;
+  logout: () => Promise<void>;
+  logoutAll: () => Promise<void>;
   isTokenExpired: (token: string) => boolean;
   getTokenExpiration: (token: string) => Date | null;
 }
 
-// Create context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Local storage keys
-const ACCESS_TOKEN_KEY = "mekteb_access_token";
-const REFRESH_TOKEN_KEY = "mekteb_refresh_token";
-const USER_KEY = "mekteb_user";
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const state = useSyncExternalStore(authSession.subscribe, authSession.getSnapshot);
+  const session = state.session;
 
-// Auth provider component
-interface AuthProviderProps {
-  children: ReactNode;
-}
+  useLayoutEffect(() => authSession.onSessionBoundary(() => {
+    queryClient.clear();
+  }), [queryClient]);
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [accessToken, setAccessToken] = useState<string | null>(null);
-  const [refreshToken, setRefreshToken] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Build user object from access token payload
-  const getUserFromToken = (token: string): User | null => {
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      return {
-        id: decoded.userId,
-        username: decoded.username,
-        email: decoded.email,
-        role: decoded.role,
-      };
-    } catch {
-      return null;
-    }
-  };
-
-  const getStoredUser = (rawUser: string | null): User | null => {
-    if (!rawUser) return null;
-    try {
-      return JSON.parse(rawUser) as User;
-    } catch {
-      return null;
-    }
-  };
-
-  // Check if token is expired
-  const isTokenExpired = (token: string): boolean => {
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      const currentTime = Date.now() / 1000;
-      return decoded.exp < currentTime;
-    } catch {
-      return true;
-    }
-  };
-
-  // Get token expiration date
-  const getTokenExpiration = (token: string): Date | null => {
-    try {
-      const decoded = jwtDecode<JwtPayload>(token);
-      return new Date(decoded.exp * 1000);
-    } catch {
-      return null;
-    }
-  };
-
-  // Login function
-  const login = (
-    newAccessToken: string,
-    newRefreshToken: string,
-    userData: User,
-  ) => {
-    // Store in localStorage
-    localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(userData));
-
-    // Update state
-    setAccessToken(newAccessToken);
-    setRefreshToken(newRefreshToken);
-    setUser(userData);
-  };
-
-  // Logout function
-  const logout = () => {
-    // Clear localStorage
-    localStorage.removeItem(ACCESS_TOKEN_KEY);
-    localStorage.removeItem(REFRESH_TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-
-    // Clear state
-    setAccessToken(null);
-    setRefreshToken(null);
-    setUser(null);
-  };
-
-  // Update tokens (for refresh)
-  const updateTokens = (newAccessToken: string, newRefreshToken: string) => {
-    localStorage.setItem(ACCESS_TOKEN_KEY, newAccessToken);
-    localStorage.setItem(REFRESH_TOKEN_KEY, newRefreshToken);
-    setAccessToken(newAccessToken);
-    setRefreshToken(newRefreshToken);
-  };
-
-  // Restore auth state from localStorage (used on refresh and cross-tab sync)
-  const restoreAuthFromStorage = useCallback(() => {
-    try {
-      const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
-      const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
-      const storedUser = localStorage.getItem(USER_KEY);
-      const parsedStoredUser = getStoredUser(storedUser);
-
-      if (storedAccessToken && !isTokenExpired(storedAccessToken)) {
-        setAccessToken(storedAccessToken);
-        setRefreshToken(storedRefreshToken);
-
-        if (parsedStoredUser) {
-          setUser(parsedStoredUser);
-        } else {
-          const tokenUser = getUserFromToken(storedAccessToken);
-          if (tokenUser) {
-            setUser(tokenUser);
-            localStorage.setItem(USER_KEY, JSON.stringify(tokenUser));
-          } else {
-            setUser(null);
-          }
-        }
-        return;
-      }
-
-      if (storedRefreshToken && !isTokenExpired(storedRefreshToken)) {
-        const refreshTokenUser = getUserFromToken(storedRefreshToken);
-
-        setAccessToken(null);
-        setRefreshToken(storedRefreshToken);
-
-        if (parsedStoredUser) {
-          setUser(parsedStoredUser);
-        } else if (refreshTokenUser) {
-          setUser(refreshTokenUser);
-          localStorage.setItem(USER_KEY, JSON.stringify(refreshTokenUser));
-        } else {
-          setUser(null);
-        }
-        return;
-      }
-
-      setAccessToken(null);
-      setRefreshToken(null);
-      setUser(null);
-    } catch (error) {
-      console.error("Error restoring auth from storage:", error);
-      setAccessToken(null);
-      setRefreshToken(null);
-      setUser(null);
-    }
+  useEffect(() => {
+    void authCoordinator.restore().catch(() => { /* A retryable error is shown below. */ });
   }, []);
 
-  // Initialize auth state from localStorage on mount
-  useEffect(() => {
-    restoreAuthFromStorage();
-    setIsLoading(false);
-  }, [restoreAuthFromStorage]);
-
-  // Keep auth state synced across tabs and with interceptor logout events
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      if (
-        event.key === ACCESS_TOKEN_KEY ||
-        event.key === REFRESH_TOKEN_KEY ||
-        event.key === USER_KEY ||
-        event.key === null
-      ) {
-        restoreAuthFromStorage();
-      }
-    };
-
-    const handleForcedLogout = () => {
-      setAccessToken(null);
-      setRefreshToken(null);
-      setUser(null);
-    };
-
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("auth:logout", handleForcedLogout as EventListener);
-
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener(
-        "auth:logout",
-        handleForcedLogout as EventListener,
-      );
-    };
-  }, [restoreAuthFromStorage]);
-
-  // Computed values
-  const isAuthenticated = Boolean(user && (accessToken || refreshToken));
-
   const value: AuthContextType = {
-    user,
-    accessToken,
-    refreshToken,
-    isAuthenticated,
-    isLoading,
-    login,
-    logout,
-    updateTokens,
+    user: session?.user ?? null,
+    accessToken: session?.accessToken ?? null,
+    isAuthenticated: Boolean(session),
+    isLoading: state.isLoading,
+    isSigningOut: state.isSigningOut,
+    login: authCoordinator.login,
+    register: authCoordinator.register,
+    logout: () => authCoordinator.logout(),
+    logoutAll: () => authCoordinator.logout("all"),
     isTokenExpired,
     getTokenExpiration,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+  const problemKey = state.problem === "logout-all-auth" ? "authSession.logoutAllNeedsLogin"
+    : state.problem === "logout-all" ? "authSession.logoutAllFailed"
+    : state.problem === "logout" ? "authSession.logoutFailed" : "authSession.restoreFailed";
+
+  return (
+    <AuthContext.Provider value={value}>
+      {state.problem && (
+        <Alert variant="warning" className="m-3" role="alert">
+          <p className="mb-2">{t(problemKey)}</p>
+          <Button size="sm" variant="outline-dark" disabled={state.isSigningOut || state.isLoading}
+            onClick={() => { void authCoordinator.retry().catch(() => { /* Keep the failure visible. */ }); }}>
+            {t("authSession.retry", "Retry")}
+          </Button>
+        </Alert>
+      )}
+      {state.isSigningOut && (
+        <div className="m-3" role="status">
+          <Spinner size="sm" animation="border" className="me-2" />
+          {t("authSession.signingOut", "Signing out...")}
+        </div>
+      )}
+      <Fragment key={sessionScope(session) ?? "anonymous"}>{children}</Fragment>
+    </AuthContext.Provider>
+  );
+}
 
 export default AuthContext;

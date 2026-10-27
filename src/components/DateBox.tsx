@@ -1,9 +1,6 @@
 import React from "react";
-import {
-  formatBosnianDate,
-  formatBosnianDateTime,
-  formatBosnianTime,
-} from "../utils/dateFormatter";
+import { useTranslation } from 'react-i18next';
+import { formatDate } from '../utils/dateUtils';
 
 type DateBoxMode = "date" | "time" | "dateTime";
 
@@ -20,19 +17,12 @@ const DateBox: React.FC<DateBoxProps> = ({
   fallback = "",
   className,
 }) => {
+  const { i18n } = useTranslation();
   if (!value) {
     return <>{fallback}</>;
   }
 
-  let formatted = "";
-
-  if (mode === "time") {
-    formatted = formatBosnianTime(value);
-  } else if (mode === "dateTime") {
-    formatted = formatBosnianDateTime(value);
-  } else {
-    formatted = formatBosnianDate(value);
-  }
+  const formatted = formatDate(value, mode === 'date' ? 'short' : mode, i18n.language);
 
   if (!formatted) {
     return <>{fallback}</>;

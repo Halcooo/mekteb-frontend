@@ -8,10 +8,12 @@ import ParentDashboard from "./parent/ParentDashboard";
 import Profile from "./profile/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
+import MessagesPage from './chat/MessagesPage';
 
 function AppRoutes() {
   return (
     <Routes>
+      <Route path="/messages" element={<ProtectedRoute requiredRole={['admin','teacher','parent','user']}><MessagesPage /></ProtectedRoute>} />
       {/* Public Routes - available to all users */}
       <Route path="/" element={<Home />} />
 

@@ -17,9 +17,11 @@ import {
 } from "./studentApi";
 import EditableGrid from "./EditableGrid";
 import PageLayout from "../components/PageLayout";
+import { useAuth } from "../hooks/useAuth";
 
 function Students() {
   const { t } = useTranslation();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
 
   // Pagination and search state
@@ -44,7 +46,7 @@ function Students() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["students", currentPage, pageSize, debouncedSearchTerm],
+    queryKey: ["students", user?.id, currentPage, pageSize, debouncedSearchTerm],
     queryFn: () =>
       studentApi.getAll({
         page: currentPage,
@@ -52,6 +54,7 @@ function Students() {
         search: debouncedSearchTerm,
       }),
     staleTime: 1000 * 60 * 5, // 5 minutes
+    enabled: Boolean(user),
   });
 
   const students = studentsResponse?.data || [];
@@ -62,7 +65,7 @@ function Students() {
     mutationFn: ({ id, data }: { id: number; data: UpdateStudentData }) =>
       studentApi.update(id, data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["students", user?.id] });
     },
     onError: (error) => {
       console.error("Update student error:", error);
@@ -73,7 +76,7 @@ function Students() {
   const deleteMutation = useMutation({
     mutationFn: studentApi.delete,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["students", user?.id] });
     },
     onError: (error) => {
       console.error("Delete student error:", error);
@@ -84,7 +87,7 @@ function Students() {
   const createMutation = useMutation({
     mutationFn: studentApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["students", user?.id] });
     },
     onError: (error) => {
       console.error("Create student error:", error);
@@ -239,12 +242,12 @@ function Students() {
                 {/* Desktop pagination */}
                 <div className="d-none d-md-flex justify-content-center">
                   <Pagination className="mb-0">
-                    <Pagination.First
+                    <Pagination.Item children={<span aria-hidden="true">«</span>} aria-label={t('firstPage')}
                       disabled={!pagination.hasPrevPage}
                       onClick={() => setCurrentPage(1)}
                       title={t("firstPage", "First page")}
                     />
-                    <Pagination.Prev
+                    <Pagination.Item children={<span aria-hidden="true">‹</span>} aria-label={t('previousPage')}
                       disabled={!pagination.hasPrevPage}
                       onClick={() =>
                         setCurrentPage(Math.max(1, currentPage - 1))
@@ -263,6 +266,8 @@ function Students() {
 
                         return (
                           <Pagination.Item
+                            activeLabel={t('currentPage')}
+                            aria-current={pageNum===currentPage?'page':undefined}
                             key={pageNum}
                             active={pageNum === currentPage}
                             onClick={() => setCurrentPage(pageNum)}
@@ -273,7 +278,7 @@ function Students() {
                       },
                     )}
 
-                    <Pagination.Next
+                    <Pagination.Item children={<span aria-hidden="true">›</span>} aria-label={t('nextPage')}
                       disabled={!pagination.hasNextPage}
                       onClick={() =>
                         setCurrentPage(
@@ -282,7 +287,7 @@ function Students() {
                       }
                       title={t("nextPage", "Next page")}
                     />
-                    <Pagination.Last
+                    <Pagination.Item children={<span aria-hidden="true">»</span>} aria-label={t('lastPage')}
                       disabled={!pagination.hasNextPage}
                       onClick={() => setCurrentPage(pagination.totalPages)}
                       title={t("lastPage", "Last page")}

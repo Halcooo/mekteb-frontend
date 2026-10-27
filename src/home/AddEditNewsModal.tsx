@@ -1,10 +1,12 @@
 import React from "react";
-import { Modal, Form, Button, Row, Col, Spinner } from "react-bootstrap";
+import { Modal, Form, Button, Row, Col, Spinner, Alert } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { NewsItem } from "../types/index";
 import "./AddEditNewsModal.scss";
+const apiBase=(import.meta.env.VITE_API_URL??'').replace(/\/api\/?$/,'');
 
 interface AddEditNewsModalProps {
+  error?:string|null;
   show: boolean;
   isEditMode: boolean;
   selectedNews: NewsItem | null;
@@ -26,6 +28,7 @@ interface AddEditNewsModalProps {
 
 const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
   show,
+  error,
   isEditMode,
   selectedNews,
   formData,
@@ -41,15 +44,16 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
   const { t } = useTranslation();
 
   return (
-    <Modal show={show} onHide={onHide}>
-      <Modal.Header closeButton>
+    <Modal show={show} onHide={()=>{if(!isLoading)onHide();}} backdrop={isLoading?'static':true} keyboard={!isLoading}>
+      <Modal.Header closeButton closeLabel={t("close")}>
         <Modal.Title>
           {isEditMode ? t("editNews", "Edit News") : t("addNews", "Add News")}
         </Modal.Title>
       </Modal.Header>
       <Form onSubmit={onSubmit}>
         <Modal.Body>
-          <Form.Group className="mb-3">
+          {error&&<Alert variant="danger" role="alert">{error}</Alert>}
+          <Form.Group className="mb-3" controlId="news-title">
             <Form.Label>{t("title", "Title")}</Form.Label>
             <Form.Control
               type="text"
@@ -60,7 +64,7 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
               required
             />
           </Form.Group>
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="news-content">
             <Form.Label>{t("content", "Content")}</Form.Label>
             <Form.Control
               as="textarea"
@@ -74,12 +78,12 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
           </Form.Group>
 
           {/* Image Upload Section */}
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="news-images">
             <Form.Label>{t("images", "Images")}</Form.Label>
             <Form.Control
               type="file"
               multiple
-              accept="image/*"
+              accept="image/png,image/jpeg,image/gif,image/webp"
               onChange={onImageSelect}
               className="mb-2"
             />
@@ -128,7 +132,7 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
                     <Col key={image.id} xs={6} md={4} className="mb-2">
                       <div className="image-preview">
                         <img
-                          src={`https://api.mekteb-pazaric.com/backend${
+                          src={`${apiBase}${
                             image.url ||
                             `/api/images/${image.imagePath?.split("/").pop()}`
                           }`}
@@ -151,7 +155,7 @@ const AddEditNewsModal: React.FC<AddEditNewsModalProps> = ({
             )}
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={onHide}>
+          <Button variant="secondary" onClick={onHide} disabled={isLoading}>
             <i className="bi bi-x-circle me-2"></i>
             {t("cancel")}
           </Button>

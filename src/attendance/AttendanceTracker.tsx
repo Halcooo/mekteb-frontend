@@ -28,11 +28,14 @@ import { commentsApi } from "../api/commentsApi";
 import StudentComments from "../components/StudentComments";
 import DatePicker from "../components/DatePicker";
 import PageLayout from "../components/PageLayout";
-import { formatBosnianDate } from "../utils/dateFormatter";
+import { useAuth } from "../hooks/useAuth";
+import { formatDate } from "../utils/dateUtils";
+import {formatPercent} from '../utils/numberFormatter';
 import "./AttendanceTracker.scss";
 
 function AttendanceTracker() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const location = useLocation();
   const handledNotificationKeyRef = useRef("");
@@ -76,13 +79,14 @@ function AttendanceTracker() {
     isLoading: studentsLoading,
     error: studentsError,
   } = useQuery({
-    queryKey: ["students", "all"],
-    queryFn: () =>
-      studentApi.getAll({
-        page: 1,
-        limit: 100, // Get all students
-        search: "",
-      }),
+    queryKey: ["students", user?.id, "all"],
+    queryFn: async () => {
+      const first=await studentApi.getAll({page:1,limit:100,search:''});
+      const data=[...first.data];
+      for(let page=2;page<=(first.pagination?.totalPages??1);page++)data.push(...(await studentApi.getAll({page,limit:100,search:''})).data);
+      return {...first,data};
+    },
+    enabled: Boolean(user),
   });
 
   // Fetch attendance for selected date
@@ -91,16 +95,16 @@ function AttendanceTracker() {
     isLoading: attendanceLoading,
     refetch: refetchAttendance,
   } = useQuery({
-    queryKey: ["attendance", selectedDate],
+    queryKey: ["attendance", user?.id, selectedDate],
     queryFn: () => attendanceApi.getByDate(selectedDate),
-    enabled: !!selectedDate,
+    enabled: Boolean(user && selectedDate),
   });
 
   // Fetch attendance summary
   const { data: summaryResponse } = useQuery({
-    queryKey: ["attendance-summary", selectedDate],
+    queryKey: ["attendance-summary", user?.id, selectedDate],
     queryFn: () => attendanceApi.getSummaryByDate(selectedDate),
-    enabled: !!selectedDate,
+    enabled: Boolean(user && selectedDate),
   });
 
   // Filter students based on search term
@@ -169,96 +173,34 @@ function AttendanceTracker() {
   const summary = {
     ...totals,
     presentRate: totals.totalStudents
-      ? Math.round((totals.presentCount / totals.totalStudents) * 1000) / 10
+      ? Math.round(((totals.presentCount + totals.lateCount) / totals.totalStudents) * 1000) / 10
       : 0,
   };
 
-  // Initialize attendance data when existing attendance loads
   useEffect(() => {
-    const newAttendanceData: Record<number, AttendanceStatus> = {};
-
-    // Keep only latest attendance record per student (highest id)
-    const latestByStudent = new Map<
-      number,
-      (typeof existingAttendance)[number]
-    >();
-
-    existingAttendance.forEach((record) => {
-      const current = latestByStudent.get(record.student_id);
-      if (!current || record.id > current.id) {
-        latestByStudent.set(record.student_id, record);
-      }
-    });
-
-    // Set existing attendance (latest only)
-    latestByStudent.forEach((record, studentId) => {
-      newAttendanceData[studentId] = record.status;
-    });
-
-    // Set default status for students without attendance record
-    students.forEach((student) => {
-      if (!newAttendanceData[student.id]) {
-        newAttendanceData[student.id] = "ABSENT"; // Default to absent
-      }
-    });
-
-    setAttendanceData(newAttendanceData);
-  }, [existingAttendance, students]);
-
-  // Individual attendance auto-save mutation
-  const autoSaveMutation = useMutation({
-    mutationFn: async ({
-      studentId,
-      status,
-    }: {
-      studentId: number;
-      status: AttendanceStatus;
-    }) => {
-      // Add to saving students set
-      setSavingStudents((prev) => new Set(prev).add(studentId));
-
-      // Check if attendance record already exists for this student and date
-      const existingRecord = existingAttendance
-        .filter((record) => record.student_id === studentId)
-        .sort((a, b) => b.id - a.id)[0];
-
-      if (existingRecord) {
-        // Update existing record
-        return attendanceApi.update(existingRecord.id, { status });
-      } else {
-        // Create new record
-        return attendanceApi.create({
-          student_id: studentId,
-          date: selectedDate,
-          status,
-        });
-      }
+    const recorded:Record<number,AttendanceStatus>={};
+    for(const record of existingAttendance) recorded[record.student_id]=record.status;
+    setAttendanceData(recorded);
+  },[existingAttendance]);
+  const savingKeys=useRef(new Set<string>());
+  const [saveError,setSaveError]=useState(false);
+  const autoSaveMutation=useMutation({
+    mutationFn:({studentId,status,date}:{studentId:number;status:AttendanceStatus;date:string})=>attendanceApi.create({student_id:studentId,status,date}),
+    onSuccess:()=>{
+      void queryClient.invalidateQueries({queryKey:['attendance',user?.id]});
+      void queryClient.invalidateQueries({queryKey:['attendance-summary',user?.id]});
     },
-    onSuccess: (_, variables) => {
-      // Remove from saving students set
-      setSavingStudents((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(variables.studentId);
-        return newSet;
-      });
-      queryClient.invalidateQueries({ queryKey: ["attendance"] });
-      queryClient.invalidateQueries({ queryKey: ["attendance-summary"] });
-    },
-    onError: (_, variables) => {
-      // Remove from saving students set on error too
-      setSavingStudents((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(variables.studentId);
-        return newSet;
-      });
+    onError:()=>{setSaveError(true);void queryClient.invalidateQueries({queryKey:['attendance',user?.id]});},
+    onSettled:(_result,_error,variables)=>{
+      savingKeys.current.delete(`${variables.date}:${variables.studentId}`);
+      setSavingStudents(current=>{const next=new Set(current);next.delete(variables.studentId);return next;});
     },
   });
-
   // Create student mutation
   const createStudentMutation = useMutation({
     mutationFn: studentApi.create,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["students"] });
+      queryClient.invalidateQueries({ queryKey: ["students", user?.id] });
       setShowAddStudent(false);
       setNewStudent({
         firstName: "",
@@ -282,17 +224,12 @@ function AttendanceTracker() {
     createStudentMutation.mutate(newStudent);
   };
 
-  const handleStatusChange = (studentId: number, status: AttendanceStatus) => {
-    // Update local state immediately for instant feedback
-    setAttendanceData((prev) => ({
-      ...prev,
-      [studentId]: status,
-    }));
-
-    // Auto-save the attendance change
-    autoSaveMutation.mutate({ studentId, status });
+  const handleStatusChange=(studentId:number,status:AttendanceStatus)=>{
+    const key=`${selectedDate}:${studentId}`;
+    if(savingKeys.current.has(key))return;
+    savingKeys.current.add(key);setSavingStudents(current=>new Set(current).add(studentId));setSaveError(false);
+    autoSaveMutation.mutate({studentId,status,date:selectedDate});
   };
-
   const handleAddCommentForStudent = (studentId: number) => {
     const allStudents = studentsResponse?.data || [];
     const student = allStudents.find((s) => s.id === studentId);
@@ -398,7 +335,7 @@ function AttendanceTracker() {
     }
   };
 
-  const getStatusBadge = (status: AttendanceStatus) => (
+  const getStatusBadge = (status: AttendanceStatus | undefined) => !status ? <Badge bg="light" text="dark">{t("attendanceTracker.unrecorded")}</Badge> : (
     <Badge bg={getStatusColor(status)} className="d-flex align-items-center">
       <i className={`${getStatusIcon(status)} me-1`}></i>
       {t(`attendanceTracker.status.${status.toLowerCase()}`)}
@@ -445,6 +382,7 @@ function AttendanceTracker() {
       }
       className="attendance-tracker"
     >
+      {saveError&&<Alert variant="danger" role="alert">{t("attendanceTracker.saveError")} <Button variant="link" onClick={()=>void refetchAttendance()}>{t("refresh")}</Button></Alert>}
       {/* Date Selection and Summary */}
       <Row className="mb-4">
         <Col md={6}>
@@ -457,6 +395,7 @@ function AttendanceTracker() {
                 <DatePicker
                   value={selectedDate}
                   onChange={setSelectedDate}
+                  required
                   size="lg"
                   placeholder={t("datePicker.selectDate", "Select date")}
                 />
@@ -464,7 +403,7 @@ function AttendanceTracker() {
               <div className="mt-3">
                 <small className="text-muted">
                   {t("attendanceTracker.selectedDate", "Selected")}:{" "}
-                  {formatBosnianDate(selectedDate)}
+                  {formatDate(selectedDate, 'short', i18n.language)}
                 </small>
               </div>
             </Card.Body>
@@ -515,8 +454,9 @@ function AttendanceTracker() {
                 <div className="mt-3 text-center">
                   <strong>
                     {t("attendanceTracker.presentRate", "Present Rate")}:{" "}
-                    {(summary.presentRate || 0).toFixed(1)}%
+                    {formatPercent(summary.presentRate,i18n.language)}
                   </strong>
+                  <div className="small text-muted mt-2">{t('attendanceTracker.unrecordedCount',{count:Math.max(0,totals.totalStudents-totals.presentCount-totals.absentCount-totals.lateCount-totals.excusedCount)})}</div>
                 </div>
               </Card.Body>
             </Card>
@@ -548,7 +488,7 @@ function AttendanceTracker() {
                 <Col md={4}>
                   <h5 className="mb-0">
                     {t("attendanceTracker.studentList", "Student Attendance")} -{" "}
-                    {formatBosnianDate(selectedDate)}
+                    {formatDate(selectedDate, 'short', i18n.language)}
                   </h5>
                 </Col>
                 <Col md={6}>
@@ -572,8 +512,8 @@ function AttendanceTracker() {
               {searchTerm && (
                 <div className="mt-2">
                   <small className="text-muted">
-                    {t("common.showing", "Showing")} {filteredStudents.length}
-                    {t("common.of", "of")} {studentsResponse?.data?.length || 0}
+                    {t("common.showing", "Showing")} {filteredStudents.length}{" "}
+                    {t("common.of", "of")} {studentsResponse?.data?.length || 0}{" "}
                     {t("studentCountLabel", "students")}
                     {filteredStudents.length > studentsPerPage && (
                       <>
@@ -598,8 +538,8 @@ function AttendanceTracker() {
                     <Table hover className="mb-0 attendance-grid-table">
                       <thead className="table-light">
                         <tr>
-                          <th>{t("students.name", "Name")}</th>
-                          <th>{t("students.gradeLevel", "Grade")}</th>
+                          <th>{t("studentName", "Name")}</th>
+                          <th>{t("gradeLevel", "Grade")}</th>
                           <th className="text-center">
                             {t("attendanceTracker.status.present", "Present")}
                           </th>
@@ -621,7 +561,7 @@ function AttendanceTracker() {
                       <tbody>
                         {students.map((student) => {
                           const currentStatus =
-                            attendanceData[student.id] || "ABSENT";
+                            attendanceData[student.id];
                           return (
                             <tr key={student.id}>
                               <td>
@@ -647,7 +587,7 @@ function AttendanceTracker() {
                               <td className="text-center p-2">
                                 <Form.Check
                                   type="radio"
-                                  name={`attendance-${student.id}`}
+                                  disabled={savingStudents.has(student.id)} aria-label={`${student.firstName} ${student.lastName}: ${t("attendanceTracker.status.present")}`} name={`attendance-${student.id}`}
                                   checked={currentStatus === "PRESENT"}
                                   onChange={() =>
                                     handleStatusChange(student.id, "PRESENT")
@@ -658,7 +598,7 @@ function AttendanceTracker() {
                               <td className="text-center p-2">
                                 <Form.Check
                                   type="radio"
-                                  name={`attendance-${student.id}`}
+                                  disabled={savingStudents.has(student.id)} aria-label={`${student.firstName} ${student.lastName}: ${t("attendanceTracker.status.absent")}`} name={`attendance-${student.id}`}
                                   checked={currentStatus === "ABSENT"}
                                   onChange={() =>
                                     handleStatusChange(student.id, "ABSENT")
@@ -669,7 +609,7 @@ function AttendanceTracker() {
                               <td className="text-center p-2">
                                 <Form.Check
                                   type="radio"
-                                  name={`attendance-${student.id}`}
+                                  disabled={savingStudents.has(student.id)} aria-label={`${student.firstName} ${student.lastName}: ${t("attendanceTracker.status.late")}`} name={`attendance-${student.id}`}
                                   checked={currentStatus === "LATE"}
                                   onChange={() =>
                                     handleStatusChange(student.id, "LATE")
@@ -680,7 +620,7 @@ function AttendanceTracker() {
                               <td className="text-center p-2">
                                 <Form.Check
                                   type="radio"
-                                  name={`attendance-${student.id}`}
+                                  disabled={savingStudents.has(student.id)} aria-label={`${student.firstName} ${student.lastName}: ${t("attendanceTracker.status.excused")}`} name={`attendance-${student.id}`}
                                   checked={currentStatus === "EXCUSED"}
                                   onChange={() =>
                                     handleStatusChange(student.id, "EXCUSED")
@@ -712,7 +652,7 @@ function AttendanceTracker() {
                   <div className="d-md-none">
                     {students.map((student) => {
                       const currentStatus =
-                        attendanceData[student.id] || "ABSENT";
+                        attendanceData[student.id];
                       return (
                         <Card key={student.id} className="mb-2 mx-2">
                           <Card.Body className="p-3">
@@ -969,7 +909,7 @@ function AttendanceTracker() {
         <Alert
           variant="danger"
           className="mt-3"
-          dismissible
+          dismissible closeLabel={t("close")}
           onClose={() => setCommentError(null)}
         >
           <i className="bi bi-exclamation-triangle me-2"></i>
@@ -979,9 +919,9 @@ function AttendanceTracker() {
 
       {/* Add Student Modal */}
       <Modal show={showAddStudent} onHide={() => setShowAddStudent(false)}>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton closeLabel={t("close")}>
           <Modal.Title>
-            {t("students.addStudent", "Add New Student")}
+            {t("addStudent", "Add New Student")}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -990,7 +930,7 @@ function AttendanceTracker() {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
-                    {t("students.firstName", "First Name")} *
+                    {t("firstName", "First Name")} *
                   </Form.Label>
                   <Form.Control
                     type="text"
@@ -1002,7 +942,7 @@ function AttendanceTracker() {
                       })
                     }
                     placeholder={t(
-                      "students.enterFirstName",
+                      "enterFirstName",
                       "Enter first name",
                     )}
                   />
@@ -1011,7 +951,7 @@ function AttendanceTracker() {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
-                    {t("students.lastName", "Last Name")} *
+                    {t("lastName", "Last Name")} *
                   </Form.Label>
                   <Form.Control
                     type="text"
@@ -1019,7 +959,7 @@ function AttendanceTracker() {
                     onChange={(e) =>
                       setNewStudent({ ...newStudent, lastName: e.target.value })
                     }
-                    placeholder={t("students.enterLastName", "Enter last name")}
+                    placeholder={t("enterLastName", "Enter last name")}
                   />
                 </Form.Group>
               </Col>
@@ -1035,7 +975,7 @@ function AttendanceTracker() {
                         dateOfBirth: value,
                       })
                     }
-                    label={t("students.dateOfBirth", "Date of Birth")}
+                    label={t("dateOfBirth", "Date of Birth")}
                     placeholder={t("datePicker.selectDate", "Select date")}
                     required
                     maxDate={formatDateForInput(new Date())} // Can't be in the future
@@ -1045,7 +985,7 @@ function AttendanceTracker() {
               <Col md={6}>
                 <Form.Group className="mb-3">
                   <Form.Label>
-                    {t("students.gradeLevel", "Grade Level")} *
+                    {t("gradeLevel", "Grade Level")} *
                   </Form.Label>
                   <Form.Select
                     value={newStudent.gradeLevel}
@@ -1057,7 +997,7 @@ function AttendanceTracker() {
                     }
                   >
                     <option value="">
-                      {t("students.selectGrade", "Select grade")}
+                      {t("selectGrade", "Select grade")}
                     </option>
                     {Array.from({ length: 12 }, (_, idx) => idx + 1).map(
                       (grade) => (
@@ -1102,7 +1042,7 @@ function AttendanceTracker() {
             ) : (
               <>
                 <i className="bi bi-person-plus me-2"></i>
-                {t("students.createStudent", "Create Student")}
+                {t("createStudent", "Create Student")}
               </>
             )}
           </Button>

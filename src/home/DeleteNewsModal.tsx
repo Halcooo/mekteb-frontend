@@ -1,10 +1,11 @@
 import React from "react";
-import { Modal, Button, Card, Spinner } from "react-bootstrap";
+import { Modal, Button, Card, Spinner, Alert } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { NewsItem } from "../types/index";
-import { formatBosnianDate } from "../utils/dateFormatter";
+import { formatDate } from "../utils/dateUtils";
 
 interface DeleteNewsModalProps {
+  error?:string|null;
   show: boolean;
   selectedNews: NewsItem | null;
   isLoading: boolean;
@@ -14,19 +15,21 @@ interface DeleteNewsModalProps {
 
 const DeleteNewsModal: React.FC<DeleteNewsModalProps> = ({
   show,
+  error,
   selectedNews,
   isLoading,
   onHide,
   onConfirmDelete,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <Modal show={show} onHide={onHide}>
-      <Modal.Header closeButton>
-        <Modal.Title>{t("confirmDelete", "Confirm Delete")}</Modal.Title>
+      <Modal.Header closeButton closeLabel={t("close")}>
+        <Modal.Title>{t("confirmDeleteTitle")}</Modal.Title>
       </Modal.Header>
       <Modal.Body>
+        {error&&<Alert variant="danger">{error}</Alert>}
         <p>
           {t(
             "confirmDeleteNews",
@@ -45,7 +48,7 @@ const DeleteNewsModal: React.FC<DeleteNewsModalProps> = ({
               {selectedNews.createdAt && (
                 <small className="text-muted">
                   <i className="bi bi-calendar me-1"></i>
-                  {formatBosnianDate(selectedNews.createdAt)}
+                  {formatDate(selectedNews.createdAt,'short',i18n.language)}
                 </small>
               )}
             </Card.Body>

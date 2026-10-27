@@ -27,6 +27,7 @@ interface ApiResponse<T> {
 }
 
 export const notificationsApi = {
+  getById: async (id:number):Promise<NotificationItem> => (await apiClient.get<ApiResponse<NotificationItem>>(`/notifications/${id}`)).data.data,
   getAll: async (params?: {
     limit?: number;
     unreadOnly?: boolean;

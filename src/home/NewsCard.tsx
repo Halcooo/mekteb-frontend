@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Card, Button, OverlayTrigger, Tooltip, Modal } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { NewsItem } from "../types/index";
-import { formatBosnianRelativeTime } from "../utils/dateFormatter";
+import { formatRelativeTime } from "../utils/dateUtils";
 import "./NewsCard.scss";
 
 // Extract base URL (remove /api from the end if present)
@@ -24,7 +24,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [showGallery, setShowGallery] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const imageCount = item.images?.length || 0;
@@ -107,7 +107,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                   <Button
                     variant="outline-primary"
                     size="sm"
-                    className="news-card-admin-btn edit"
+                    className="news-card-admin-btn edit" aria-label={t("editNews")}
                     onClick={handleEditClick}
                   >
                     <i className="bi bi-pencil-square"></i>
@@ -120,7 +120,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                   <Button
                     variant="outline-danger"
                     size="sm"
-                    className="news-card-admin-btn delete"
+                    className="news-card-admin-btn delete" aria-label={t("deleteNews")}
                     onClick={handleDeleteClick}
                   >
                     <i className="bi bi-trash3"></i>
@@ -142,7 +142,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
               {item.createdAt && (
                 <small className="timestamp">
                   <i className="bi bi-clock news-card-icon me-1"></i>
-                  {formatBosnianRelativeTime(item.createdAt)}
+                  {formatRelativeTime(item.createdAt,i18n.language)}
                 </small>
               )}
               {(item.authorName || item.authorUsername) && (
@@ -165,7 +165,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
         centered
         className="news-gallery-modal"
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton closeLabel={t("close")}>
           <Modal.Title>{item.title}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="news-gallery-body">
@@ -180,7 +180,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 <Button
                   variant="secondary"
                   onClick={handlePrevImage}
-                  className="gallery-btn-prev"
+                  className="gallery-btn-prev" aria-label={t("previousImage")}
                   disabled={imageCount <= 1}
                 >
                   <i className="bi bi-chevron-left"></i>
@@ -191,7 +191,7 @@ const NewsCard: React.FC<NewsCardProps> = ({
                 <Button
                   variant="secondary"
                   onClick={handleNextImage}
-                  className="gallery-btn-next"
+                  className="gallery-btn-next" aria-label={t("nextImage")}
                   disabled={imageCount <= 1}
                 >
                   <i className="bi bi-chevron-right"></i>

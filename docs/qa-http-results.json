@@ -1,0 +1,157 @@
+{
+  "date": "27.10.2026.",
+  "environment": "marked isolated MySQL; synthetic data only",
+  "cases": [
+    {
+      "scenario": "AUTH-01 registration, validation and role injection",
+      "status": "passed"
+    },
+    {
+      "scenario": "ACL-01 every protected route rejects anonymous and insufficient roles",
+      "status": "passed"
+    },
+    {
+      "scenario": "ADM-01 two admins and teacher see every student and conversation page",
+      "status": "passed"
+    },
+    {
+      "scenario": "STU-01 search, pagination, stats, grade and parent filters",
+      "status": "passed"
+    },
+    {
+      "scenario": "STU-02 student CRUD, date-only birthday and invalid dates",
+      "status": "passed"
+    },
+    {
+      "scenario": "PROF-01 own profile updates and role/email protection",
+      "status": "passed"
+    },
+    {
+      "scenario": "PAR-01 own children, shared child, invitation connect/disconnect and denial",
+      "status": "passed"
+    },
+    {
+      "scenario": "ATT-01 attendance writes, all statuses, filters, deletion and uniqueness",
+      "status": "passed"
+    },
+    {
+      "scenario": "ATT-02 missing attendance is unrecorded, not absent; bulk and accurate summary",
+      "status": "passed"
+    },
+    {
+      "scenario": "CHAT-02 idempotent sending and both administrators see the committed message",
+      "status": "passed"
+    },
+    {
+      "scenario": "CHAT-03 cursor history, replies and legacy daily comments",
+      "status": "passed"
+    },
+    {
+      "scenario": "CHAT-04 own edits, moderation, soft delete and read acknowledgement",
+      "status": "passed"
+    },
+    {
+      "scenario": "NOT-01 owned notifications, counts, filters, individual/all read",
+      "status": "passed"
+    },
+    {
+      "scenario": "NEWS-01/02 public news, strict input, CRUD and image lifecycle",
+      "status": "passed"
+    },
+    {
+      "scenario": "PUSH-01 valid config and invalid destination rejection",
+      "status": "passed"
+    },
+    {
+      "scenario": "AUTH-02/03/04 owned sessions, refresh, revocation and logout all",
+      "status": "passed"
+    },
+    {
+      "scenario": "API-01 health, unknown resources and malformed identifiers",
+      "status": "passed"
+    }
+  ],
+  "coveredRequests": [
+    "DELETE /attendance/17",
+    "DELETE /attendance/19",
+    "DELETE /auth/sessions/7673a742-cc1b-4367-be0a-85b78445b114",
+    "DELETE /comments/468",
+    "DELETE /news/1",
+    "DELETE /news/2",
+    "DELETE /news/images/1",
+    "DELETE /parent/students/9",
+    "DELETE /push/subscription",
+    "DELETE /students/121",
+    "GET /attendance",
+    "GET /attendance/17",
+    "GET /attendance/date/2026-10-19",
+    "GET /attendance/date/2026-10-26",
+    "GET /attendance/date/2026-10-27/summary",
+    "GET /attendance/grade/2",
+    "GET /attendance/student/1",
+    "GET /attendance/student/1/stats",
+    "GET /auth/sessions",
+    "GET /chat/1/messages",
+    "GET /chat/2/messages",
+    "GET /chat/3/messages",
+    "GET /chat/9/messages",
+    "GET /chat/conversations",
+    "GET /chat/conversations/1",
+    "GET /chat/conversations/3",
+    "GET /comments",
+    "GET /comments/daily/2026-10-27",
+    "GET /comments/student/1",
+    "GET /comments/thread/58",
+    "GET /health",
+    "GET /images/news-1793131895898-192777910.png",
+    "GET /news",
+    "GET /news/1abc",
+    "GET /news/2",
+    "GET /news/2/images",
+    "GET /news/author/1",
+    "GET /not-a-route",
+    "GET /notifications",
+    "GET /notifications/374",
+    "GET /notifications/unread-count",
+    "GET /parent/students",
+    "GET /parent/students/1/attendance",
+    "GET /parent/students/1/attendance/stats",
+    "GET /parent/students/3/attendance",
+    "GET /push/config",
+    "GET /students",
+    "GET /students/1",
+    "GET /students/121",
+    "GET /students/1abc",
+    "GET /students/grade/2",
+    "GET /students/parent/4",
+    "GET /students/search",
+    "GET /students/stats",
+    "GET /users",
+    "GET /users/profile",
+    "PATCH /chat/1/read",
+    "PATCH /notifications/374/read",
+    "PATCH /notifications/read-all",
+    "POST /attendance",
+    "POST /attendance/bulk",
+    "POST /auth/login",
+    "POST /auth/logout",
+    "POST /auth/logout-all",
+    "POST /auth/refresh",
+    "POST /auth/register",
+    "POST /chat/1/messages",
+    "POST /comments",
+    "POST /news",
+    "POST /news/2/images",
+    "POST /news/999999/images",
+    "POST /parent/connect",
+    "POST /push/subscription",
+    "POST /students",
+    "PUT /attendance/17",
+    "PUT /comments/468",
+    "PUT /news/1",
+    "PUT /news/2",
+    "PUT /students/121",
+    "PUT /users/1",
+    "PUT /users/4"
+  ]
+}

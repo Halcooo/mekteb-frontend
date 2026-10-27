@@ -1,167 +1,33 @@
-import { Navbar, Nav, Container, Button } from "react-bootstrap";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import mektebLogo from "../assets/mekteb.png";
-import { useAuth } from "../hooks/useAuth";
-import LanguageDropdown from "../components/LanguageDropdown";
-import NotificationBell from "../components/NotificationBell";
-import "./AppNavbar.scss";
+import { useState } from 'react';
+import { Navbar, Nav, Container, Dropdown } from 'react-bootstrap';
+import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import mektebLogo from '../assets/mekteb.png';
+import { useAuth } from '../hooks/useAuth';
+import LanguageDropdown from '../components/LanguageDropdown';
+import NotificationBell from '../components/NotificationBell';
+import './AppNavbar.scss';
 
-function AppNavbar() {
-  const { t } = useTranslation();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { isAuthenticated, logout, user } = useAuth();
-
-  const isRouteActive = (path: string) => location.pathname === path;
-
-  return (
-    <Navbar bg="light" expand="lg" className="shadow-sm">
-      <Container fluid className="px-3">
-        <Navbar.Brand as={Link} to="/" className="fw-bold">
-          <img
-            src={mektebLogo}
-            alt={t("mektebLogo", "Mekteb Logo")}
-            className="navbar-brand-logo"
-          />
-          <span className="navbar-brand-text desktop">{t("mekteb")}</span>
-          <span className="navbar-brand-text mobile">{t("mekteb")}</span>
-        </Navbar.Brand>
-
-        <Navbar.Toggle
-          aria-controls="mekteb-navbar-nav"
-          className="navbar-toggler-custom"
-        >
-          <span className="navbar-toggler-icon"></span>
-        </Navbar.Toggle>
-
-        <Navbar.Collapse id="mekteb-navbar-nav">
-          <Nav className="me-auto">
-            <Nav.Link
-              as={Link}
-              to="/"
-              className={`fw-500 ${
-                isRouteActive("/") ? "active bg-primary text-white rounded" : ""
-              }`}
-            >
-              <i className="bi bi-house me-2"></i>
-              <span className="d-lg-inline d-xl-inline">
-                {t("home", "Home")}
-              </span>
-            </Nav.Link>
-
-            {isAuthenticated && (
-              <>
-                {user?.role === "admin" && (
-                  <Nav.Link
-                    as={Link}
-                    to="/attendance"
-                    className={`fw-500 ${
-                      isRouteActive("/attendance")
-                        ? "active bg-primary text-white rounded"
-                        : ""
-                    }`}
-                  >
-                    <i className="bi bi-calendar-check me-2"></i>
-                    <span className="d-lg-inline d-xl-inline">
-                      {t("attendance")}
-                    </span>
-                  </Nav.Link>
-                )}
-
-                {["admin", "teacher"].includes(user?.role || "") && (
-                  <Nav.Link
-                    as={Link}
-                    to="/students"
-                    className={`fw-500 ${
-                      isRouteActive("/students")
-                        ? "active bg-primary text-white rounded"
-                        : ""
-                    }`}
-                  >
-                    <i className="bi bi-people me-2"></i>
-                    <span className="d-lg-inline d-xl-inline">
-                      {t("students")}
-                    </span>
-                  </Nav.Link>
-                )}
-
-                {(user?.role === "parent" ||
-                  user?.role === "admin" ||
-                  user?.role === "user") && (
-                  <Nav.Link
-                    as={Link}
-                    to="/parent-dashboard"
-                    className={`fw-500 ${
-                      isRouteActive("/parent-dashboard")
-                        ? "active bg-primary text-white rounded"
-                        : ""
-                    }`}
-                  >
-                    <i className="bi bi-people-fill me-2"></i>
-                    <span className="d-lg-inline d-xl-inline">
-                      {t("parentDashboard.title", "Parent View")}
-                    </span>
-                  </Nav.Link>
-                )}
-
-                <Nav.Link
-                  as={Link}
-                  to="/profile"
-                  className={`fw-500 ${
-                    isRouteActive("/profile")
-                      ? "active bg-primary text-white rounded"
-                      : ""
-                  }`}
-                >
-                  <i className="bi bi-person-circle me-2"></i>
-                  <span className="d-lg-inline d-xl-inline">
-                    {t("profile")}
-                  </span>
-                </Nav.Link>
-              </>
-            )}
-          </Nav>
-
-          <Nav className="mt-2 mt-lg-0 d-flex align-items-center gap-2">
-            {!isAuthenticated ? (
-              <>
-                <Link to="/login" style={{ textDecoration: "none" }}>
-                  <Button variant="outline-primary" size="sm" className="me-2">
-                    <i className="bi bi-box-arrow-in-right me-1"></i>
-                    {t("login", "Login")}
-                  </Button>
-                </Link>
-                <Link to="/register" style={{ textDecoration: "none" }}>
-                  <Button variant="primary" size="sm">
-                    <i className="bi bi-person-plus me-1"></i>
-                    {t("register", "Register")}
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <NotificationBell />
-                <Button
-                  variant="outline-danger"
-                  size="sm"
-                  onClick={() => {
-                    logout();
-                    navigate("/login");
-                  }}
-                >
-                  <i className="bi bi-box-arrow-right me-1"></i>
-                  {t("logout", "Logout")}
-                </Button>
-              </>
-            )}
-
-            <LanguageDropdown />
-          </Nav>
-        </Navbar.Collapse>
-      </Container>
-    </Navbar>
-  );
+export default function AppNavbar() {
+  const {t}=useTranslation(), location=useLocation();
+  const {isAuthenticated,isLoading,isSigningOut,logout,user}=useAuth();
+  const [expanded,setExpanded]=useState(false);
+  const links=[{path:'/',label:t('home'),icon:'house-door'},...(isAuthenticated?[
+    {path:'/messages',label:t('chat.title'),icon:'chat-dots'},
+    ...(user?.role==='admin'?[{path:'/attendance',label:t('attendance'),icon:'calendar-check'}]:[]),
+    ...(['admin','teacher'].includes(user?.role??'')?[{path:'/students',label:t('students'),icon:'people'}]:[]),
+    ...(['parent','admin','user'].includes(user?.role??'')?[{path:'/parent-dashboard',label:t('parentDashboard.title'),icon:'person-hearts'}]:[]),
+  ]:[])];
+  return <Navbar expand="lg" expanded={expanded} onToggle={setExpanded} className="app-navbar" aria-label={t('menu')}>
+    <Container fluid>
+      <Navbar.Brand as={Link} to="/" onClick={()=>setExpanded(false)}><img src={mektebLogo} alt={t('mektebLogo')} className="navbar-brand-logo"/><span className="brand-copy"><strong>{t('mekteb')}</strong><small>{t('appName')}</small></span></Navbar.Brand>
+      <div className="navbar-tools">
+        {isAuthenticated&&<NotificationBell/>}
+        <LanguageDropdown/>
+        {isAuthenticated?<Dropdown align="end" className="account-dropdown"><Dropdown.Toggle variant="light" className="account-toggle" aria-label={t('accountMenu')}><span className="account-avatar">{user?.username.slice(0,2).toUpperCase()}</span><span className="account-name">{user?.username}<small>{t(`comments.${user?.role==='user'?'parent':user?.role}`)}</small></span></Dropdown.Toggle><Dropdown.Menu><Dropdown.Header>{user?.username}</Dropdown.Header><Dropdown.Item as={Link} to="/profile"><i className="bi bi-person-circle me-2"/>{t('profile')}</Dropdown.Item><Dropdown.Divider/><Dropdown.Item className="text-danger" onClick={()=>{void logout().catch(()=>{});}}><i className="bi bi-box-arrow-right me-2"/>{t('logout')}</Dropdown.Item></Dropdown.Menu></Dropdown>:!isLoading&&!isSigningOut&&<Link to="/login" className="btn btn-primary navbar-login">{t('login')}</Link>}
+        <Navbar.Toggle aria-controls="mekteb-navbar-nav" label={t(expanded?'closeMenu':'menu')}/>
+      </div>
+      <Navbar.Collapse id="mekteb-navbar-nav"><Nav>{links.map(link=><Nav.Link as={Link} to={link.path} key={link.path} active={location.pathname===link.path} aria-current={location.pathname===link.path?'page':undefined} onClick={()=>setExpanded(false)}><i className={`bi bi-${link.icon}`}/>{link.label}</Nav.Link>)}</Nav></Navbar.Collapse>
+    </Container>
+  </Navbar>;
 }
-
-export default AppNavbar;

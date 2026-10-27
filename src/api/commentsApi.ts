@@ -16,6 +16,9 @@ export interface StudentComment {
   studentName?: string;
   studentGrade?: string;
   repliesCount?: number;
+  clientMessageId?: string;
+  deletedAt?: string | null;
+  editedAt?: string | null;
 }
 
 export interface CreateCommentRequest {
@@ -23,6 +26,7 @@ export interface CreateCommentRequest {
   content: string;
   date: string; // YYYY-MM-DD format
   parentCommentId?: number; // For parent replies
+  clientMessageId?: string;
 }
 
 export interface GetCommentsParams {
@@ -110,6 +114,7 @@ export const commentsApi = {
       "/comments",
       {
         ...commentData,
+        clientMessageId: commentData.clientMessageId ?? crypto.randomUUID(),
         date: normalizedDate,
       },
     );

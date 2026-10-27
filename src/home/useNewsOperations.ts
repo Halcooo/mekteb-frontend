@@ -12,6 +12,8 @@ interface FormData {
 export const useNewsOperations = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
+  const [operationError,setOperationError]=useState<string|null>(null);
+  const [persistedNewsId,setPersistedNewsId]=useState<number|null>(null);
 
   // Modal states
   const [showAddModal, setShowAddModal] = useState(false);
@@ -35,8 +37,8 @@ export const useNewsOperations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["news"] });
-      setShowAddModal(false);
-      setFormData({ title: "", text: "" });
+
+
     },
     onError: (error) => {
       console.error("Error adding news:", error);
@@ -58,9 +60,6 @@ export const useNewsOperations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["news"] });
-      setShowEditModal(false);
-      setSelectedNews(null);
-      setFormData({ title: "", text: "" });
     },
     onError: (error) => {
       console.error("Error editing news:", error);
@@ -79,7 +78,7 @@ export const useNewsOperations = () => {
       setSelectedNews(null);
     },
     onError: (error) => {
-      console.error("Error deleting news:", error);
+      console.error("Error deleting news:", error);setOperationError(t("newsDeleteError"));
     },
   });
 
@@ -109,8 +108,7 @@ export const useNewsOperations = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["news"] });
-      setSelectedImages([]);
-      setImagePreviewUrls([]);
+      clearSelectedImages();
     },
     onError: (error) => {
       console.error("Error uploading images:", error);
@@ -123,49 +121,31 @@ export const useNewsOperations = () => {
       const response = await apiClient.delete(`/news/images/${imageId}`);
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (_result,imageId) => {
       queryClient.invalidateQueries({ queryKey: ["news"] });
+      setSelectedNews(current=>current?{...current,images:current.images?.filter(image=>image.id!==imageId)}:current);
     },
     onError: (error) => {
       console.error("Error deleting image:", error);
+      setOperationError(t('newsDeleteError'));
     },
   });
 
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (showAddModal) {
-      try {
-        const newsResponse = await addNewsMutation.mutateAsync(formData);
-        // Upload images if any selected
-        if (selectedImages.length > 0 && newsResponse.data.id) {
-          await uploadImagesMutation.mutateAsync({
-            newsId: newsResponse.data.id,
-            images: selectedImages,
-          });
-        }
-      } catch (error) {
-        console.error("Error creating news with images:", error);
-      }
-    } else if (showEditModal && selectedNews) {
-      try {
-        await editNewsMutation.mutateAsync({
-          id: selectedNews.id,
-          ...formData,
-        });
-        // Upload new images if any selected
-        if (selectedImages.length > 0) {
-          await uploadImagesMutation.mutateAsync({
-            newsId: selectedNews.id,
-            images: selectedImages,
-          });
-        }
-      } catch (error) {
-        console.error("Error updating news with images:", error);
-      }
-    }
+  // Keep the dialog open until text and images have finished. Retrying a failed
+  // upload reuses the saved news ID instead of creating a duplicate article.
+  const handleSubmit=async(e:React.FormEvent)=>{
+    e.preventDefault();setOperationError(null);
+    let id=persistedNewsId??(showEditModal?selectedNews?.id:undefined);
+    let textSaved=false;
+    try {
+      if(id)await editNewsMutation.mutateAsync({id,...formData});
+      else {const saved=await addNewsMutation.mutateAsync(formData);id=saved.data.id;setPersistedNewsId(id!);}
+      textSaved=true;
+      if(selectedImages.length)await uploadImagesMutation.mutateAsync({newsId:id!,images:selectedImages});
+      setShowAddModal(false);setShowEditModal(false);setSelectedNews(null);setPersistedNewsId(null);
+      setFormData({title:'',text:''});clearSelectedImages();
+    }catch {setOperationError(t(textSaved?'newsImagesError':'newsSaveError'));}
   };
-
   // Handle input changes
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -182,7 +162,7 @@ export const useNewsOperations = () => {
     const newFiles = Array.from(files);
 
     // Validate number of files
-    if (selectedImages.length + newFiles.length > 5) {
+    if ((showEditModal?selectedNews?.images?.length??0:0) + selectedImages.length + newFiles.length > 5) {
       alert(t("maxImagesAllowed"));
       return;
     }
@@ -192,7 +172,7 @@ export const useNewsOperations = () => {
     const validPreviewUrls: string[] = [];
 
     for (const file of newFiles) {
-      if (!file.type.startsWith("image/")) {
+      if (!["image/png","image/jpeg","image/gif","image/webp"].includes(file.type)) {
         alert(t("onlyImagesAllowed"));
         continue;
       }
@@ -237,7 +217,7 @@ export const useNewsOperations = () => {
   const handleAddNews = () => {
     setFormData({ title: "", text: "" });
     clearSelectedImages();
-    setShowAddModal(true);
+    setOperationError(null);setPersistedNewsId(null);setShowAddModal(true);
   };
 
   // Handle edit news
@@ -245,13 +225,13 @@ export const useNewsOperations = () => {
     setSelectedNews(newsItem);
     setFormData({ title: newsItem.title, text: newsItem.text });
     clearSelectedImages();
-    setShowEditModal(true);
+    setOperationError(null);setPersistedNewsId(null);setShowEditModal(true);
   };
 
   // Handle delete news
   const handleDeleteNews = (newsItem: NewsItem) => {
     setSelectedNews(newsItem);
-    setShowDeleteModal(true);
+    setOperationError(null);setShowDeleteModal(true);
   };
 
   // Handle preview news
@@ -291,6 +271,7 @@ export const useNewsOperations = () => {
     showDeleteModal,
     showPreviewModal,
 
+    operationError,
     // Data states
     selectedNews,
     formData,

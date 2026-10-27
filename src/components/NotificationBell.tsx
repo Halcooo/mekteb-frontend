@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Badge, Button, ListGroup, Modal, Spinner } from "react-bootstrap";
+import { Alert, Badge, Button, ListGroup, Modal, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -7,20 +7,23 @@ import {
   type NotificationItem,
 } from "../api/notificationsApi";
 import { useAuth } from "../hooks/useAuth";
-import { formatDateForInput } from "../utils/dateFormatter";
+
 import "./NotificationBell.scss";
+import { formatDate, formatRelativeTime } from '../utils/dateUtils';
 
 function NotificationBell() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { user, accessToken } = useAuth();
   const navigate = useNavigate();
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
+  const reconnectAttempts = useRef(0);
   const showModalRef = useRef(false);
   const unreadOnlyRef = useRef(false);
 
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [unreadOnly, setUnreadOnly] = useState(false);
@@ -44,6 +47,7 @@ function NotificationBell() {
 
   const loadNotifications = useCallback(async (onlyUnread: boolean) => {
     setLoading(true);
+    setLoadError(false);
     try {
       const items = await notificationsApi.getAll({
         limit: 50,
@@ -51,7 +55,7 @@ function NotificationBell() {
       });
       setNotifications(items);
     } catch {
-      setNotifications([]);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -63,36 +67,13 @@ function NotificationBell() {
         return null;
       }
 
-      const apiUrl = new URL(import.meta.env.VITE_API_URL as string);
+      const apiUrl = new URL(import.meta.env.VITE_API_URL as string,window.location.origin);
       const wsProtocol = apiUrl.protocol === "https:" ? "wss:" : "ws:";
-      return `${wsProtocol}//${apiUrl.host}/backend/ws/notifications?token=${encodeURIComponent(accessToken)}`;
+      return `${wsProtocol}//${apiUrl.host}/backend/ws/notifications`;
     } catch {
       return null;
     }
   }, [accessToken]);
-
-  const formatRelativeTime = (value: string) => {
-    const date = new Date(value);
-    const diffMs = Date.now() - date.getTime();
-    const minutes = Math.floor(diffMs / 60000);
-
-    if (minutes < 1) return t("notifications.justNow", "Just now");
-    if (minutes < 60) {
-      return t("notifications.minutesAgo", "{{count}}m ago", {
-        count: minutes,
-      });
-    }
-
-    const hours = Math.floor(minutes / 60);
-    if (hours < 24) {
-      return t("notifications.hoursAgo", "{{count}}h ago", {
-        count: hours,
-      });
-    }
-
-    const days = Math.floor(hours / 24);
-    return t("notifications.daysAgo", "{{count}}d ago", { count: days });
-  };
 
   useEffect(() => {
     if (!user) {
@@ -100,10 +81,12 @@ function NotificationBell() {
     }
 
     loadUnreadCount();
+    const onChange = () => { void loadUnreadCount(); if (showModalRef.current) void loadNotifications(unreadOnlyRef.current); };
+    window.addEventListener("mekteb:notifications", onChange);
     const interval = window.setInterval(loadUnreadCount, 20000);
 
-    return () => window.clearInterval(interval);
-  }, [user, loadUnreadCount]);
+    return () => { window.clearInterval(interval); window.removeEventListener("mekteb:notifications", onChange); };
+  }, [user, loadUnreadCount, loadNotifications]);
 
   useEffect(() => {
     if (!user || !accessToken) {
@@ -124,6 +107,7 @@ function NotificationBell() {
 
       const socket = new WebSocket(wsUrl);
       wsRef.current = socket;
+      socket.onopen = () => { reconnectAttempts.current=0; socket.send(JSON.stringify({type:'authenticate',accessToken})); };
 
       socket.onmessage = (event) => {
         try {
@@ -140,9 +124,11 @@ function NotificationBell() {
             return;
           }
 
+          if (payload.type === 'ready') { void loadUnreadCount(); return; }
           if (payload.type === "notification:new") {
+            window.dispatchEvent(new Event('mekteb:chat'));
             // Instant visual feedback, then sync from API.
-            setUnreadCount((prev) => prev + 1);
+
             void loadUnreadCount();
             if (showModalRef.current) {
               void loadNotifications(unreadOnlyRef.current);
@@ -166,7 +152,8 @@ function NotificationBell() {
           return;
         }
 
-        reconnectTimeoutRef.current = window.setTimeout(connect, 3000);
+        const delay=Math.min(30_000,1000*2**reconnectAttempts.current++)+Math.random()*500;
+        reconnectTimeoutRef.current = window.setTimeout(connect, delay);
       };
     };
 
@@ -286,12 +273,12 @@ function NotificationBell() {
     if (!notification.isRead) {
       try {
         await notificationsApi.markAsRead(notification.id);
+        setNotifications((prev) =>
+          prev.map((n) => (n.id === notification.id ? { ...n, isRead: 1 } : n)),
+        );
       } catch {
         // Continue navigation even if mark-as-read fails
       }
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notification.id ? { ...n, isRead: 1 } : n)),
-      );
     }
 
     await loadUnreadCount();
@@ -301,58 +288,17 @@ function NotificationBell() {
 
     setShowModal(false);
 
-    const navTimestamp = String(Date.now());
-    const normalizedCommentDate = notification.commentDate
-      ? formatDateForInput(notification.commentDate)
-      : null;
-    const hasStudent = Boolean(notification.studentId);
-
-    if ((user?.role === "parent" || user?.role === "user") && hasStudent) {
-      const params = new URLSearchParams({
-        openComments: "1",
-        studentId: String(notification.studentId),
-        notificationId: String(notification.id),
-        ts: navTimestamp,
-      });
-      if (notification.commentId) {
-        params.set("commentId", String(notification.commentId));
-      }
-      if (normalizedCommentDate) {
-        params.set("date", normalizedCommentDate);
-      }
-      navigate(`/parent-dashboard?${params.toString()}`);
-      return;
-    }
-
-    if (normalizedCommentDate || hasStudent) {
-      const params = new URLSearchParams({
-        notificationId: String(notification.id),
-        ts: navTimestamp,
-      });
-      if (notification.commentId) {
-        params.set("commentId", String(notification.commentId));
-      }
-      if (normalizedCommentDate) {
-        params.set("commentsDate", normalizedCommentDate);
-      }
-      if (hasStudent) {
-        params.set("studentId", String(notification.studentId));
-        params.set("openComments", "1");
-      }
-      navigate(`/attendance?${params.toString()}`);
-      return;
-    }
-
-    navigate("/");
+    navigate(`/messages?notificationId=${notification.id}`);
   };
-
   const handleMarkAllAsRead = async () => {
+    try {
     await notificationsApi.markAllAsRead();
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: 1 })));
     setUnreadCount(0);
     if (unreadOnly) {
       setNotifications([]);
     }
+    } catch { setLoadError(true); }
   };
 
   if (!user) {
@@ -366,9 +312,10 @@ function NotificationBell() {
         size="sm"
         onClick={handleOpen}
         className="notification-bell-btn"
+        aria-label={unreadCount>0?`${t('notifications.title')}: ${t('chat.unreadCount',{count:unreadCount})}`:t('notifications.title')}
+        title={t('notifications.title')}
       >
-        <i className="bi bi-bell me-1"></i>
-        {t("notifications.title", "Notifications")}
+        <i className="bi bi-bell" aria-hidden="true"></i>
         {unreadCount > 0 && (
           <Badge bg="danger" className="ms-2 notification-count-badge">
             {unreadCount}
@@ -381,10 +328,11 @@ function NotificationBell() {
         onHide={() => setShowModal(false)}
         className="notifications-modal"
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton closeLabel={t("close")}>
           <Modal.Title>{t("notifications.title", "Notifications")}</Modal.Title>
         </Modal.Header>
         <Modal.Body className="notifications-modal-body">
+          {loadError&&<Alert variant="warning">{t('chat.loadError')} <Button variant="link" onClick={()=>void loadNotifications(unreadOnly)}>{t('chat.retry')}</Button></Alert>}
           <div className="notifications-toolbar mb-3">
             <div className="d-flex align-items-center gap-2">
               <Badge bg="secondary" pill>
@@ -446,9 +394,9 @@ function NotificationBell() {
                             </small>
                           )}
                         </div>
-                        <small className="text-muted nb-time-label">
+                        <small className="text-muted nb-time-label" title={formatDate(notification.createdAt,'dateTime',i18n.language)}>
                           <i className="bi bi-clock me-1"></i>
-                          {formatRelativeTime(notification.createdAt)}
+                          {formatRelativeTime(notification.createdAt,i18n.language)}
                         </small>
                       </div>
                       <small className="text-muted d-block notification-message">

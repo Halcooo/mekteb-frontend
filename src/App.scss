@@ -47,7 +47,6 @@ body {
 // Mobile-friendly touch targets (minimum 44px)
 button,
 .btn,
-a,
 input[type="button"],
 input[type="submit"] {
   min-height: 44px;
@@ -59,9 +58,9 @@ input[type="submit"] {
 input,
 textarea,
 select {
-  font-size: 16px !important; // Prevent iOS zoom on focus
   max-width: 100%;
 }
+@media(max-width:767px) { input, textarea, select { font-size:16px!important; } }
 
 // Mobile-friendly cards
 .card {

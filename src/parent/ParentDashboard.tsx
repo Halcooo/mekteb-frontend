@@ -1,3 +1,4 @@
+import {formatPercent} from '../utils/numberFormatter';
 import React, { useState, useEffect, useCallback } from "react";
 import {
   Row,
@@ -22,9 +23,10 @@ import type {
   ParentAttendanceStats,
 } from "../api/parentApi";
 import { validateParentKey } from "../utils/parentKeyUtils";
-import { formatBosnianDate, formatDateForInput } from "../utils/dateFormatter";
+import { formatDate, formatDateForInput } from "../utils/dateUtils";
 import StudentComments from "../components/StudentComments";
 import DateBox from "../components/DateBox";
+import DatePicker from '../components/DatePicker';
 import "./ParentDashboard.scss";
 
 // Local interface that extends the API interface
@@ -33,7 +35,7 @@ interface ConnectedStudent extends ApiConnectedStudent {
 }
 
 const ParentDashboard: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const [studentKey, setStudentKey] = useState("");
   const [connectedStudents, setConnectedStudents] = useState<
@@ -176,7 +178,7 @@ const ParentDashboard: React.FC = () => {
           }
         }, 100);
       } else {
-        setError(response.message || t("parentDashboard.invalidKey"));
+        setError(t("parentDashboard.invalidKey"));
       }
     } catch (error: unknown) {
       console.error("Error connecting student:", error);
@@ -263,22 +265,11 @@ const ParentDashboard: React.FC = () => {
     return "info";
   };
 
-  const getAttendanceNote = (status: string) => {
-    const normalizedStatus = status.toUpperCase();
-
-    if (normalizedStatus === "PRESENT") return t("parentDashboard.onTime");
-    if (normalizedStatus === "LATE") {
-      return t("parentDashboard.arrivedLate", { minutes: "-" });
-    }
-    if (normalizedStatus === "ABSENT") return t("parentDashboard.sickLeave");
-    return t("parentDashboard.medicalAppointment");
-  };
-
   return (
     <PageLayout
       title={
         <span>
-          <i className="fas fa-family"></i>
+          <i className="bi bi-person-hearts"></i>
           {t("parentDashboard.title")}
         </span>
       }
@@ -290,7 +281,7 @@ const ParentDashboard: React.FC = () => {
           <Card>
             <Card.Header>
               <h5 className="mb-0">
-                <i className="fas fa-link me-2"></i>
+                <i className="bi bi-link-45deg me-2"></i>
                 {t("parentDashboard.connectStudent")}
               </h5>
             </Card.Header>
@@ -316,7 +307,7 @@ const ParentDashboard: React.FC = () => {
                       </>
                     ) : (
                       <>
-                        <i className="fas fa-plus me-2"></i>
+                        <i className="bi bi-plus me-2"></i>
                         {t("parentDashboard.connect")}
                       </>
                     )}
@@ -326,7 +317,7 @@ const ParentDashboard: React.FC = () => {
 
               <div className="help-text">
                 <small className="text-muted">
-                  <i className="fas fa-info-circle me-1"></i>
+                  <i className="bi bi-info-circle me-1"></i>
                   {t("parentDashboard.keyHelp")}
                 </small>
               </div>
@@ -339,7 +330,7 @@ const ParentDashboard: React.FC = () => {
       {error && (
         <Row className="mb-3">
           <Col>
-            <Alert variant="danger" dismissible onClose={() => setError(null)}>
+            <Alert variant="danger" dismissible closeLabel={t("close")} onClose={() => setError(null)}>
               {error}
             </Alert>
           </Col>
@@ -351,7 +342,7 @@ const ParentDashboard: React.FC = () => {
           <Col>
             <Alert
               variant="success"
-              dismissible
+              dismissible closeLabel={t("close")}
               onClose={() => setSuccess(null)}
             >
               {success}
@@ -366,7 +357,7 @@ const ParentDashboard: React.FC = () => {
           <Card>
             <Card.Header className="d-flex justify-content-between align-items-center">
               <h5 className="mb-0">
-                <i className="fas fa-users me-2"></i>
+                <i className="bi bi-people me-2"></i>
                 {t("parentDashboard.myChildren")} ({connectedStudents.length})
               </h5>
               <Button
@@ -375,7 +366,7 @@ const ParentDashboard: React.FC = () => {
                 onClick={fetchConnectedStudents}
                 disabled={loading}
               >
-                <i className="fas fa-sync-alt me-1"></i>
+                <i className="bi bi-arrow-clockwise me-1"></i>
                 {t("common.refresh")}
               </Button>
             </Card.Header>
@@ -387,7 +378,7 @@ const ParentDashboard: React.FC = () => {
                 </div>
               ) : connectedStudents.length === 0 ? (
                 <div className="text-center py-4">
-                  <i className="fas fa-user-plus fa-3x text-muted mb-3"></i>
+                  <i className="bi bi-person-plus fs-1 text-muted mb-3"></i>
                   <h6 className="text-muted">
                     {t("parentDashboard.noStudentsConnected")}
                   </h6>
@@ -411,23 +402,23 @@ const ParentDashboard: React.FC = () => {
                     <tbody>
                       {connectedStudents.map((student) => (
                         <tr key={student.id}>
-                          <td>
+                          <td data-label={t('firstName')}>
                             <strong>{student.firstName}</strong>
                           </td>
-                          <td>{student.lastName}</td>
-                          <td>
+                          <td data-label={t('lastName')}>{student.lastName}</td>
+                          <td data-label={t('gradeLevel')}>
                             <Badge bg="info">{student.gradeLevel}</Badge>
                           </td>
-                          <td>
+                          <td data-label={t('parentDashboard.attendanceRate')}>
                             <Badge
                               bg={getStatusBadgeVariant(
                                 student.attendanceRate || 0,
                               )}
                             >
-                              {(student.attendanceRate || 0).toFixed(1)}%
+                              {formatPercent(student.attendanceRate,i18n.language)}
                             </Badge>
                           </td>
-                          <td>
+                          <td data-label={t('parentDashboard.connectedSince')}>
                             {student.connectionDate ? (
                               <DateBox
                                 value={student.connectionDate}
@@ -437,14 +428,14 @@ const ParentDashboard: React.FC = () => {
                               t("common.unknown")
                             )}
                           </td>
-                          <td>
+                          <td className="parent-student-actions">
                             <div className="d-flex gap-2 flex-wrap">
                               <Button
                                 variant="outline-primary"
                                 size="sm"
                                 onClick={() => handleViewAttendance(student)}
                               >
-                                <i className="fas fa-calendar-alt me-1"></i>
+                                <i className="bi bi-calendar-check me-1"></i>
                                 {t("parentDashboard.viewAttendance")}
                               </Button>
                               <Button
@@ -452,7 +443,7 @@ const ParentDashboard: React.FC = () => {
                                 size="sm"
                                 onClick={() => handleViewComments(student)}
                               >
-                                <i className="fas fa-comments me-1"></i>
+                                <i className="bi bi-chat-dots me-1"></i>
                                 {t("parentDashboard.viewComments")}
                               </Button>
                               <Button
@@ -461,7 +452,7 @@ const ParentDashboard: React.FC = () => {
                                 onClick={() => handleDisconnectStudent(student)}
                                 disabled={loading}
                               >
-                                <i className="fas fa-unlink me-1"></i>
+                                <i className="bi bi-link-45deg me-1"></i>
                                 {t("parentDashboard.disconnect")}
                               </Button>
                             </div>
@@ -483,7 +474,7 @@ const ParentDashboard: React.FC = () => {
             <Card className="parent-comments-card" id="parent-comments-panel">
               <Card.Header className="d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <h5 className="mb-0">
-                  <i className="fas fa-comments me-2"></i>
+                  <i className="bi bi-chat-dots me-2"></i>
                   {t("comments.title")} - {selectedStudent.firstName}{" "}
                   {selectedStudent.lastName}
                 </h5>
@@ -498,14 +489,12 @@ const ParentDashboard: React.FC = () => {
               <Card.Body>
                 <div className="mb-3 parent-comments-date-filter">
                   <Form.Group>
-                    <Form.Label>
-                      {t("comments.selectDate", "Select Date")}
-                    </Form.Label>
-                    <Form.Control
-                      type="date"
+                    <DatePicker
+                      label={t('comments.selectDate')}
                       value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      max={formatDateForInput(new Date())}
+                      onChange={setSelectedDate}
+                      maxDate={formatDateForInput(new Date())}
+                      required
                     />
                   </Form.Group>
                 </div>
@@ -529,7 +518,7 @@ const ParentDashboard: React.FC = () => {
         onHide={() => setShowAttendanceModal(false)}
         size="lg"
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton closeLabel={t("close")}>
           <Modal.Title>
             <i className="fas fa-calendar-check me-2"></i>
             {t("parentDashboard.attendanceDetails")} -{" "}
@@ -558,10 +547,7 @@ const ParentDashboard: React.FC = () => {
                         <Card className="text-center">
                           <Card.Body>
                             <h4 className="text-success">
-                              {(attendanceStats?.attendanceRate || 0).toFixed(
-                                1,
-                              )}
-                              %
+                              {formatPercent(attendanceStats?.attendanceRate,i18n.language)}
                             </h4>
                             <small className="text-muted">
                               {t("parentDashboard.overallAttendance")}
@@ -611,13 +597,13 @@ const ParentDashboard: React.FC = () => {
                         <tr>
                           <th>{t("parentDashboard.date")}</th>
                           <th>{t("parentDashboard.status")}</th>
-                          <th>{t("parentDashboard.notes")}</th>
+
                         </tr>
                       </thead>
                       <tbody>
                         {attendanceRecords.map((record) => (
                           <tr key={record.id}>
-                            <td>{formatBosnianDate(record.date)}</td>
+                            <td>{formatDate(record.date,'short',i18n.language)}</td>
                             <td>
                               <Badge
                                 bg={getAttendanceStatusBadgeVariant(
@@ -628,11 +614,6 @@ const ParentDashboard: React.FC = () => {
                                   `parentDashboard.statusValues.${record.status.toLowerCase()}`,
                                 )}
                               </Badge>
-                            </td>
-                            <td>
-                              <small className="text-muted">
-                                {getAttendanceNote(record.status)}
-                              </small>
                             </td>
                           </tr>
                         ))}

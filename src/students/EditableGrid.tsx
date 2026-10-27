@@ -66,7 +66,7 @@ const ParentKeyDisplay: React.FC<ParentKeyDisplayProps> = ({ parentKey }) => {
   if (!parentKey) {
     return (
       <span className="text-muted">
-        <i className="fas fa-key me-1"></i>
+        <i className="bi bi-key me-1"></i>
         {t("parentKey.notGenerated", "Not generated")}
       </span>
     );
@@ -90,7 +90,7 @@ const ParentKeyDisplay: React.FC<ParentKeyDisplayProps> = ({ parentKey }) => {
         className={`parent-key-btn ${copied ? "copied" : ""}`}
       >
         <code className="parent-key-code">{parentKey}</code>
-        <i className={`fas ${copied ? "fa-check" : "fa-copy"} ms-1`}></i>
+        <i className={`bi ${copied ? 'bi-check' : 'bi-copy'} ms-1`}></i>
       </Button>
     </OverlayTrigger>
   );
@@ -104,7 +104,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
   loading = false,
   error = null,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [editingRows, setEditingRows] = useState<{
     [key: number]: EditableRow;
   }>({});
@@ -322,7 +322,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
 
     // Format dates when displaying
     if (type === "date" && currentValue) {
-      return <span>{formatDate(String(currentValue))}</span>;
+      return <span>{formatDate(String(currentValue), 'short', i18n.language)}</span>;
     }
 
     return <span>{currentValue ?? t("common.notAvailable", "N/A")}</span>;
@@ -374,7 +374,6 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                 <th>{t("dateOfBirth", "Date of Birth")}</th>
                 <th>{t("grade", "Grade Level")}</th>
                 <th>{t("parentKey.label", "Parent Key")}</th>
-                <th>{t("parentId", "Parent ID")}</th>
                 <th>{t("parentName", "Parent Name")}</th>
                 <th>{t("actions", "Actions")}</th>
               </tr>
@@ -402,7 +401,6 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                         studentName={`${student.firstName} ${student.lastName}`}
                       />
                     </td>
-                    <td>{renderEditableCell(student, "parentId", "number")}</td>
                     <td>
                       {student.parentName || t("common.notAvailable", "N/A")}
                     </td>
@@ -514,7 +512,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                             <div className="d-flex justify-content-between">
                               <span>
                                 <i className="bi bi-calendar3 me-1"></i>
-                                {formatDate(student.dateOfBirth)}
+                                {formatDate(student.dateOfBirth, 'short', i18n.language)}
                                 {age && (
                                   <span className="ms-1">
                                     (
@@ -605,7 +603,7 @@ const EditableGrid: React.FC<EditableGridProps> = ({
 
       {/* Add New Student Modal */}
       <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
-        <Modal.Header closeButton>
+        <Modal.Header closeButton closeLabel={t("close")}>
           <Modal.Title>
             <i className="bi bi-person-plus me-2"></i>
             {t("addStudent")}
@@ -664,21 +662,6 @@ const EditableGrid: React.FC<EditableGridProps> = ({
                   required
                 />
               </div>
-            </div>
-            <div className="mb-3">
-              <Form.Label>{t("parentIdOptional")}</Form.Label>
-              <Form.Control
-                type="number"
-                value={newStudentData.parentId ?? ""}
-                onChange={(e) =>
-                  handleNewStudentChange(
-                    "parentId",
-                    e.target.value ? Number(e.target.value) : null,
-                  )
-                }
-                placeholder={t("parentIdPlaceholder")}
-              />
-              <Form.Text className="text-muted">{t("parentIdHelp")}</Form.Text>
             </div>
           </Form>
         </Modal.Body>

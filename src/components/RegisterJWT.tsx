@@ -12,7 +12,6 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { authApi } from "../api/authApi";
 import { useAuth } from "../hooks/useAuth";
 
 interface RegisterFormData {
@@ -37,7 +36,7 @@ interface RegisterErrors {
 const RegisterJWT: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { register } = useAuth();
 
   // Helper function to translate backend errors
   const getTranslatedError = (backendError: string): string => {
@@ -48,9 +47,11 @@ const RegisterJWT: React.FC = () => {
         "firstNameRequired",
       "Invalid email or password": "invalidEmailOrPassword",
       "Registration failed": "registrationFailed",
+      "Password must contain at least 12 characters and no more than 72 UTF-8 bytes":
+        "passwordRequirements",
     };
 
-    return errorMap[backendError] ? t(errorMap[backendError]) : backendError;
+    return errorMap[backendError] ? t(errorMap[backendError]) : t("registrationFailed");
   };
 
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -66,15 +67,10 @@ const RegisterJWT: React.FC = () => {
 
   const registerMutation = useMutation({
     mutationFn: async (data: Omit<RegisterFormData, "confirmPassword">) => {
-      const response = await authApi.register(data);
-      return response;
+      await register(data);
     },
-    onSuccess: (data) => {
-      // Automatically log in the user after successful registration
-      if (data.accessToken && data.refreshToken && data.user) {
-        login(data.accessToken, data.refreshToken, data.user);
-        navigate("/", { replace: true });
-      }
+    onSuccess: () => {
+      navigate("/", { replace: true });
     },
     onError: (error: unknown) => {
       console.error("Registration error:", error);
@@ -133,8 +129,10 @@ const RegisterJWT: React.FC = () => {
     // Password validation
     if (!formData.password) {
       newErrors.password = t("passwordRequired");
-    } else if (formData.password.length < 6) {
+    } else if (formData.password.length < 12) {
       newErrors.password = t("passwordMinLength");
+    } else if (new TextEncoder().encode(formData.password).length > 72) {
+      newErrors.password = t("passwordTooLong");
     }
 
     // Confirm password validation
@@ -180,7 +178,7 @@ const RegisterJWT: React.FC = () => {
   };
 
   return (
-    <Container className="py-5">
+    <Container className="auth-page py-5">
       <Row className="justify-content-center">
         <Col md={8} lg={6}>
           <Card>
@@ -203,7 +201,8 @@ const RegisterJWT: React.FC = () => {
                       <Form.Label>{t("firstName")}</Form.Label>
                       <Form.Control
                         type="text"
-                        name="firstName"
+                        name="firstName" autoComplete="given-name"
+                        maxLength={100}
                         value={formData.firstName}
                         onChange={handleInputChange}
                         isInvalid={!!errors.firstName}
@@ -219,7 +218,8 @@ const RegisterJWT: React.FC = () => {
                       <Form.Label>{t("lastName")}</Form.Label>
                       <Form.Control
                         type="text"
-                        name="lastName"
+                        name="lastName" autoComplete="family-name"
+                        maxLength={100}
                         value={formData.lastName}
                         onChange={handleInputChange}
                         isInvalid={!!errors.lastName}
@@ -236,7 +236,8 @@ const RegisterJWT: React.FC = () => {
                   <Form.Label>{t("username")}</Form.Label>
                   <Form.Control
                     type="text"
-                    name="username"
+                    name="username" autoComplete="username"
+                    maxLength={100}
                     value={formData.username}
                     onChange={handleInputChange}
                     isInvalid={!!errors.username}
@@ -251,7 +252,8 @@ const RegisterJWT: React.FC = () => {
                   <Form.Label>{t("email")}</Form.Label>
                   <Form.Control
                     type="email"
-                    name="email"
+                    name="email" autoComplete="email"
+                    maxLength={254}
                     value={formData.email}
                     onChange={handleInputChange}
                     isInvalid={!!errors.email}
@@ -273,10 +275,12 @@ const RegisterJWT: React.FC = () => {
                         onChange={handleInputChange}
                         isInvalid={!!errors.password}
                         placeholder={t("enterPassword")}
+                        autoComplete="new-password"
                       />
                       <Form.Control.Feedback type="invalid">
                         {errors.password}
                       </Form.Control.Feedback>
+                      <Form.Text>{t("passwordRequirements")}</Form.Text>
                     </Form.Group>
                   </Col>
                   <Col md={6}>
@@ -289,6 +293,7 @@ const RegisterJWT: React.FC = () => {
                         onChange={handleInputChange}
                         isInvalid={!!errors.confirmPassword}
                         placeholder={t("confirmYourPassword")}
+                        autoComplete="new-password"
                       />
                       <Form.Control.Feedback type="invalid">
                         {errors.confirmPassword}

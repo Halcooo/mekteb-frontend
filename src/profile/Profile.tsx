@@ -5,10 +5,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "../hooks/useAuth";
 import PageLayout from "../components/PageLayout";
 import { profileApi } from "../api/profileApi";
+import PushSettings from '../notifications/PushSettings';
+import './Profile.scss';
 
 const Profile: React.FC = () => {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { user, logoutAll } = useAuth();
   const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -23,8 +25,9 @@ const Profile: React.FC = () => {
     isLoading,
     error: queryError,
   } = useQuery({
-    queryKey: ["profile"],
+    queryKey: ["profile", user?.id],
     queryFn: () => profileApi.getCurrentProfile(),
+    enabled: Boolean(user),
   });
 
   // Update profile mutation
@@ -35,17 +38,11 @@ const Profile: React.FC = () => {
       setSuccess(
         t("profileSettings.updateSuccess", "Profile updated successfully!"),
       );
-      queryClient.invalidateQueries({ queryKey: ["profile"] });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
       setTimeout(() => setSuccess(null), 3000);
     },
-    onError: (error: unknown) => {
-      const apiError = error as {
-        response?: { data?: { error?: string } };
-      };
-      setError(
-        apiError?.response?.data?.error ||
-          t("profileSettings.updateError", "Failed to update profile"),
-      );
+    onError: () => {
+      setError(t('profileSettings.updateError'));
     },
   });
 
@@ -111,9 +108,7 @@ const Profile: React.FC = () => {
       <PageLayout>
         <Container className="py-5">
           <Alert variant="danger">
-            {t("profileSettings.updateError", "Failed to load profile")}
-            <br />
-            <small>{String(queryError)}</small>
+            {t('profileSettings.loadError')}
           </Alert>
         </Container>
       </PageLayout>
@@ -133,42 +128,46 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <PageLayout>
-      <Container className="py-4" style={{ maxWidth: "600px" }}>
-        <h2 className="mb-4">{t("profile", "Profile")}</h2>
+    <PageLayout title={t('profileSettings.myProfile')} subtitle={t('profileSettings.description')} className="profile-settings" maxWidth="lg">
+      <Container className="profile-settings-content">
 
         {error && (
-          <Alert variant="danger" onClose={() => setError(null)} dismissible>
+          <Alert variant="danger" onClose={() => setError(null)} dismissible closeLabel={t("close")}>
             {error}
           </Alert>
         )}
 
         {success && (
-          <Alert variant="success" onClose={() => setSuccess(null)} dismissible>
+          <Alert variant="success" onClose={() => setSuccess(null)} dismissible closeLabel={t("close")}>
             {success}
           </Alert>
         )}
 
-        <Form>
+        <Form className="profile-details" onSubmit={event=>{event.preventDefault();handleSave();}}>
+          <h2>{t('profileSettings.edit')}</h2>
           {/* First Name */}
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="profile-first-name">
             <Form.Label>{t("firstName", "First Name")}</Form.Label>
             <Form.Control
               type="text"
               name="firstName"
-              value={formData.firstName || profileData?.first_name || ""}
+              value={formData.firstName}
+              autoComplete="given-name"
+              maxLength={100}
               onChange={handleInputChange}
               disabled={updateMutation.isPending}
             />
           </Form.Group>
 
           {/* Last Name */}
-          <Form.Group className="mb-3">
+          <Form.Group className="mb-3" controlId="profile-last-name">
             <Form.Label>{t("lastName", "Last Name")}</Form.Label>
             <Form.Control
               type="text"
               name="lastName"
-              value={formData.lastName || profileData?.last_name || ""}
+              value={formData.lastName}
+              autoComplete="family-name"
+              maxLength={100}
               onChange={handleInputChange}
               disabled={updateMutation.isPending}
             />
@@ -201,7 +200,7 @@ const Profile: React.FC = () => {
             <Form.Label>{t("role", "Role")}</Form.Label>
             <Form.Control
               type="text"
-              value={profileData?.role || ""}
+              value={t(`comments.${profileData?.role==='user'?'parent':profileData?.role}`)}
               disabled
               className="bg-light"
             />
@@ -211,7 +210,7 @@ const Profile: React.FC = () => {
           <div className="d-flex gap-2">
             <Button
               variant="success"
-              onClick={handleSave}
+              type="submit"
               disabled={updateMutation.isPending}
             >
               {updateMutation.isPending ? (
@@ -231,7 +230,17 @@ const Profile: React.FC = () => {
               {t("cancel", "Cancel")}
             </Button>
           </div>
+          <div className="border-top mt-4 pt-3">
+            <h5>{t("authSession.devicesTitle", "Signed-in devices")}</h5>
+            <p className="text-muted">{t("authSession.logoutAllDescription")}</p>
+            <Button variant="outline-danger" onClick={() => {
+              void logoutAll().catch(() => { /* AuthProvider keeps the retryable failure visible. */ });
+            }}>
+              {t("authSession.logoutAll", "Sign out on all devices")}
+            </Button>
+          </div>
         </Form>
+        <PushSettings />
       </Container>
     </PageLayout>
   );

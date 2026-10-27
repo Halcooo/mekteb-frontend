@@ -2,8 +2,9 @@ import React from "react";
 import { Modal, Button, Badge, Carousel } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import type { NewsItem } from "../types/index";
-import { formatBosnianDate } from "../utils/dateFormatter";
+import { formatDate } from "../utils/dateUtils";
 import "./PreviewNewsModal.scss";
+const apiBase=(import.meta.env.VITE_API_URL??'').replace(/\/api\/?$/,'');
 
 interface PreviewNewsModalProps {
   show: boolean;
@@ -16,7 +17,7 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
   selectedNews,
   onHide,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   return (
     <Modal
@@ -26,7 +27,7 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
       centered
       className="preview-news-modal"
     >
-      <Modal.Header closeButton>
+      <Modal.Header closeButton closeLabel={t("close")}>
         <Modal.Title className="d-flex align-items-center">
           <i className="bi bi-newspaper me-2"></i>
           {selectedNews?.title}
@@ -45,12 +46,12 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                   <>
                     {" • "}
                     <i className="bi bi-calendar me-1"></i>
-                    {formatBosnianDate(selectedNews.createdAt)}
+                    {formatDate(selectedNews.createdAt,'short',i18n.language)}
                   </>
                 )}
               </p>
               <div className="news-content">
-                {selectedNews.text.split("\\n").map((paragraph, index) => (
+                {selectedNews.text.split("\n").map((paragraph, index) => (
                   <p key={index} className="mb-3">
                     {paragraph}
                   </p>
@@ -72,7 +73,7 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                 {selectedNews.images.length === 1 ? (
                   <div className="text-center preview-image-frame">
                     <img
-                      src={`https://api.mekteb-pazaric.com/backend${
+                      src={`${apiBase}${
                         selectedNews.images[0].url ||
                         `/api/images/${selectedNews.images[0].imagePath
                           ?.split("/")
@@ -83,12 +84,12 @@ const PreviewNewsModal: React.FC<PreviewNewsModalProps> = ({
                     />
                   </div>
                 ) : (
-                  <Carousel>
+                  <Carousel prevLabel={t('previousImage')} nextLabel={t('nextImage')}>
                     {selectedNews.images.map((image, index) => (
                       <Carousel.Item key={image.id}>
                         <div className="text-center preview-image-frame">
                           <img
-                            src={`https://api.mekteb-pazaric.com/backend${
+                            src={`${apiBase}${
                               image.url ||
                               `/api/images/${image.imagePath?.split("/").pop()}`
                             }`}

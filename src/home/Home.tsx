@@ -26,6 +26,7 @@ function Home() {
 
     // Data states
     selectedNews,
+    operationError,
     formData,
     imagePreviewUrls,
 
@@ -33,6 +34,7 @@ function Home() {
     isAddingNews,
     isEditingNews,
     isDeletingNews,
+    isUploadingImages,
 
     // Handlers
     handleSubmit,
@@ -213,12 +215,13 @@ function Home() {
 
       {/* Add/Edit News Modal */}
       <AddEditNewsModal
+        error={operationError}
         show={showAddModal || showEditModal}
         isEditMode={showEditModal}
         selectedNews={selectedNews}
         formData={formData}
         imagePreviewUrls={imagePreviewUrls}
-        isLoading={isAddingNews || isEditingNews}
+        isLoading={isAddingNews || isEditingNews || isUploadingImages}
         onHide={handleAddEditModalClose}
         onSubmit={handleSubmit}
         onInputChange={handleInputChange}
@@ -229,6 +232,7 @@ function Home() {
 
       {/* Delete Confirmation Modal */}
       <DeleteNewsModal
+        error={operationError}
         show={showDeleteModal}
         selectedNews={selectedNews}
         isLoading={isDeletingNews}

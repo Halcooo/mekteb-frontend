@@ -19,6 +19,7 @@ import type { StudentComment } from "../api/commentsApi";
 import type { Student } from "../students/studentApi";
 import { formatDateForInput } from "../utils/dateFormatter";
 import DateBox from "./DateBox";
+import DatePicker from './DatePicker';
 import "./DailyCommentsAdmin.scss";
 
 interface DailyCommentsAdminProps {
@@ -266,14 +267,12 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
               <Row className="mb-4">
                 <Col md={6}>
                   <Form.Group>
-                    <Form.Label>
-                      {t("comments.selectDate", "Select Date")}
-                    </Form.Label>
-                    <Form.Control
-                      type="date"
+                    <DatePicker
+                      label={t('comments.selectDate')}
                       value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      max={formatDateForInput(new Date())}
+                      onChange={setSelectedDate}
+                      maxDate={formatDateForInput(new Date())}
+                      required
                     />
                   </Form.Group>
                 </Col>
@@ -294,7 +293,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
               {error && (
                 <Alert
                   variant="danger"
-                  dismissible
+                  dismissible closeLabel={t("close")}
                   onClose={() => setError(null)}
                 >
                   {error}
@@ -304,7 +303,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
               {success && (
                 <Alert
                   variant="success"
-                  dismissible
+                  dismissible closeLabel={t("close")}
                   onClose={() => setSuccess(null)}
                 >
                   {success}
@@ -493,7 +492,7 @@ const DailyCommentsAdmin: React.FC<DailyCommentsAdminProps> = ({
         size="lg"
         className="daily-comments-modal"
       >
-        <Modal.Header closeButton>
+        <Modal.Header closeButton closeLabel={t("close")}>
           <Modal.Title>{t("comments.addComment", "Add Comment")}</Modal.Title>
         </Modal.Header>
 

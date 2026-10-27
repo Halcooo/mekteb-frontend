@@ -8,6 +8,18 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+.deploy-access/
+production-backups/
+*.sql.gz
+*.pem
+*.key
+*.p12
+*.pfx
+id_mekteb_*
+.env
+.env.*
+!.env.example
+!.env.production.example
 
 *.local
 
